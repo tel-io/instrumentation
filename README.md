@@ -17,3 +17,7 @@ opentelemetry-go-contrib: https://github.com/open-telemetry/opentelemetry-go-con
 | [github.com/nats-io/nats.go](./middleware/natsmw) |    ✓    |   ✓    |  ✓   |
 |         [database/sql](./plugins/otelsql)         |    ✓    |   ✓    |      |
 |     [github.com/jackc/pgx/v4](./plugins/pgx)      |         |        |  ✓   |
+
+## Grafana Dashboards
+
+In addition, we provide specific [grafana-dashboards](./grafana-dashboards)
