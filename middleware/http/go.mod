@@ -1,4 +1,4 @@
-module github.com/tel-io/instrumentation/middleware/http
+module github.com/tel-io/instrumentation/middleware/http/v1
 
 go 1.18
 
