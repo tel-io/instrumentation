@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strings"
 
-	mw "github.com/d7561985/tel/v2/middleware/http"
 	"github.com/gin-gonic/gin"
+	mw "github.com/tel-io/instrumentation/middleware/http"
 	"go.opentelemetry.io/otel/baggage"
 )
 

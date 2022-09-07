@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	mw "github.com/d7561985/tel/v2/middleware/http"
+	mw "github.com/tel-io/instrumentation/middleware/http"
 
 	"github.com/d7561985/tel/v2"
 	"github.com/go-chi/chi/v5"

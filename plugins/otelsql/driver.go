@@ -19,7 +19,7 @@ import (
 
 const _maxDriver = 150
 
-const instrumentationName = "github.com/d7561985/tel/v2/plugins/otelsql"
+const instrumentationName = "github.com/tel-io/instrumentation/plugins/otelsql"
 
 var regMu sync.Mutex
 

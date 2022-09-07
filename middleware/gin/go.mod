@@ -3,13 +3,14 @@ module github.com/tel-io/instrumentation/middleware/gin
 go 1.17
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5
 	github.com/gin-gonic/gin v1.8.1
+	github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af
 	go.opentelemetry.io/otel v1.8.0
 )
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
+	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6 // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect

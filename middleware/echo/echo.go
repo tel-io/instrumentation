@@ -3,8 +3,8 @@ package echo
 import (
 	"net/http"
 
-	mw "github.com/d7561985/tel/v2/middleware/http"
 	"github.com/labstack/echo/v4"
+	mw "github.com/tel-io/instrumentation/middleware/http"
 )
 
 // GetPath extracts path from chi route for http MW for correct metric exposure
