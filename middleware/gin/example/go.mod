@@ -3,12 +3,12 @@ module github.com/tel-io/instrumentation/middleware/gin/example
 go 1.17
 
 require (
-	github.com/tel-io/instrumentation/middleware/gin v1.0.0-20220729143045-357dd4a663fa
-	github.com/d7561985/tel/v2 v2.0.8-0.20220624154128-3efe6a38c43d
+	github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5
 	github.com/gin-gonic/gin v1.8.1
+	github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907131920-978a5a53d1f4
 )
 
-replace github.com/tel-io/instrumentation/middleware/gin  => ../
+//replace github.com/tel-io/instrumentation/middleware/gin  => ../
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
@@ -41,17 +41,17 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/host v0.32.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.32.0 // indirect
-	go.opentelemetry.io/otel v1.7.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.7.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.30.0 // indirect
+	go.opentelemetry.io/otel v1.8.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.8.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.31.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.30.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.7.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.7.0 // indirect
-	go.opentelemetry.io/otel/metric v0.30.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.7.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v0.30.0 // indirect
-	go.opentelemetry.io/otel/trace v1.7.0 // indirect
-	go.opentelemetry.io/proto/otlp v0.16.0 // indirect
+	go.opentelemetry.io/otel/metric v0.31.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.8.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.31.0 // indirect
+	go.opentelemetry.io/otel/trace v1.8.0 // indirect
+	go.opentelemetry.io/proto/otlp v0.18.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	go.uber.org/zap v1.18.1 // indirect

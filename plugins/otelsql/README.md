@@ -66,8 +66,8 @@ package open
 import (
 	"database/sql"
 	_ "github.com/ClickHouse/clickhouse-go/v2"
-	otelsql "github.com/d7561985/tel/plugins/otelsql/v2"
 	"github.com/pkg/errors"
+	otelsql "github.com/tel-io/instrumentation/plugins/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 	"time"
 )

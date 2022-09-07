@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0
-	github.com/d7561985/tel/plugins/otelsql/v2 v2.0.0-20220907082513-551baff2428d
-	github.com/d7561985/tel/v2 v2.0.8-0.20220905123707-1f9a18353268
+	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
+	github.com/tel-io/instrumentation/plugins/otelsql v0.0.0-20220907131920-978a5a53d1f4
 	go.opentelemetry.io/otel v1.9.0
 )
 
@@ -50,7 +50,7 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.22.0 // indirect
-	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
+	golang.org/x/net v0.0.0-20220722155237-a158d28d115b // indirect
 	golang.org/x/sys v0.0.0-20220818161305-2296e01440c6 // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
