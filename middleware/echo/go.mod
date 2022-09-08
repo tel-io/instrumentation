@@ -2,14 +2,12 @@ module github.com/tel-io/instrumentation/middleware/echo
 
 go 1.17
 
-//replace github.com/tel-io/instrumentation/middleware/http => ../http
-
 require (
 	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.7.1
-	github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af
+	github.com/tel-io/instrumentation/middleware/http v1.0.0
 )
 
 require (
