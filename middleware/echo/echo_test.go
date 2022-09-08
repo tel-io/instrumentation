@@ -1,4 +1,4 @@
-package echo
+package echo_test
 
 import (
 	"context"
@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	emw "github.com/tel-io/instrumentation/middleware/echo"
 	mw "github.com/tel-io/instrumentation/middleware/http"
 )
 
@@ -25,7 +26,7 @@ func TestGorillaWS(t *testing.T) {
 	ok := make(chan struct{})
 
 	app := echo.New()
-	app.Use(HTTPServerMiddlewareAll(mw.WithTel(&tele)))
+	app.Use(emw.HTTPServerMiddlewareAll(mw.WithTel(&tele)))
 
 	app.GET("/ws", func(ctx echo.Context) error {
 		upgrader := websocket.Upgrader{
