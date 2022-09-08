@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af
+	github.com/tel-io/instrumentation/middleware/http v1.0.0
 	go.opentelemetry.io/otel v1.8.0
 )
 
