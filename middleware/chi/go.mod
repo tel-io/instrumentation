@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/go-chi/chi/v5 v5.0.7
-	github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af
+	github.com/tel-io/instrumentation/middleware/http v1.0.0
 )
 
 require (
