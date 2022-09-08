@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/d7561985/tel/v2"
-	"github.com/tel-io/instrumentation/middleware/natsmw"
+	natsmw "github.com/tel-io/instrumentation/middleware/nats"
 	"os"
 	"os/signal"
 	"syscall"
