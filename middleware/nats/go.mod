@@ -1,4 +1,4 @@
-module github.com/tel-io/instrumentation/middleware/natsmw
+module github.com/tel-io/instrumentation/middleware/nats
 
 go 1.17
 
@@ -12,7 +12,9 @@ require (
 	go.uber.org/zap v1.21.0
 )
 
-require go.opentelemetry.io/otel/metric v0.31.0
+require (
+	go.opentelemetry.io/otel/metric v0.31.0
+)
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
@@ -23,9 +25,10 @@ require (
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0 // indirect
-	github.com/kr/text v0.2.0 // indirect
+	github.com/klauspost/compress v1.14.4 // indirect
 	github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0 // indirect
-	github.com/nats-io/nats-server/v2 v2.8.4 // indirect
+	github.com/minio/highwayhash v1.0.2 // indirect
+	github.com/nats-io/jwt/v2 v2.2.1-0.20220330180145-442af02fd36a // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -50,6 +53,7 @@ require (
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
 	golang.org/x/sys v0.0.0-20220319134239-a9b59b0215f8 // indirect
 	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 	google.golang.org/genproto v0.0.0-20211118181313-81c1377c94b1 // indirect
 	google.golang.org/grpc v1.47.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect

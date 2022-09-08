@@ -1,12 +1,12 @@
-package natsmw
+package nats
 
 import (
 	"context"
 	"fmt"
+	"github.com/nats-io/nats.go"
 	"testing"
 
 	"github.com/d7561985/tel/v2"
-	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )

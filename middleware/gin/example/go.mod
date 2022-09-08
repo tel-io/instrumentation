@@ -3,9 +3,9 @@ module github.com/tel-io/instrumentation/middleware/gin/example
 go 1.17
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5
+	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907131920-978a5a53d1f4
+	github.com/tel-io/instrumentation/middleware/gin v1.0.0
 )
 
 //replace github.com/tel-io/instrumentation/middleware/gin  => ../
@@ -34,6 +34,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shirou/gopsutil/v3 v3.22.3 // indirect
+	github.com/tel-io/instrumentation/middleware/http v1.0.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect

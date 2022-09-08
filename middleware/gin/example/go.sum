@@ -58,6 +58,8 @@ github.com/cncf/xds/go v0.0.0-20211011173535-cb28da3451f1/go.mod h1:eXthEFrGJvWH
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5 h1:HJN6L2vbrvtuSpO1ICZtOWSsiGjsJyoCUr85TsxE5Lw=
 github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5/go.mod h1:yoYzONMi2/8ZY5HqMSh8Tdb9Rv+3/wcuoE1vbNSqOFc=
+github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6 h1:9MHt4OZktDHt1sV8bPGLuSR3A+c8NzqInIg9654HeF8=
+github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6/go.mod h1:yoYzONMi2/8ZY5HqMSh8Tdb9Rv+3/wcuoE1vbNSqOFc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -219,6 +221,14 @@ github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMT
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907131920-978a5a53d1f4 h1:nLDlO5XMc7+gNr5k8CDWyLr/+xe0xVh8yZnEBrnDqVI=
 github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907131920-978a5a53d1f4/go.mod h1:nnrC03YYBfGNKgtEVsw1PLMaqaTSm+XscRH9snCYF+I=
+github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907180650-42f5361cb71a h1:3OARwSlYZAirUZPtuGc6gJ2mwUkj+NM46uzaiFgdiOc=
+github.com/tel-io/instrumentation/middleware/gin v0.0.0-20220907180650-42f5361cb71a/go.mod h1:cZ6+rhnXewTdEetDINtK8vY42J1DYusdL7n3IfR2BfM=
+github.com/tel-io/instrumentation/middleware/gin v1.0.0 h1:7cQE2FY4QcKWW6KPfDIXAdJ1tyFewOmW8vz61O5y+WU=
+github.com/tel-io/instrumentation/middleware/gin v1.0.0/go.mod h1:43qZ2LucyczSZm2fxwCd3C4BuGNUL98j9GKuMMcrPYI=
+github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af h1:om6k5AKbWCMvhVGH3NFsatc7r0tWi9OaoRaWU6ZD0nA=
+github.com/tel-io/instrumentation/middleware/http v0.0.0-20220907155016-5135187287af/go.mod h1:n5AhBhxHBpbLi3++JkzNI/lY81WsDPoD+ptqrcSLGQ0=
+github.com/tel-io/instrumentation/middleware/http v1.0.0 h1:EfLbquYpxmKetuq2YsK6KBpiU1+cNMQuBdalw9D+nuw=
+github.com/tel-io/instrumentation/middleware/http v1.0.0/go.mod h1:836+8Q9iA1uF0ql7YbVWUuFvYsY0A7wy26oDjKf21sA=
 github.com/tklauser/go-sysconf v0.3.10 h1:IJ1AZGZRWbY8T5Vfk04D9WOA5WSejdflXxP03OUqALw=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
 github.com/tklauser/numcpus v0.4.0 h1:E53Dm1HjH1/R2/aoCtXtPgzmElmn51aOkhCFSuZq//o=

@@ -3,7 +3,7 @@
 ## How to start
 
 ```bash
-go get github.com/tel-io/instrumentation/middleware/natsmw 
+go get github.com/tel-io/instrumentation/middleware/nats 
 ```
 
 ### Consumer
@@ -11,7 +11,7 @@ go get github.com/tel-io/instrumentation/middleware/natsmw
 ```go
 import (
     "github.com/d7561985/tel/v2"
-    "github.com/tel-io/instrumentation/middleware/natsmw"
+    "github.com/tel-io/instrumentation/middleware/nats"
 )
 
 func sub(){

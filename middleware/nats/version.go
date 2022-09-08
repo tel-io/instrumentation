@@ -1,7 +1,7 @@
-package natsmw
+package nats
 
 const (
-	instrumentationName = "github.com/tel-io/instrumentation/middleware/natsmw"
+	instrumentationName = "github.com/tel-io/instrumentation/middleware/nats"
 )
 
 // Version is the current release version of the otelnats instrumentation.

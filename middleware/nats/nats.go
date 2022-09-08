@@ -1,15 +1,15 @@
-package natsmw
+package nats
 
 import (
 	"context"
 	"fmt"
 	"github.com/d7561985/tel/v2"
-	"github.com/tel-io/instrumentation/middleware/natsmw/natsprop"
+	"github.com/nats-io/nats.go"
+	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
 	"net/http"
 	"runtime/debug"
 	"time"
 
-	"github.com/nats-io/nats.go"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"

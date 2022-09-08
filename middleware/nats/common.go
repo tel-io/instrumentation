@@ -1,4 +1,4 @@
-package natsmw
+package nats
 
 import "go.opentelemetry.io/otel/attribute"
 
