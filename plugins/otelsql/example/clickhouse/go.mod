@@ -7,7 +7,7 @@ require (
 	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/google/uuid v1.3.0
 	github.com/pkg/errors v0.9.1
-	github.com/tel-io/instrumentation/plugins/otelsql v0.0.0-20220907131920-978a5a53d1f4
+	github.com/tel-io/instrumentation/plugins/otelsql v1.0.0
 	go.opentelemetry.io/otel v1.9.0
 )
 
