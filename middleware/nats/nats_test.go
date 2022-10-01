@@ -6,9 +6,9 @@ import (
 	"github.com/nats-io/nats.go"
 	"testing"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
+	"github.com/tel-io/tel/v2"
 )
 
 func Example_handler() {

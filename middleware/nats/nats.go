@@ -3,9 +3,9 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/d7561985/tel/v2"
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
+	"github.com/tel-io/tel/v2"
 	"net/http"
 	"runtime/debug"
 	"time"
