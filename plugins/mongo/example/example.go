@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"github.com/d7561985/tel/v2"
 	plugin "github.com/tel-io/instrumentation/plugins/mongo"
+	"github.com/tel-io/tel/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
