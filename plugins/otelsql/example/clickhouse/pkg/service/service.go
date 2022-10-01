@@ -6,8 +6,8 @@ import (
 	"github.com/google/uuid"
 	"time"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/pkg/errors"
+	"github.com/tel-io/tel/v2"
 )
 
 type ClickHouse struct {

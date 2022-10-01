@@ -2,7 +2,7 @@
 
 ## How to run
 
-First run otel stack from  `/github.com/d7561985/tel/docker` using command inside that folder 
+First run otel stack from  `/github.com/tel-io/tel/docker` using command inside that folder
 ```bash
 docker-compose up
 ```
