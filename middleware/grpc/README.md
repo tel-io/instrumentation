@@ -12,7 +12,7 @@ go get github.com/tel-io/instrumentation/middleware/grpc@latest
 ```go
 import (
 	//...
-    "github.com/d7561985/tel/v2"
+    "github.com/tel-io/tel/v2"
     grpcx "github.com/tel-io/instrumentation/middleware/grpc"
     //...
 )
@@ -43,7 +43,7 @@ func NewConn(addr string)  {
 ```go
     import (
 
-    "github.com/d7561985/tel/v2"
+    "github.com/tel-io/tel/v2"
     grpcx "github.com/tel-io/instrumentation/middleware/grpc"
 )
 

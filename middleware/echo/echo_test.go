@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	emw "github.com/tel-io/instrumentation/middleware/echo"
 	mw "github.com/tel-io/instrumentation/middleware/http"
+	"github.com/tel-io/tel/v2"
 )
 
 func TestGorillaWS(t *testing.T) {

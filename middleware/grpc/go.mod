@@ -3,7 +3,7 @@ module github.com/tel-io/instrumentation/middleware/grpc
 go 1.17
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220905123310-f409d02174f5
+	github.com/tel-io/tel/v2 v2.0.8-0.20220905123310-f409d02174f5
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/stretchr/testify v1.7.1
 	github.com/tel-io/otelgrpc v1.0.2-0.20220605174232-2f9b4153a0a4

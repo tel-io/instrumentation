@@ -3,9 +3,9 @@ module github.com/tel-io/instrumentation/middleware/chi
 go 1.17
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/go-chi/chi/v5 v5.0.7
-	github.com/tel-io/instrumentation/middleware/http v1.0.0
+	github.com/tel-io/instrumentation/middleware/http v1.1.0
+	github.com/tel-io/tel/v2 v2.1.0-rc
 )
 
 require (

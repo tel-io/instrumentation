@@ -1,6 +1,6 @@
 # Instrumentation
 
-Repository store plugins for [tel](http://github.com/d7561985/tel) project which currently located
+Repository store plugins for [tel](http://github.com/tel-io/tel) project which currently located
 
 Take look on
 opentelemetry-go-contrib: https://github.com/open-telemetry/opentelemetry-go-contrib/blob/main/instrumentation/README.md

@@ -12,7 +12,7 @@ import (
 
 const prefix = "path="
 
-// ServerMiddlewareAll create mw for gin which uses github.com/d7561985/tel/v2/middleware/http
+// ServerMiddlewareAll create mw for gin which uses github.com/tel-io/tel/v2/middleware/http
 // note: WithPathExtractor option of it is overwritten
 func ServerMiddlewareAll(opts ...mw.Option) gin.HandlerFunc {
 	opts = append(opts, mw.WithPathExtractor(func(r *http.Request) string {

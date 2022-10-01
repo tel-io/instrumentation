@@ -6,8 +6,8 @@ import (
 
 	mw "github.com/tel-io/instrumentation/middleware/http"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/go-chi/chi/v5"
+	"github.com/tel-io/tel/v2"
 )
 
 const defaultPath = "<no-path>"

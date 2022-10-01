@@ -7,7 +7,7 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/d7561985/tel/v2"
+	"github.com/tel-io/tel/v2"
 	grpc_middleware "github.com/grpc-ecosystem/go-grpc-middleware"
 	"github.com/tel-io/otelgrpc"
 	"go.uber.org/zap"

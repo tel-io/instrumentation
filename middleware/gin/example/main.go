@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/d7561985/tel/v2"
+	"github.com/tel-io/tel/v2"
 	"net/http"
 	"os"
 	"os/signal"
