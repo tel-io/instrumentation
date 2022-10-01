@@ -8,8 +8,8 @@ import (
 	"runtime/debug"
 	"time"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/felixge/httpsnoop"
+	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.uber.org/zap/zapcore"
 

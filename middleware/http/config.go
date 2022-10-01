@@ -2,10 +2,10 @@ package http
 
 import (
 	"fmt"
+	"github.com/tel-io/tel/v2"
 	"net/http"
 	"strings"
 
-	"github.com/d7561985/tel/v2"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 

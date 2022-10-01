@@ -9,7 +9,7 @@ $ go get github.com/tel-io/instrumentation/middleware/http@latest
 
 ```go
 import (
-    "github.com/d7561985/tel/v2"
+    "github.com/tel-io/tel/v2"
 	mw "github.com/tel-io/instrumentation/middleware/http"
 )
 

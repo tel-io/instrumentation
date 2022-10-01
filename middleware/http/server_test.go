@@ -9,9 +9,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/d7561985/tel/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/tel-io/tel/v2"
 )
 
 // want to checl if response will write to log via mw

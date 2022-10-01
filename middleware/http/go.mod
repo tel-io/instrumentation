@@ -3,9 +3,9 @@ module github.com/tel-io/instrumentation/middleware/http
 go 1.18
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
 	github.com/felixge/httpsnoop v1.0.2
 	github.com/stretchr/testify v1.7.1
+	github.com/tel-io/tel/v2 v2.1.0-rc
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.32.0
 	go.opentelemetry.io/otel v1.8.0
 	go.uber.org/zap v1.18.1
