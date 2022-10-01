@@ -5,8 +5,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/tel-io/tel/v2"
 	"github.com/stretchr/testify/suite"
+	"github.com/tel-io/tel/v2"
 )
 
 type Suite struct {
