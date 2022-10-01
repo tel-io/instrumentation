@@ -1,7 +1,7 @@
 package mongo
 
 import (
-	"github.com/d7561985/tel/v2"
+	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 )
 
