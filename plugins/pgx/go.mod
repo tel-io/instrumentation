@@ -3,7 +3,7 @@ module github.com/tel-io/instrumentation/plugins/pgx/v2
 go 1.17
 
 require (
-	github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6
+	github.com/tel-io/tel/v2 v2.1.0-rc
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/stretchr/testify v1.7.1
 	go.uber.org/zap v1.21.0

@@ -62,8 +62,6 @@ github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7
 github.com/coreos/go-systemd v0.0.0-20190719114852-fd7a80b32e1f/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
 github.com/creack/pty v1.1.7/go.mod h1:lj5s0c3V2DBrqTV7llrYr5NG6My20zk30Fl46Y7DoTY=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
-github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6 h1:9MHt4OZktDHt1sV8bPGLuSR3A+c8NzqInIg9654HeF8=
-github.com/d7561985/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6/go.mod h1:yoYzONMi2/8ZY5HqMSh8Tdb9Rv+3/wcuoE1vbNSqOFc=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -271,6 +269,10 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/tel-io/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6 h1:9MHt4OZktDHt1sV8bPGLuSR3A+c8NzqInIg9654HeF8=
+github.com/tel-io/tel/v2 v2.0.8-0.20220907122942-341fd6f2bee6/go.mod h1:yoYzONMi2/8ZY5HqMSh8Tdb9Rv+3/wcuoE1vbNSqOFc=
+github.com/tel-io/tel/v2 v2.1.0-rc h1:KBifQo7T3kf66kH1gVQKofYli07/X8Pk82BRJ9MeQHo=
+github.com/tel-io/tel/v2 v2.1.0-rc/go.mod h1:VmtrfMqEpS3ZBUKYfbyJyLleyOzgHHveOtvHm/Ap1Mg=
 github.com/tklauser/go-sysconf v0.3.10 h1:IJ1AZGZRWbY8T5Vfk04D9WOA5WSejdflXxP03OUqALw=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
 github.com/tklauser/numcpus v0.4.0 h1:E53Dm1HjH1/R2/aoCtXtPgzmElmn51aOkhCFSuZq//o=
