@@ -8,9 +8,9 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/d7561985/tel/v2"
-	health "github.com/d7561985/tel/v2/monitoring/heallth"
 	"github.com/nats-io/nats.go"
+	"github.com/tel-io/tel/v2"
+	health "github.com/tel-io/tel/v2/monitoring/heallth"
 
 	_ "github.com/joho/godotenv/autoload"
 )

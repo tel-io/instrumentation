@@ -3,16 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/d7561985/tel/v2"
 	natsmw "github.com/tel-io/instrumentation/middleware/nats"
+	"github.com/tel-io/tel/v2"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	health "github.com/d7561985/tel/v2/monitoring/heallth"
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
+	health "github.com/tel-io/tel/v2/monitoring/heallth"
 )
 
 var addr = "nats://127.0.0.1:4222"
