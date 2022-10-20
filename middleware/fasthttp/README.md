@@ -1,9 +1,14 @@
 # FastHttp middleware
 Provide simple middleware for fasthttp with context prapagation option
 
+## GET
+```bash
+$ go get github.com/tel-io/instrumentation/middleware/fasthttp@latest
+```
 
 ## Usage
 Just wrap function with mw and context extractor `GetNativeContext` with tel instance and trace span
+
 
 ```go
 import (
