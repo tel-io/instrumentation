@@ -147,7 +147,7 @@ func (n *MiddleWare) Handler(next PostFn) func(*nats.Msg) {
 			l.Check(lvl, opr).Write()
 		}(time.Now())
 
-		resp, err = next(ctx, msg.Sub.Subject, msg.Data)
+		resp, err = next(ctx, msg.Subject, msg.Data)
 		if err != nil || n.config.postHook == nil {
 			return
 		}
