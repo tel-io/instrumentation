@@ -18,6 +18,12 @@ import (
 
 type Middleware func(next http.Handler) http.Handler
 
+func Converter(h http.Handler) Middleware {
+	return func(next http.Handler) http.Handler {
+		return h(next)
+	}
+}
+
 // ServerMiddlewareAll represent all essential metrics
 // Execution order:
 //  * opentracing injection via nethttp.Middleware
@@ -33,7 +39,7 @@ func ServerMiddlewareAll(opts ...Option) Middleware {
 	mw := ServerMiddleware(opts...)
 
 	return func(next http.Handler) http.Handler {
-		for _, cb := range []func(next http.Handler) http.Handler{mw, tr} {
+		for _, cb := range []Middleware{mw, tr} {
 			next = cb(next)
 		}
 
