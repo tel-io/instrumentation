@@ -4,9 +4,9 @@ go 1.17
 
 require (
 	github.com/joho/godotenv v1.4.0
-	github.com/nats-io/nats.go v1.17.0
-	github.com/tel-io/instrumentation/middleware/nats v1.1.0
-	github.com/tel-io/tel/v2 v2.1.0-rc
+	github.com/nats-io/nats.go v1.18.0
+	github.com/tel-io/instrumentation/middleware/nats v1.2.1
+	github.com/tel-io/tel/v2 v2.1.0-rc.0.20221001104207-05c8eba44d2d
 )
 
 require (

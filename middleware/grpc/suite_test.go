@@ -3,6 +3,7 @@ package grpc
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -29,4 +30,11 @@ func (s *Suite) SetupSuite() {
 
 func TestSuite(t *testing.T) {
 	suite.Run(t, new(Suite))
+}
+
+func TestAAA(t *testing.T) {
+	mymap := map[string]string{"1": "2"}
+
+	fmt.Println(mymap["1"])
+
 }

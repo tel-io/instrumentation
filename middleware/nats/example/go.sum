@@ -168,6 +168,8 @@ github.com/nats-io/nats-server/v2 v2.9.2 h1:XNDgJgOYYaYlquLdbSHI3xssLipfKUOq3EmY
 github.com/nats-io/nats-server/v2 v2.9.2/go.mod h1:4sq8wvrpbvSzL1n3ZfEYnH4qeUuIl5W990j3kw13rRk=
 github.com/nats-io/nats.go v1.17.0 h1:1jp5BThsdGlN91hW0k3YEfJbfACjiOYtUiLXG0RL4IE=
 github.com/nats-io/nats.go v1.17.0/go.mod h1:BPko4oXsySz4aSWeFgOHLZs3G4Jq4ZAyE6/zMCxRT6w=
+github.com/nats-io/nats.go v1.18.0 h1:o480Ao6kuSSFyJO75rGTXCEPj7LGkY84C1Ye+Uhm4c0=
+github.com/nats-io/nats.go v1.18.0/go.mod h1:BPko4oXsySz4aSWeFgOHLZs3G4Jq4ZAyE6/zMCxRT6w=
 github.com/nats-io/nkeys v0.3.0 h1:cgM5tL53EvYRU+2YLXIK0G2mJtK12Ft9oeooSZMA2G8=
 github.com/nats-io/nkeys v0.3.0/go.mod h1:gvUNGjVcM2IPr5rCsRsC6Wb3Hr2CQAm08dsxtV6A5y4=
 github.com/nats-io/nuid v1.0.1 h1:5iA8DT8V7q8WK2EScv2padNa/rTESc1KdnPw4TC2paw=
@@ -200,8 +202,12 @@ github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMT
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/tel-io/instrumentation/middleware/nats v1.1.0 h1:w5ZhAbzRyGhgCQKdKnXHW64A1jlt0GMh43Ohpy0rGLk=
 github.com/tel-io/instrumentation/middleware/nats v1.1.0/go.mod h1:ghd697HzR+NtQZVw8rLxD1dAJFvxkePOcZBbpGhXehY=
+github.com/tel-io/instrumentation/middleware/nats v1.2.1 h1:ZZAeHIYyGi3neEn2LrvKx6Oy7HUSg0L4ZmH2ru3GKZo=
+github.com/tel-io/instrumentation/middleware/nats v1.2.1/go.mod h1:YiB2Plfz/+Fv4VBo6bM2VOMPCEhND1DjgX3agDnlUXg=
 github.com/tel-io/tel/v2 v2.1.0-rc h1:KBifQo7T3kf66kH1gVQKofYli07/X8Pk82BRJ9MeQHo=
 github.com/tel-io/tel/v2 v2.1.0-rc/go.mod h1:VmtrfMqEpS3ZBUKYfbyJyLleyOzgHHveOtvHm/Ap1Mg=
+github.com/tel-io/tel/v2 v2.1.0-rc.0.20221001104207-05c8eba44d2d h1:Ni8y4e4drzir5a9Z7Zu5PJaFahS5QjdNmhmd69KCLh0=
+github.com/tel-io/tel/v2 v2.1.0-rc.0.20221001104207-05c8eba44d2d/go.mod h1:8Bm+BaEwwdP08C/fFuBKZ+oFGbPOp1WS3S3XFVcj89s=
 github.com/tklauser/go-sysconf v0.3.10 h1:IJ1AZGZRWbY8T5Vfk04D9WOA5WSejdflXxP03OUqALw=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
 github.com/tklauser/numcpus v0.4.0 h1:E53Dm1HjH1/R2/aoCtXtPgzmElmn51aOkhCFSuZq//o=
