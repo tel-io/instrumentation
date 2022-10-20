@@ -3,7 +3,7 @@ module github.com/tel-io/instrumentation/middleware/nats
 go 1.17
 
 require (
-	github.com/nats-io/nats.go v1.17.0
+	github.com/nats-io/nats.go v1.18.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
 	github.com/tel-io/tel/v2 v2.1.0-rc
