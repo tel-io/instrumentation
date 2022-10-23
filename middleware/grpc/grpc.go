@@ -89,7 +89,7 @@ func UnaryServerInterceptorAll(o ...Option) grpc.UnaryServerInterceptor {
 	otmetr := otelgrpc.NewServerMetrics(c.metricsOpts...)
 
 	return grpc_middleware.ChainUnaryServer(
-		otracer.UnaryServerInterceptor(),
+		otracer.UnaryServerInterceptor(c.traceOpts...),
 		UnaryServerInterceptor(o...),
 		otmetr.UnaryServerInterceptor(),
 	)
