@@ -15,6 +15,6 @@ func GetPath(r *http.Request) string {
 // HTTPServerMiddlewareAll all in one mw packet
 func HTTPServerMiddlewareAll(opts ...mw.Option) echo.MiddlewareFunc {
 	return echo.WrapMiddleware(mw.ServerMiddlewareAll(
-		append(opts, mw.WithPathExtractor(GetPath))...,
+		append([]mw.Option{mw.WithPathExtractor(GetPath)}, opts...)...,
 	))
 }
