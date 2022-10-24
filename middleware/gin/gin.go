@@ -12,23 +12,25 @@ import (
 
 const prefix = "path="
 
+func extractor(r *http.Request) string {
+	b := baggage.FromContext(r.Context())
+
+	v, err := url.PathUnescape(b.Member("path").String())
+	if err != nil {
+		return r.URL.Path
+	}
+
+	if v != prefix && strings.HasPrefix(v, prefix) {
+		return strings.Split(v, "path=")[1]
+	}
+
+	return r.URL.Path
+}
+
 // ServerMiddlewareAll create mw for gin which uses github.com/tel-io/tel/v2/middleware/http
 // note: WithPathExtractor option of it is overwritten
 func ServerMiddlewareAll(opts ...mw.Option) gin.HandlerFunc {
-	opts = append(opts, mw.WithPathExtractor(func(r *http.Request) string {
-		b := baggage.FromContext(r.Context())
-
-		v, err := url.PathUnescape(b.Member("path").String())
-		if err != nil {
-			return r.URL.Path
-		}
-
-		if v != prefix && strings.HasPrefix(v, prefix) {
-			return strings.Split(v, "path=")[1]
-		}
-
-		return r.URL.Path
-	}))
+	opts = append([]mw.Option{mw.WithPathExtractor(extractor)}, opts...)
 
 	q := mw.ServerMiddlewareAll(opts...)
 
