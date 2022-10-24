@@ -17,7 +17,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shirou/gopsutil/v3 v3.22.3 // indirect
-	github.com/tel-io/instrumentation/middleware/http v1.1.0 // indirect
+	github.com/tel-io/instrumentation/middleware/http v1.2.0 // indirect
 	github.com/tel-io/tel/v2 v2.1.0-rc // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
