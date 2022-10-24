@@ -37,6 +37,10 @@ type config struct {
 	pathExtractor PathExtractor
 	headerChecker HeaderChecker
 	filters       []otelhttp.Filter
+
+	readRequest   bool
+	readHeader    bool
+	writeResponse bool
 }
 
 // Option interface used for setting optional config properties.
@@ -110,6 +114,28 @@ func WithFilter(f ...otelhttp.Filter) Option {
 		for _, filter := range f {
 			c.otelOpts = append(c.otelOpts, otelhttp.WithFilter(filter))
 		}
+	})
+}
+
+// WithDumpRequest dump request as plain text to log and trace
+// i guess we can go further and perform option with encoding requests
+func WithDumpRequest(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.readRequest = enable
+	})
+}
+
+// WithHeaders explicitly set possibility to write http headers
+func WithHeaders(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.readHeader = enable
+	})
+}
+
+// WithDumpResponse dump response as plain text to log and trace
+func WithDumpResponse(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.writeResponse = enable
 	})
 }
 

@@ -16,13 +16,11 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
-type Middleware func(next http.Handler) http.Handler
+const (
+	keyHeader = "req_header"
+)
 
-func Converter(h http.Handler) Middleware {
-	return func(next http.Handler) http.Handler {
-		return h(next)
-	}
-}
+type Middleware func(next http.Handler) http.Handler
 
 // ServerMiddlewareAll represent all essential metrics
 // Execution order:
@@ -92,10 +90,19 @@ func ServerMiddleware(opts ...Option) Middleware {
 			// set tracing identification to log
 			tel.UpdateTraceFields(ctx)
 
-			var reqBody []byte
-			if r.Body != nil {
-				reqBody, _ = ioutil.ReadAll(r.Body)
-				r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
+			if s.readRequest {
+				// we should replace reader before handler call
+				var reqBody []byte
+				if r.Body != nil {
+					reqBody, _ = ioutil.ReadAll(r.Body)
+					r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
+				}
+
+				tel.FromCtx(ctx).PutFields(tel.String("request", string(reqBody)))
+			}
+
+			if s.readHeader {
+				tel.FromCtx(ctx).PutFields(tel.Any(keyHeader, r.Header))
 			}
 
 			defer func(start time.Time) {
@@ -109,18 +116,17 @@ func ServerMiddleware(opts ...Option) Middleware {
 					lableler.Add(attribute.Int("code", rww.statusCode))
 				}
 
+				// metrics and traces
 				l := tel.FromCtx(ctx).With(
 					tel.Duration("duration", time.Since(start)),
 					tel.String("method", r.Method),
 					tel.String("user-agent", r.UserAgent()),
-					tel.Any("req_header", r.Header),
 					tel.String("ip", r.RemoteAddr),
 					tel.String("url", s.pathExtractor(r)),
 					tel.String("status_code", http.StatusText(rww.statusCode)),
-					tel.String("request", string(reqBody)),
 				)
 
-				if rww.response != nil {
+				if s.writeResponse && rww.response != nil {
 					l = l.With(tel.String("response", string(rww.response)))
 				}
 

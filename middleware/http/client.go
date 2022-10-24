@@ -15,8 +15,8 @@ import (
 )
 
 // NewClient with CA injection
-func NewClient(ca []byte) *http.Client {
-	return httpClient(ca)
+func NewClient(ca []byte, opts ...Option) *http.Client {
+	return httpClient(ca, opts...)
 }
 
 // UpdateClient inject tracer
