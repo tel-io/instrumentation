@@ -3,8 +3,8 @@ module github.com/tel-io/instrumentation/middleware/fasthttp
 go 1.18
 
 require (
-	github.com/tel-io/instrumentation/middleware/http v1.2.0
-	github.com/tel-io/tel/v2 v2.1.0-rc.0.20221020110534-a179aa743545
+	github.com/tel-io/instrumentation/middleware/http v1.2.1
+	github.com/tel-io/tel/v2 v2.1.0
 	github.com/valyala/fasthttp v1.40.0
 )
 
