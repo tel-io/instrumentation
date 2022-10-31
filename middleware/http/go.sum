@@ -176,8 +176,8 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1 h1:5TQK59W5E3v0r2duFAb7P95B6hEeOyEnHRa8MjYSMTY=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/tel-io/tel/v2 v2.1.0-rc.0.20221020110534-a179aa743545 h1:evq7i3CQmCXYnOGPiO7wZ9L6oKB+L7ixf5dMmSQNFCM=
-github.com/tel-io/tel/v2 v2.1.0-rc.0.20221020110534-a179aa743545/go.mod h1:8Bm+BaEwwdP08C/fFuBKZ+oFGbPOp1WS3S3XFVcj89s=
+github.com/tel-io/tel/v2 v2.1.0 h1:LC7WlDw89zHd4PiDGW0xKBSBMOIoGRdVxkYtq+Ep+Ck=
+github.com/tel-io/tel/v2 v2.1.0/go.mod h1:8Bm+BaEwwdP08C/fFuBKZ+oFGbPOp1WS3S3XFVcj89s=
 github.com/tklauser/go-sysconf v0.3.10 h1:IJ1AZGZRWbY8T5Vfk04D9WOA5WSejdflXxP03OUqALw=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
 github.com/tklauser/numcpus v0.4.0 h1:E53Dm1HjH1/R2/aoCtXtPgzmElmn51aOkhCFSuZq//o=
