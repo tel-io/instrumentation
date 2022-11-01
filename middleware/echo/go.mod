@@ -7,7 +7,7 @@ require (
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.7.1
 	github.com/tel-io/instrumentation/middleware/http v1.2.1
-	github.com/tel-io/tel/v2 v2.1.0
+	github.com/tel-io/tel/v2 v2.1.1
 )
 
 require (

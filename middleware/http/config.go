@@ -2,9 +2,10 @@ package http
 
 import (
 	"fmt"
-	"github.com/tel-io/tel/v2"
 	"net/http"
 	"strings"
+
+	"github.com/tel-io/tel/v2"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
@@ -28,14 +29,12 @@ var (
 )
 
 type PathExtractor func(r *http.Request) string
-type HeaderChecker func(h http.Header) bool
 
 type config struct {
 	log           *tel.Telemetry
 	operation     string
 	otelOpts      []otelhttp.Option
 	pathExtractor PathExtractor
-	headerChecker HeaderChecker
 	filters       []otelhttp.Filter
 
 	readRequest   bool

@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/jackc/pgx/v4 v4.15.0
 	github.com/stretchr/testify v1.7.1
-	github.com/tel-io/tel/v2 v2.1.0
+	github.com/tel-io/tel/v2 v2.1.1
 	go.uber.org/zap v1.21.0
 )
 

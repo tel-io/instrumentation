@@ -2,11 +2,12 @@ package fasthttp
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
+
 	mw "github.com/tel-io/instrumentation/middleware/http"
 	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
-	"net/http"
-	"net/http/httptest"
 )
 
 type Middleware func(next fasthttp.RequestHandler) fasthttp.RequestHandler

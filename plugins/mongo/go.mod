@@ -3,7 +3,7 @@ module github.com/tel-io/instrumentation/plugins/mongo
 go 1.18
 
 require (
-	github.com/tel-io/tel/v2 v2.1.0
+	github.com/tel-io/tel/v2 v2.1.1
 	go.mongodb.org/mongo-driver v1.10.2
 	go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo v0.34.0
 )

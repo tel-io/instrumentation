@@ -2,10 +2,11 @@ package http
 
 import (
 	"context"
-	health "github.com/tel-io/tel/v2/monitoring/heallth"
-	"go.opentelemetry.io/otel/attribute"
 	"net/http"
 	"time"
+
+	health "github.com/tel-io/tel/v2/monitoring/heallth"
+	"go.opentelemetry.io/otel/attribute"
 )
 
 var code = attribute.Key("code")

@@ -3,8 +3,9 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/nats-io/nats.go"
 	"testing"
+
+	"github.com/nats-io/nats.go"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

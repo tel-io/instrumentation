@@ -3,20 +3,19 @@ package main
 import (
 	"context"
 	"fmt"
-	natsmw "github.com/tel-io/instrumentation/middleware/nats"
-	"github.com/tel-io/tel/v2"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	natsmw "github.com/tel-io/instrumentation/middleware/nats"
+	"github.com/tel-io/tel/v2"
+
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
-	health "github.com/tel-io/tel/v2/monitoring/heallth"
 )
 
 var addr = "nats://127.0.0.1:4222"
-var cAddr = "http://127.0.0.1:54239"
 
 func main() {
 	ccx, cancel := context.WithCancel(context.Background())
@@ -24,7 +23,7 @@ func main() {
 
 	go func() {
 		cn := make(chan os.Signal, 1)
-		signal.Notify(cn, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(cn, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM)
 		<-cn
 		cancel()
 	}()
@@ -35,11 +34,10 @@ func main() {
 	cfg.Service = "NATS.CONSUMER"
 	cfg.MonitorConfig.Enable = false
 
-	t, cc := tel.New(ccx, cfg)
+	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())
 	defer cc()
 
 	ctx := tel.WithContext(ccx, t)
-	t.AddHealthChecker(ctx, tel.HealthChecker{Handler: health.NewCompositeChecker()})
 
 	t.Info("nats", tel.String("collector", cfg.Addr))
 
@@ -53,21 +51,29 @@ func main() {
 		// send as reply
 		return []byte("HELLO"), nil
 	}))
+	nullErr(err)
 
 	crash, err := con.Subscribe("nats.crash", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
 		time.Sleep(time.Millisecond)
 		panic("some panic")
-		return nil, nil
 	}))
+	nullErr(err)
 
 	someErr, err := con.Subscribe("nats.err", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
 		time.Sleep(time.Millisecond)
 		return nil, fmt.Errorf("some errro")
 	}))
-
-	defer subscribe.Unsubscribe()
-	defer crash.Unsubscribe()
-	defer someErr.Unsubscribe()
+	nullErr(err)
 
 	<-ctx.Done()
+
+	_ = subscribe.Unsubscribe()
+	_ = crash.Unsubscribe()
+	_ = someErr.Unsubscribe()
+}
+
+func nullErr(err error) {
+	if err != nil {
+		tel.Global().Panic("err", tel.Error(err))
+	}
 }

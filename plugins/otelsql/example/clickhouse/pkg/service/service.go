@@ -3,8 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/pkg/errors"
 	"github.com/tel-io/tel/v2"
@@ -82,9 +83,9 @@ func (c *ClickHouse) Batch(ctx context.Context) error {
 			[]string{"Q", "W", "E", "R", "T", "Y"}, // Array(String)
 			[]interface{}{ // Tuple(String, UInt8, Array(Map(String, String)))
 				"String Value", uint8(5), []map[string]string{
-					map[string]string{"key": "value"},
-					map[string]string{"key": "value"},
-					map[string]string{"key": "value"},
+					{"key": "value"},
+					{"key": "value"},
+					{"key": "value"},
 				},
 			},
 			time.Now(),

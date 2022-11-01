@@ -3,12 +3,13 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/nats-io/nats.go"
-	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
-	"github.com/tel-io/tel/v2"
 	"net/http"
 	"runtime/debug"
 	"time"
+
+	"github.com/nats-io/nats.go"
+	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
+	"github.com/tel-io/tel/v2"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"

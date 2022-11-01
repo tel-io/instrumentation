@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"time"
+
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/pkg/errors"
 	otelsql "github.com/tel-io/instrumentation/plugins/otelsql"
 	"github.com/tel-io/tel/v2"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
-	"time"
 )
 
 var resClick = semconv.DBSystemKey.String("clockhouse")

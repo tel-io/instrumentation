@@ -49,9 +49,7 @@ func Extract(ctx context.Context, msg *nats.Msg, opts ...Option) ([]attribute.Ke
 	c := newConfig(opts)
 	ctx = c.propagators.Extract(ctx, propagation.HeaderCarrier(msg.Header))
 
-	attrs := append(
-		NewAttributesFromNATSRequest(msg),
-	)
+	attrs := NewAttributesFromNATSRequest(msg)
 
 	return attrs, baggage.FromContext(ctx), trace.SpanContextFromContext(ctx)
 }

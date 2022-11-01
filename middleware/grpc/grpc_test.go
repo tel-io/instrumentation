@@ -7,6 +7,8 @@ import (
 	"log"
 	"net"
 
+	"google.golang.org/grpc/credentials/insecure"
+
 	"github.com/tel-io/tel/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -75,7 +77,7 @@ func (s *Suite) TestGrpcPanicMW() {
 	defer srv.Stop()
 
 	dial, err := grpc.Dial(l.Addr().String(),
-		grpc.WithInsecure(),
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(
 			UnaryClientInterceptorAll(WithTel(&s.tel)),
 		))

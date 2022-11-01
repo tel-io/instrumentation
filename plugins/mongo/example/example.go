@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
 	plugin "github.com/tel-io/instrumentation/plugins/mongo"
 	"github.com/tel-io/tel/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {
@@ -19,7 +20,7 @@ func main() {
 
 	go func() {
 		cn := make(chan os.Signal, 1)
-		signal.Notify(cn, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(cn, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM)
 		<-cn
 		cancel()
 	}()

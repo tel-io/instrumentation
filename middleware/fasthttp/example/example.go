@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	mw "github.com/tel-io/instrumentation/middleware/fasthttp"
-	"github.com/tel-io/tel/v2"
-	"github.com/valyala/fasthttp"
 	"os"
 	"os/signal"
 	"syscall"
+
+	mw "github.com/tel-io/instrumentation/middleware/fasthttp"
+	"github.com/tel-io/tel/v2"
+	"github.com/valyala/fasthttp"
 )
 
 const (
@@ -20,7 +21,7 @@ func main() {
 
 	go func() {
 		cn := make(chan os.Signal, 1)
-		signal.Notify(cn, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(cn, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM)
 		<-cn
 		cancel()
 	}()
@@ -48,7 +49,7 @@ func main() {
 
 			tel.FromCtx(cxx).Info("world", tel.Bool("tex", true))
 
-			panic(true)
+			//panic(true)
 
 			_, _ = ctx.Write([]byte("HELLO"))
 

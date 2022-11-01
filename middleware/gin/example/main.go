@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"github.com/tel-io/tel/v2"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+
+	"github.com/tel-io/tel/v2"
 
 	"github.com/gin-gonic/gin"
 	mw "github.com/tel-io/instrumentation/middleware/gin"
@@ -18,7 +19,7 @@ func main() {
 
 	go func() {
 		cn := make(chan os.Signal, 1)
-		signal.Notify(cn, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(cn, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM)
 		<-cn
 		cancel()
 	}()

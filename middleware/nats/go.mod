@@ -6,7 +6,7 @@ require (
 	github.com/nats-io/nats.go v1.18.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
-	github.com/tel-io/tel/v2 v2.1.0
+	github.com/tel-io/tel/v2 v2.1.1
 	go.opentelemetry.io/otel v1.8.0
 	go.opentelemetry.io/otel/trace v1.8.0
 	go.uber.org/zap v1.21.0

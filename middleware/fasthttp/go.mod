@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/tel-io/instrumentation/middleware/http v1.2.1
-	github.com/tel-io/tel/v2 v2.1.0
+	github.com/tel-io/tel/v2 v2.1.1
 	github.com/valyala/fasthttp v1.40.0
 )
 

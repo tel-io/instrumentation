@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+
 	health "github.com/tel-io/tel/v2/monitoring/heallth"
 	"go.opentelemetry.io/otel/attribute"
 	"google.golang.org/grpc"

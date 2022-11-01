@@ -1,3 +1,5 @@
+include ../../Makefile.Common
+
 VENDOR_DIR = vendor
 
 GO ?= go

@@ -8,11 +8,9 @@ import (
 	"syscall"
 	"time"
 
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
-	health "github.com/tel-io/tel/v2/monitoring/heallth"
-
-	_ "github.com/joho/godotenv/autoload"
 )
 
 var addr = "nats://127.0.0.1:4222"
@@ -25,7 +23,7 @@ func main() {
 
 	go func() {
 		cn := make(chan os.Signal, 1)
-		signal.Notify(cn, os.Kill, syscall.SIGINT, syscall.SIGTERM)
+		signal.Notify(cn, syscall.SIGTERM, syscall.SIGINT, syscall.SIGTERM)
 		<-cn
 		cancel()
 	}()
@@ -36,11 +34,10 @@ func main() {
 	cfg.Service = "NATS.PRODUCER"
 	cfg.MonitorConfig.Enable = false
 
-	t, cc := tel.New(ccx, cfg)
+	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())
 	defer cc()
 
 	ctx := tel.WithContext(ccx, t)
-	t.AddHealthChecker(ctx, tel.HealthChecker{Handler: health.NewCompositeChecker()})
 
 	t.Info("nats", tel.String("collector", cfg.Addr))
 
@@ -69,7 +66,6 @@ func run(ctx context.Context, con *nats.Conn) {
 				_ = con.Publish("nats.crash", []byte("HELLO"))
 			default:
 				_ = con.Publish("nats.demo", []byte("HELLO"))
-
 			}
 		}
 	}

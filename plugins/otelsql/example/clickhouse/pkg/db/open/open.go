@@ -2,11 +2,12 @@ package open
 
 import (
 	"database/sql"
+	"time"
+
 	_ "github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/pkg/errors"
 	otelsql "github.com/tel-io/instrumentation/plugins/otelsql"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
-	"time"
 )
 
 var clickhouse = semconv.DBSystemKey.String("clockhouse")

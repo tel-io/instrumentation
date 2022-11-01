@@ -7,12 +7,13 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	_ "github.com/ClickHouse/clickhouse-go/v2"
-	otelsql "github.com/tel-io/instrumentation/plugins/otelsql"
-	"github.com/tel-io/tel/v2"
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "github.com/ClickHouse/clickhouse-go/v2"
+	otelsql "github.com/tel-io/instrumentation/plugins/otelsql"
+	"github.com/tel-io/tel/v2"
 )
 
 const (

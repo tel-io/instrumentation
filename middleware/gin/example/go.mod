@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/gin-gonic/gin v1.8.1
 	github.com/tel-io/instrumentation/middleware/gin v1.1.0
-	github.com/tel-io/tel/v2 v2.1.0-rc
+	github.com/tel-io/tel/v2 v2.1.1
 )
 
 //replace github.com/tel-io/instrumentation/middleware/gin  => ../

@@ -6,7 +6,7 @@ go 1.18
 
 require (
 	github.com/tel-io/instrumentation/plugins/mongo v0.4.0
-	github.com/tel-io/tel/v2 v2.1.0-rc
+	github.com/tel-io/tel/v2 v2.1.1
 	go.mongodb.org/mongo-driver v1.10.2
 )
 

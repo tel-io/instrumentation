@@ -1,8 +1,8 @@
 package grpc
 
 import (
-	"github.com/tel-io/tel/v2"
 	"github.com/tel-io/otelgrpc"
+	"github.com/tel-io/tel/v2"
 	otracer "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 )
 
