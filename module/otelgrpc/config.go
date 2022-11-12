@@ -21,7 +21,7 @@ import (
 )
 
 const (
-	instrumentationName = "github.com/tel-io/otelgrpc"
+	instrumentationName = "github.com/tel-io/instrumentation/module/otelgrpc"
 )
 
 // config represents the configuration options available

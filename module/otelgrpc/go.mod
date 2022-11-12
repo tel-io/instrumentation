@@ -4,7 +4,6 @@ go 1.18
 
 require (
 	github.com/stretchr/testify v1.8.0
-	github.com/tel-io/otelgrpc v1.0.1
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	google.golang.org/grpc v1.47.0
