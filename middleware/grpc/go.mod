@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/stretchr/testify v1.8.0
-	github.com/tel-io/otelgrpc v1.0.2-0.20220605174232-2f9b4153a0a4
+	github.com/tel-io/instrumentation/module/otelgrpc v1.0.2
 	github.com/tel-io/tel/v2 v2.1.2-0.20221111152654-9e5e734f01e2
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.36.4
 	go.opentelemetry.io/otel v1.11.1
