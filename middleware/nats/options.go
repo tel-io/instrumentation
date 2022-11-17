@@ -28,11 +28,16 @@ type config struct {
 	postHook PostHook
 	tele     tel.Telemetry
 	meter    metric.Meter
+
+	dumpRequest        bool
+	dumpResponse       bool
+	dumpPayloadOnError bool
 }
 
 func newConfig(opts []Option) *config {
 	c := &config{
-		tele: tel.Global(),
+		tele:               tel.Global(),
+		dumpPayloadOnError: true,
 	}
 
 	c.apply(opts)
@@ -83,5 +88,29 @@ func WithPostHook(cb PostHook) Option {
 func WithTel(t tel.Telemetry) Option {
 	return optionFunc(func(c *config) {
 		c.tele = t
+	})
+}
+
+// WithDumpRequest dump request as plain text to log and trace
+// i guess we can go further and perform option with encoding requests
+func WithDumpRequest(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dumpRequest = enable
+	})
+}
+
+// WithDumpResponse dump response as plain text to log and trace
+func WithDumpResponse(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dumpResponse = enable
+	})
+}
+
+// WithDumpPayloadOnError write dump request and response on faults
+//
+// Default: true
+func WithDumpPayloadOnError(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dumpPayloadOnError = enable
 	})
 }

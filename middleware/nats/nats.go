@@ -117,20 +117,20 @@ func (n *MiddleWare) Handler(next PostFn) func(*nats.Msg) {
 				zap.String("duration", time.Since(start).String()),
 			)
 
-			if msg.Data != nil {
-				l = l.With(zap.String("request", string(msg.Data)))
-			}
-
-			if resp != nil {
-				l = l.With(zap.String("response", string(resp)))
-			}
-
 			lvl := zapcore.DebugLevel
 			if err != nil {
 				lvl = zapcore.ErrorLevel
 				l = l.With(zap.Error(err))
 
 				span.RecordError(err)
+			}
+
+			if ((n.config.dumpPayloadOnError && err != nil) || n.config.dumpRequest) && msg.Data != nil {
+				l = l.With(zap.String("request", string(msg.Data)))
+			}
+
+			if ((n.config.dumpPayloadOnError && err != nil) || n.config.dumpResponse) && resp != nil {
+				l = l.With(zap.String("response", string(resp)))
 			}
 
 			if hasRecovery != nil {
