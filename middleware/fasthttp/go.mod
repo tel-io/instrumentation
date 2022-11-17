@@ -3,7 +3,7 @@ module github.com/tel-io/instrumentation/middleware/fasthttp
 go 1.18
 
 require (
-	github.com/tel-io/instrumentation/middleware/http v1.2.2-0.20221112212654-16536b57a7a9
+	github.com/tel-io/instrumentation/middleware/http v1.2.2
 	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
 	github.com/valyala/fasthttp v1.40.0
 )
@@ -30,7 +30,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/host v0.36.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.36.4 // indirect
-	go.opentelemetry.io/otel v1.11.2-0.20221111171059-308d0362e6c5 // indirect
+	go.opentelemetry.io/otel v1.11.2-0.20221116164004-b0618095a4b0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.2-0.20221111171059-308d0362e6c5 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.33.1-0.20221111171059-308d0362e6c5 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.33.1-0.20221111171059-308d0362e6c5 // indirect

@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/go-chi/chi/v5 v5.0.7
-	github.com/tel-io/instrumentation/middleware/http v1.2.2-0.20221112212654-16536b57a7a9
+	github.com/tel-io/instrumentation/middleware/http v1.2.2
 )
 
 require (
@@ -27,7 +27,7 @@ require (
 	go.opentelemetry.io/contrib/instrumentation/host v0.36.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4 // indirect
 	go.opentelemetry.io/contrib/instrumentation/runtime v0.36.4 // indirect
-	go.opentelemetry.io/otel v1.11.2-0.20221111171059-308d0362e6c5 // indirect
+	go.opentelemetry.io/otel v1.11.2-0.20221116164004-b0618095a4b0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/internal/retry v1.11.2-0.20221111171059-308d0362e6c5 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.33.1-0.20221111171059-308d0362e6c5 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.33.1-0.20221111171059-308d0362e6c5 // indirect
