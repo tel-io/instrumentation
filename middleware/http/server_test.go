@@ -115,6 +115,7 @@ func (s *Suite) TestContextConsistency() {
 		WithTel(&s.tel),
 		WithDumpRequest(true),
 		WithDumpResponse(true),
+		WithDumpPayloadOnError(false),
 	)
 
 	mw.Handle("/test", handler)
@@ -188,6 +189,7 @@ func (s *Suite) TestHttpServerMiddlewareAll() {
 				WithTel(&s.tel),
 				WithDumpRequest(test.hasRequest),
 				WithDumpResponse(test.hasResponse),
+				WithDumpPayloadOnError(false), //
 				WithHeaders(len(test.headers) > 0),
 			)
 
@@ -248,21 +250,21 @@ func writeHandlerBody(body []byte) http.Handler {
 	}))
 }
 
-// LogEncode: none, WithDumpRequest=true, WithDumpResponse=true, WithHeaders=true
+// LogEncode: none, WithDumpRequest=true, WithDumpResponse=true, WithHeaders=true, WithDumpPayloadOnError=false
 // BenchmarkMw-10    	   15398	    113394 ns/op
 //
-// LogEncode: none, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false
+// LogEncode: none, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false, WithDumpPayloadOnError=false
 // BenchmarkMw-10    	  237624	      6713 ns/op
 //
-// LogEncode: console, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false
+// LogEncode: console, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false, WithDumpPayloadOnError=false
 // BenchmarkMw-10    	  204169	      6709 ns/op
 //
-// LogEncode: json, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false
+// LogEncode: json, WithDumpRequest=false, WithDumpResponse=false, WithHeaders=false, WithDumpPayloadOnError=false
 // BenchmarkMw-10    	  211017	      6787 ns/op
 func BenchmarkMw(b *testing.B) {
 	c := tel.DefaultDebugConfig()
 	c.LogLevel = "debug"
-	c.LogEncode = "json"
+	c.LogEncode = "none"
 	c.OtelConfig.Enable = false
 
 	t, closer := tel.New(context.Background(), c)
@@ -273,6 +275,7 @@ func BenchmarkMw(b *testing.B) {
 		WithDumpRequest(false),
 		WithDumpResponse(false),
 		WithHeaders(false),
+		WithDumpPayloadOnError(false),
 	)
 
 	req := NewRequest(http.MethodPost, "/", bytes.NewBufferString(strings.Repeat("y", 100)))

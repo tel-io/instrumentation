@@ -37,9 +37,10 @@ type config struct {
 	pathExtractor PathExtractor
 	filters       []otelhttp.Filter
 
-	readRequest   bool
-	readHeader    bool
-	writeResponse bool
+	readRequest        bool
+	readHeader         bool
+	writeResponse      bool
+	dumpPayloadOnError bool
 }
 
 // Option interface used for setting optional config properties.
@@ -64,8 +65,9 @@ func newConfig(opts ...Option) *config {
 			otelhttp.WithSpanNameFormatter(DefaultSpanNameFormatter),
 			otelhttp.WithFilter(DefaultFilter),
 		},
-		pathExtractor: DefaultURI,
-		filters:       []otelhttp.Filter{DefaultFilter},
+		pathExtractor:      DefaultURI,
+		filters:            []otelhttp.Filter{DefaultFilter},
+		dumpPayloadOnError: true,
 	}
 
 	for _, opt := range opts {
@@ -140,4 +142,13 @@ func WithDumpResponse(enable bool) Option {
 
 func DefaultURI(r *http.Request) string {
 	return r.URL.RequestURI()
+}
+
+// WithDumpPayloadOnError write dump request and response on faults
+//
+// Default: true
+func WithDumpPayloadOnError(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dumpPayloadOnError = enable
+	})
 }

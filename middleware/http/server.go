@@ -90,15 +90,12 @@ func ServerMiddleware(opts ...Option) Middleware {
 			// set tracing identification to log
 			tel.UpdateTraceFields(ctx)
 
-			if s.readRequest {
-				// we should replace reader before handler call
-				var reqBody []byte
-				if r.Body != nil {
-					reqBody, _ = ioutil.ReadAll(r.Body)
-					r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
-				}
-
-				tel.FromCtx(ctx).PutFields(tel.String("request", string(reqBody)))
+			// we should replace reader before handler call
+			// even with readRequest == false we should have copy of body as it would be used during error
+			var reqBody []byte
+			if !(s.readRequest == false && s.dumpPayloadOnError == false) && r.Body != nil {
+				reqBody, _ = ioutil.ReadAll(r.Body)
+				r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
 			}
 
 			if s.readHeader {
@@ -126,14 +123,18 @@ func ServerMiddleware(opts ...Option) Middleware {
 					tel.String("status_code", http.StatusText(rww.statusCode)),
 				)
 
-				if s.writeResponse && rww.response != nil {
-					l = l.With(tel.String("response", string(rww.response)))
-				}
-
 				lvl := zapcore.DebugLevel
 				if err != nil {
 					lvl = zapcore.ErrorLevel
 					l = l.With(tel.Error(err))
+				}
+
+				if ((err != nil && s.dumpPayloadOnError) || s.readRequest) && reqBody != nil {
+					l = tel.FromCtx(ctx).With(tel.String("request", string(reqBody)))
+				}
+
+				if ((err != nil && s.dumpPayloadOnError) || s.writeResponse) && rww.response != nil {
+					l = l.With(tel.String("response", string(rww.response)))
 				}
 
 				if hasRecovery != nil {
