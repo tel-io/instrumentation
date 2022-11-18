@@ -16,4 +16,9 @@ const (
 	RequestContentLength  = "nats.consumer.request_content_length"  // Incoming request bytes total
 	ResponseContentLength = "nats.consumer.response_content_length" // Incoming response bytes total
 	ServerLatency         = "nats.consumer.duration"                // Incoming end to end duration, microseconds
+
+	SubscriptionsPendingCount = "nats.subscriptions.pending.msgs"
+	SubscriptionsPendingBytes = "nats.subscriptions.pending.bytes"
+	SubscriptionsDroppedMsgs  = "nats.subscriptions.dropped.count"
+	SubscriptionCountMsgs     = "nats.subscriptions.send.count"
 )

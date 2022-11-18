@@ -47,29 +47,42 @@ func main() {
 	}
 
 	mw := natsmw.New(natsmw.WithTel(t))
-	subscribe, err := con.Subscribe("nats.demo", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
-		// send as reply
-		return []byte("HELLO"), nil
-	}))
+
+	x, err := natsmw.NewSubscriptionMetrics(natsmw.WithTel(t))
 	nullErr(err)
 
-	crash, err := con.Subscribe("nats.crash", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
-		time.Sleep(time.Millisecond)
-		panic("some panic")
-	}))
-	nullErr(err)
+	for i := 0; i < 100; i++ {
+		go func() {
+			subscribe, err := con.QueueSubscribe("nats.demo", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+				// send as reply
+				time.Sleep(time.Second)
+				return []byte("HELLO"), nil
+			}))
+			nullErr(err)
 
-	someErr, err := con.Subscribe("nats.err", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
-		time.Sleep(time.Millisecond)
-		return nil, fmt.Errorf("some errro")
-	}))
-	nullErr(err)
+			crash, err := con.QueueSubscribe("nats.crash", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+				time.Sleep(time.Microsecond)
+				panic("some panic")
+			}))
+			nullErr(err)
+
+			someErr, err := con.QueueSubscribe("nats.err", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+				time.Sleep(time.Millisecond)
+				return nil, fmt.Errorf("some errro")
+			}))
+			nullErr(err)
+
+			x.Register(subscribe, crash, someErr)
+
+			<-ctx.Done()
+
+			_ = subscribe.Unsubscribe()
+			_ = crash.Unsubscribe()
+			_ = someErr.Unsubscribe()
+		}()
+	}
 
 	<-ctx.Done()
-
-	_ = subscribe.Unsubscribe()
-	_ = crash.Unsubscribe()
-	_ = someErr.Unsubscribe()
 }
 
 func nullErr(err error) {

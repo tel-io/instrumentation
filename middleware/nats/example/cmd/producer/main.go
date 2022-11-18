@@ -15,7 +15,7 @@ import (
 
 var addr = "nats://127.0.0.1:4222"
 
-const threads = 10
+const threads = 100
 
 func main() {
 	ccx, cancel := context.WithCancel(context.Background())
@@ -65,7 +65,9 @@ func run(ctx context.Context, con *nats.Conn) {
 			case 1:
 				_ = con.Publish("nats.crash", []byte("HELLO"))
 			default:
-				_ = con.Publish("nats.demo", []byte("HELLO"))
+				go func() {
+					_, _ = con.Request("nats.demo", []byte("HELLO"), time.Minute)
+				}()
 			}
 		}
 	}
