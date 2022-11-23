@@ -41,8 +41,9 @@ type config struct {
 	// Deprecated: only for legacy usage
 	postHook PostHook
 
-	tele  tel.Telemetry
-	meter metric.Meter
+	tele    tel.Telemetry
+	meter   metric.Meter
+	metrics *metrics
 
 	dumpRequest        bool
 	dumpResponse       bool
@@ -70,6 +71,8 @@ func newConfig(opts []Option) *config {
 		metric.WithInstrumentationVersion(SemVersion()),
 	)
 
+	c.metrics = createMeasures(c.tele, c.meter)
+
 	return c
 }
 
@@ -81,9 +84,9 @@ func (c *config) apply(opts []Option) {
 
 func (c *config) DefaultMiddleware() []Middleware {
 	return []Middleware{
-		NewTracer(c.pubNameFn),
+		NewTracer(c.subNameFn),
 		NewLogs(c),
-		NewMetrics(c.tele, c.meter),
+		NewMetrics(c.metrics),
 		NewRecovery(),
 	}
 }
@@ -94,8 +97,8 @@ func (c *config) Middleware() []Middleware {
 
 func (c *config) DefaultPubMiddleware() []PubMiddleware {
 	return []PubMiddleware{
-		NewPubMetric(c.tele, c.meter),
 		NewPubTrace(c.pubNameFn),
+		NewPubMetric(c.metrics),
 	}
 }
 

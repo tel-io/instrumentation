@@ -63,14 +63,13 @@ func (c *Conn) hook(s *nats.Subscription, err error) (*nats.Subscription, error)
 
 // wrap Middleware wrap
 func (c *Conn) wrap(in MsgHandler) nats.MsgHandler {
-	// init context for instance
-	cxt := c.config.tele.Copy().Ctx()
-
 	for _, cb := range c.list {
 		in = cb.apply(in)
 	}
 
 	return func(msg *nats.Msg) {
+		// init context for instance
+		cxt := c.config.tele.Copy().Ctx()
 		_ = in(cxt, msg)
 	}
 }

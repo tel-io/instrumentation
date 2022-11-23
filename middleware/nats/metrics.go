@@ -16,41 +16,47 @@ import (
 	"time"
 )
 
-// SubMetrics implement Middleware interface
-type SubMetrics struct {
+type metrics struct {
 	counters       map[string]syncint64.Counter
 	valueRecorders map[string]syncfloat64.Histogram
 }
 
-func NewMetrics(tele tel.Telemetry, meter metric.Meter) *SubMetrics {
-	m := &SubMetrics{}
-	m.createMeasures(tele, meter)
+func createMeasures(tele tel.Telemetry, meter metric.Meter) *metrics {
+	counters := make(map[string]syncint64.Counter)
+	valueRecorders := make(map[string]syncfloat64.Histogram)
 
-	return m
+	counter, err := meter.SyncInt64().Counter(Count)
+	if err != nil {
+		tele.Panic("nats mw", tel.String("key", Count))
+	}
+
+	requestBytesCounter, err := meter.SyncInt64().Counter(ContentLength)
+	if err != nil {
+		tele.Panic("nats mw", tel.String("key", ContentLength))
+	}
+
+	serverLatencyMeasure, err := meter.SyncFloat64().Histogram(Latency)
+	if err != nil {
+		tele.Panic("nats mw", tel.String("key", Latency))
+	}
+
+	counters[Count] = counter
+	counters[ContentLength] = requestBytesCounter
+	valueRecorders[Latency] = serverLatencyMeasure
+
+	return &metrics{
+		counters:       counters,
+		valueRecorders: valueRecorders,
+	}
 }
 
-func (t *SubMetrics) createMeasures(tele tel.Telemetry, meter metric.Meter) {
-	t.counters = make(map[string]syncint64.Counter)
-	t.valueRecorders = make(map[string]syncfloat64.Histogram)
+// SubMetrics implement Middleware interface
+type SubMetrics struct {
+	*metrics
+}
 
-	counter, err := meter.SyncInt64().Counter(SubCount)
-	if err != nil {
-		tele.Panic("nats mw", tel.String("key", SubCount))
-	}
-
-	requestBytesCounter, err := meter.SyncInt64().Counter(SubContentLength)
-	if err != nil {
-		tele.Panic("nats mw", tel.String("key", SubContentLength))
-	}
-
-	serverLatencyMeasure, err := meter.SyncFloat64().Histogram(SubLatency)
-	if err != nil {
-		tele.Panic("nats mw", tel.String("key", SubLatency))
-	}
-
-	t.counters[SubCount] = counter
-	t.counters[SubContentLength] = requestBytesCounter
-	t.valueRecorders[SubLatency] = serverLatencyMeasure
+func NewMetrics(m *metrics) *SubMetrics {
+	return &SubMetrics{metrics: m}
 }
 
 func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
@@ -58,11 +64,15 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 		var err error
 
 		defer func(start time.Time) {
-			attr := extractAttr(msg, err != nil)
+			attr := []attribute.KeyValue{
+				IsError.Bool(err != nil),
+				Subject.String(msg.Subject),
+				Kind.String(KindSub),
+			}
 
-			t.counters[SubCount].Add(ctx, 1, attr...)
-			t.counters[SubContentLength].Add(ctx, int64(len(msg.Data)), attr...)
-			t.valueRecorders[SubLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
+			t.counters[Count].Add(ctx, 1, attr...)
+			t.counters[ContentLength].Add(ctx, int64(len(msg.Data)), attr...)
+			t.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
 
 		}(time.Now())
 
@@ -70,6 +80,109 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 
 		return err
 	}
+}
+
+// PubMetric handle publish and request metrics gathering implementing PubMiddleware
+type PubMetric struct {
+	*metrics
+
+	root Publish
+}
+
+var _ PubMiddleware = &PubMetric{}
+
+func NewPubMetric(m *metrics) *PubMetric {
+
+	return &PubMetric{
+		metrics: m,
+	}
+}
+
+func (p *PubMetric) apply(in PubMiddleware) PubMiddleware {
+	p.root = in
+
+	return p
+}
+
+func (p *PubMetric) PublishWithContext(ctx context.Context, subj string, data []byte) (err error) {
+	defer func(start time.Time) {
+		attr := []attribute.KeyValue{
+			IsError.Bool(err != nil),
+			Subject.String(subj),
+			Kind.String(KindPub),
+		}
+
+		p.counters[Count].Add(ctx, 1, attr...)
+		p.counters[ContentLength].Add(ctx, int64(len(data)), attr...)
+		p.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
+	}(time.Now())
+
+	return p.root.PublishWithContext(ctx, subj, data)
+}
+
+func (p *PubMetric) PublishMsgWithContext(ctx context.Context, msg *nats.Msg) (err error) {
+	defer func(start time.Time) {
+		attr := []attribute.KeyValue{
+			IsError.Bool(err != nil),
+			Subject.String(msg.Subject),
+			Kind.String(KindPub),
+		}
+
+		p.counters[Count].Add(ctx, 1, attr...)
+		p.counters[ContentLength].Add(ctx, int64(len(msg.Data)), attr...)
+		p.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
+	}(time.Now())
+
+	return p.root.PublishMsgWithContext(ctx, msg)
+}
+
+func (p *PubMetric) PublishRequestWithContext(ctx context.Context, subj, reply string, data []byte) (err error) {
+	defer func(start time.Time) {
+		attr := []attribute.KeyValue{
+			IsError.Bool(err != nil),
+			Subject.String(subj),
+			Kind.String(KindPub),
+		}
+
+		p.counters[Count].Add(ctx, 1, attr...)
+		p.counters[ContentLength].Add(ctx, int64(len(data)), attr...)
+		p.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
+	}(time.Now())
+
+	return p.root.PublishRequestWithContext(ctx, subj, reply, data)
+}
+
+func (p *PubMetric) RequestWithContext(ctx context.Context, subj string, data []byte) (resp *nats.Msg, err error) {
+	msg := &nats.Msg{Subject: subj, Data: data}
+
+	return p.RequestMsgWithContext(ctx, msg)
+}
+
+func (p *PubMetric) RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (resp *nats.Msg, err error) {
+	defer func(start time.Time) {
+		reqAttr := []attribute.KeyValue{
+			IsError.Bool(err != nil),
+			Subject.String(msg.Subject),
+			Kind.String(KindRequest),
+		}
+
+		p.counters[Count].Add(ctx, 1, reqAttr...)
+		p.counters[ContentLength].Add(ctx, int64(len(msg.Subject)), reqAttr...)
+		p.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), reqAttr...)
+
+		if err == nil {
+			resAttr := []attribute.KeyValue{
+				IsError.Bool(err != nil),
+				Subject.String(msg.Subject),
+				Kind.String(KindRespond),
+			}
+
+			p.counters[Count].Add(ctx, int64(len(resp.Data)), resAttr...)
+			p.counters[ContentLength].Add(ctx, int64(len(resp.Data)), resAttr...)
+		}
+	}(time.Now())
+
+	return p.root.RequestMsgWithContext(ctx, msg)
 }
 
 // SubscriptionStatMetric hook provide important subscription statistics
@@ -148,135 +261,4 @@ func (s *SubscriptionStatMetric) callback(ctx context.Context) {
 		s.counters[SubscriptionsDroppedMsgs].Observe(ctx, v.dropped, Subject.String(k))
 		s.counters[SubscriptionCountMsgs].Observe(ctx, v.count, Subject.String(k))
 	}
-}
-
-// PubMetric handle publish and request metrics gathering implementing PubMiddleware
-type PubMetric struct {
-	tele  tel.Telemetry
-	meter metric.Meter
-
-	counters       map[string]syncint64.Counter
-	valueRecorders map[string]syncfloat64.Histogram
-
-	root Publish
-}
-
-var _ PubMiddleware = &PubMetric{}
-
-func NewPubMetric(tele tel.Telemetry, meter metric.Meter) *PubMetric {
-	counters := make(map[string]syncint64.Counter)
-	valueRecorders := make(map[string]syncfloat64.Histogram)
-
-	regCount := func(name string) {
-		v, err := meter.SyncInt64().Counter(name)
-		if err != nil {
-			tele.Panic("mw", tel.String("key", name))
-		}
-		counters[name] = v
-	}
-
-	regCount(OutCount)
-	regCount(OutContentLength)
-	regCount(RequestRespondContentLength)
-
-	serverLatencyMeasure, err := meter.SyncFloat64().Histogram(OutLatency)
-	if err != nil {
-		tele.Panic("nats mw", tel.String("key", OutLatency))
-	}
-
-	valueRecorders[OutLatency] = serverLatencyMeasure
-
-	return &PubMetric{
-		counters:       counters,
-		valueRecorders: valueRecorders,
-	}
-}
-
-func (p *PubMetric) apply(in PubMiddleware) PubMiddleware {
-	p.root = in
-
-	return p
-}
-
-func (p *PubMetric) PublishWithContext(ctx context.Context, subj string, data []byte) (err error) {
-	defer func(start time.Time) {
-		attr := []attribute.KeyValue{
-			IsError.Bool(err != nil),
-			Subject.String(subj),
-		}
-
-		p.counters[OutCount].Add(ctx, 1, attr...)
-		p.counters[OutContentLength].Add(ctx, int64(len(data)), attr...)
-		p.valueRecorders[OutLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
-	}(time.Now())
-
-	return p.root.PublishWithContext(ctx, subj, data)
-}
-
-func (p *PubMetric) PublishMsgWithContext(ctx context.Context, msg *nats.Msg) (err error) {
-	defer func(start time.Time) {
-		attr := []attribute.KeyValue{
-			IsError.Bool(err != nil),
-			Subject.String(msg.Subject),
-		}
-
-		p.counters[OutCount].Add(ctx, 1, attr...)
-		p.counters[OutContentLength].Add(ctx, int64(len(msg.Data)), attr...)
-		p.valueRecorders[OutLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
-	}(time.Now())
-
-	return p.root.PublishMsgWithContext(ctx, msg)
-}
-
-func (p *PubMetric) PublishRequestWithContext(ctx context.Context, subj, reply string, data []byte) (err error) {
-	defer func(start time.Time) {
-		attr := []attribute.KeyValue{
-			IsError.Bool(err != nil),
-			Subject.String(subj),
-		}
-
-		p.counters[OutCount].Add(ctx, 1, attr...)
-		p.counters[OutContentLength].Add(ctx, int64(len(data)), attr...)
-		p.valueRecorders[OutLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
-	}(time.Now())
-
-	return p.root.PublishRequestWithContext(ctx, subj, reply, data)
-}
-
-func (p *PubMetric) RequestWithContext(ctx context.Context, subj string, data []byte) (resp *nats.Msg, err error) {
-	defer func(start time.Time) {
-		attr := []attribute.KeyValue{
-			IsError.Bool(err != nil),
-			Subject.String(subj),
-		}
-
-		p.counters[OutCount].Add(ctx, 1, attr...)
-		p.counters[OutContentLength].Add(ctx, int64(len(data)), attr...)
-		p.valueRecorders[OutLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
-
-		if err == nil {
-			p.counters[RequestRespondContentLength].Add(ctx, int64(len(resp.Data)), attr...)
-		}
-	}(time.Now())
-
-	return p.root.RequestWithContext(ctx, subj, data)
-}
-
-func (p *PubMetric) RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (resp *nats.Msg, err error) {
-	defer func(start time.Time) {
-		attr := []attribute.KeyValue{
-			IsError.Bool(err != nil),
-			Subject.String(msg.Subject),
-		}
-
-		p.counters[OutCount].Add(ctx, 1, attr...)
-		p.counters[OutContentLength].Add(ctx, int64(len(msg.Subject)), attr...)
-		p.valueRecorders[OutLatency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
-
-		if err == nil {
-			p.counters[RequestRespondContentLength].Add(ctx, int64(len(resp.Data)), attr...)
-		}
-	}(time.Now())
-
-	return p.root.RequestMsgWithContext(ctx, msg)
 }

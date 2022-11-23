@@ -32,7 +32,7 @@ func main() {
 	cfg := tel.GetConfigFromEnv()
 	cfg.LogEncode = "console"
 	cfg.Namespace = "TEST"
-	cfg.Service = "NATS.PRODUCER"
+	cfg.Service = "NATS_PRODUCER"
 	cfg.MonitorConfig.Enable = false
 
 	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())

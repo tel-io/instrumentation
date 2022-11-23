@@ -30,7 +30,7 @@ func (t *Tracer) apply(next MsgHandler) MsgHandler {
 		defer span.End()
 
 		tel.FromCtx(ctx).PutAttr(extract...)
-		tel.UpdateTraceFields(ctx)
+		tel.UpdateTraceFields(cxt)
 
 		err := next(ctx, msg)
 		if err != nil {
