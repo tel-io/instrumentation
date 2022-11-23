@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
@@ -24,20 +25,42 @@ func (o optionFunc) apply(c *config) {
 
 type PostHook func(ctx context.Context, msg *nats.Msg, data []byte) error
 
+// NameFn operation name description
+type NameFn func(msg *nats.Msg) string
+
+// defaultSubOperationFn default name convention
+func defaultSubOperationFn(msg *nats.Msg) string {
+	return fmt.Sprintf("NATS:SUB/%s/%s", msg.Sub.Queue, msg.Subject)
+}
+
+func defaultPubOperationFn(msg *nats.Msg) string {
+	return fmt.Sprintf("NATS:PUB/%s", msg.Subject)
+}
+
 type config struct {
+	// Deprecated: only for legacy usage
 	postHook PostHook
-	tele     tel.Telemetry
-	meter    metric.Meter
+
+	tele  tel.Telemetry
+	meter metric.Meter
 
 	dumpRequest        bool
 	dumpResponse       bool
 	dumpPayloadOnError bool
+
+	subNameFn NameFn
+	pubNameFn NameFn
+
+	list    []Middleware
+	pubList []PubMiddleware
 }
 
 func newConfig(opts []Option) *config {
 	c := &config{
 		tele:               tel.Global(),
 		dumpPayloadOnError: true,
+		subNameFn:          defaultSubOperationFn,
+		pubNameFn:          defaultPubOperationFn,
 	}
 
 	c.apply(opts)
@@ -56,8 +79,33 @@ func (c *config) apply(opts []Option) {
 	}
 }
 
+func (c *config) DefaultMiddleware() []Middleware {
+	return []Middleware{
+		NewTracer(c.pubNameFn),
+		NewLogs(c),
+		NewMetrics(c.tele, c.meter),
+		NewRecovery(),
+	}
+}
+
+func (c *config) Middleware() []Middleware {
+	return append(c.DefaultMiddleware(), c.list...)
+}
+
+func (c *config) DefaultPubMiddleware() []PubMiddleware {
+	return []PubMiddleware{
+		NewPubMetric(c.tele, c.meter),
+		NewPubTrace(c.pubNameFn),
+	}
+}
+
+func (c *config) PubMiddleware() []PubMiddleware {
+	return append(c.DefaultPubMiddleware(), c.pubList...)
+}
+
 // WithReply extend mw with automatically sending reply on nats requests if they ask with data provided
 // @inject - wrap nats.Msg handler with OTEL propagation data - extend traces, baggage and etc.
+// Deprecated: legacy usage only
 func WithReply(inject bool) Option {
 	return WithPostHook(func(ctx context.Context, msg *nats.Msg, data []byte) error {
 		if msg.Reply == "" {
@@ -78,6 +126,7 @@ func WithReply(inject bool) Option {
 }
 
 // WithPostHook set (only one) where you can perform post handle operation with data provided by handler
+// Deprecated: legacy usage only
 func WithPostHook(cb PostHook) Option {
 	return optionFunc(func(c *config) {
 		c.postHook = cb
@@ -112,5 +161,11 @@ func WithDumpResponse(enable bool) Option {
 func WithDumpPayloadOnError(enable bool) Option {
 	return optionFunc(func(c *config) {
 		c.dumpPayloadOnError = enable
+	})
+}
+
+func WithNameFunction(fn NameFn) Option {
+	return optionFunc(func(c *config) {
+		c.subNameFn = fn
 	})
 }

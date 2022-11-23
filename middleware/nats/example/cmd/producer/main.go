@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
+	mw "github.com/tel-io/instrumentation/middleware/nats"
 	"github.com/tel-io/tel/v2"
 )
 
@@ -46,14 +47,16 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
+	connection := mw.WrapConn(con, mw.WithTel(t))
+
 	for i := 0; i < threads; i++ {
-		go run(ctx, con)
+		go run(ctx, connection, i)
 	}
 
 	<-ctx.Done()
 }
 
-func run(ctx context.Context, con *nats.Conn) {
+func run(ctx context.Context, con *mw.Conn, i int) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -61,13 +64,14 @@ func run(ctx context.Context, con *nats.Conn) {
 		case <-time.After(time.Second):
 			switch rand.Int63n(20) {
 			case 0:
-				_ = con.Publish("nats.err", []byte("HELLO"))
+				_ = con.PublishWithContext(ctx, "nats.err", []byte("HELLO"))
 			case 1:
-				_ = con.Publish("nats.crash", []byte("HELLO"))
+				_ = con.PublishWithContext(ctx, "nats.crash", []byte("HELLO"))
 			default:
-				go func() {
-					_, _ = con.Request("nats.demo", []byte("HELLO"), time.Minute)
-				}()
+				cxx, cancel := context.WithTimeout(ctx, time.Second)
+				_, _ = con.RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
+				cancel()
+
 			}
 		}
 	}

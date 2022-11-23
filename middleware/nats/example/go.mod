@@ -7,7 +7,7 @@ replace github.com/tel-io/instrumentation/middleware/nats => ../
 require (
 	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/nats.go v1.18.0
-	github.com/tel-io/instrumentation/middleware/nats v1.2.1
+	github.com/tel-io/instrumentation/middleware/nats v1.2.4
 	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
 )
 

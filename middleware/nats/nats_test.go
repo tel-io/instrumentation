@@ -2,108 +2,38 @@ package nats
 
 import (
 	"context"
-	"fmt"
-	"testing"
-
 	"github.com/nats-io/nats.go"
 
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/assert"
 	"github.com/tel-io/tel/v2"
 )
 
 func Example_handler() {
-	cb := func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+	tele := tel.NewNull()
+	ctx := tele.Ctx()
+
+	conn, _ := nats.Connect("example.com")
+	nConn, _ := WrapConn(conn, WithTel(tele))
+
+	// legacy backport
+	cbLegacy := func(ctx context.Context, sub string, data []byte) ([]byte, error) {
 		return nil, nil
 	}
 
-	tele := tel.NewNull()
-	mw := New(WithReply(true), WithTel(tele))
-
-	conn, _ := nats.Connect("example.com")
-
-	_, _ = conn.QueueSubscribe("sub", "queue", mw.Handler(cb))
-	_, _ = conn.QueueSubscribe("sub2", "queue", mw.Handler(cb))
-}
-
-func Test_mw(t *testing.T) {
-	type args struct {
-		next PostFn
-		msg  *nats.Msg
+	cb := func(ctx context.Context, msg *nats.Msg) error {
+		return nil
 	}
 
-	cfg := tel.DefaultConfig()
-	cfg.Debug = true
-	cfg.LogLevel = "debug"
+	_, _ = nConn.QueueSubscribeMW("sub", "queue", cbLegacy)
+	_, _ = nConn.QueueSubscribeMW("sub2", "queue", cbLegacy)
 
-	tele := tel.NewNull()
+	// sub
+	nConn.Subscribe("sub", cb)
+	nConn.QueueSubscribe("sub", "xxx", cb)
 
-	tests := []struct {
-		name string
-		args args
-	}{
-		{
-			name: "OK",
-			args: args{
-				next: func(ctx context.Context, _ string, data []byte) ([]byte, error) {
-					return []byte("OK"), nil
-				},
-				msg: &nats.Msg{
-					Data: []byte(`{"user": "1"}`),
-					Sub: &nats.Subscription{
-						Queue: "queue#1", Subject: "subject#1",
-					}},
-			},
-		},
-		{
-			name: "ERR",
-			args: args{
-				next: func(ctx context.Context, _ string, data []byte) ([]byte, error) {
-					return nil, errors.WithStack(fmt.Errorf("some error"))
-				},
-				msg: &nats.Msg{
-					Data: []byte(`{"user": "1"}`),
-					Sub: &nats.Subscription{
-						Queue: "queue#1", Subject: "subject#1",
-					}},
-			},
-		},
-		{
-			name: "PANIC",
-			args: args{
-				next: func(ctx context.Context, _ string, data []byte) ([]byte, error) {
-					panic("omg")
-				},
-				msg: &nats.Msg{
-					Data: []byte(`{"user": "1"}`),
-					Sub: &nats.Subscription{
-						Queue: "queue#1", Subject: "subject#1",
-					}},
-			},
-		},
-		{
-			name: "reply",
-			args: args{
-				next: func(ctx context.Context, _ string, data []byte) ([]byte, error) {
-					return []byte("OK"), nil
-				},
-				msg: &nats.Msg{
-					Reply: "XXX",
-					Data:  []byte(`{"user": "1"}`),
-					Sub: &nats.Subscription{
-						Queue: "queue#1", Subject: "subject#1",
-					}},
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cb := New(WithTel(tele), WithReply(true)).Handler(tt.args.next)
-
-			assert.NotPanics(t, func() {
-				cb(tt.args.msg)
-			})
-		})
-	}
+	// pub
+	nConn.PublishWithContext(ctx, "sub", []byte("HELLO"))
+	nConn.PublishMsgWithContext(ctx, &nats.Msg{})
+	nConn.PublishRequestWithContext(ctx, "sub", "reply", []byte("HELLO"))
+	nConn.RequestWithContext(ctx, "sub", []byte("HELLO"))
+	nConn.RequestMsgWithContext(ctx, &nats.Msg{})
 }
