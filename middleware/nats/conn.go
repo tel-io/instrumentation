@@ -3,8 +3,18 @@ package nats
 import (
 	"context"
 	"github.com/nats-io/nats.go"
+	"github.com/pkg/errors"
 	"github.com/tel-io/tel/v2"
 )
+
+// Core features for context
+type Core struct {
+	*config
+
+	list []Middleware
+
+	subMeter *SubscriptionStatMetric
+}
 
 // ConnContext wrapper for nats.ConnContext aks mw connection approach
 //
@@ -14,15 +24,10 @@ type ConnContext struct {
 	conn *nats.Conn
 	Publish
 
-	*config
-
-	list []Middleware
-
-	subMeter *SubscriptionStatMetric
+	*Core
 }
 
-// New wraps nats Core connection with middleware functionality
-func New(conn *nats.Conn, opts ...Option) *ConnContext {
+func newCore(opts ...Option) *Core {
 	cfg := newConfig(opts)
 
 	sb, err := NewSubscriptionStatMetrics(opts...)
@@ -30,28 +35,35 @@ func New(conn *nats.Conn, opts ...Option) *ConnContext {
 		cfg.tele.Panic("wrap connection", tel.Error(err))
 	}
 
+	return &Core{
+		config:   cfg,
+		subMeter: sb,
+		list:     cfg.Middleware(),
+	}
+}
+
+// New wraps nats Core connection with middleware functionality
+func New(conn *nats.Conn, opts ...Option) *ConnContext {
+	core := newCore(opts...)
+
 	// init publish
 	var pub PubMiddleware
 	pub = NewCommonPublish(conn)
 
-	pubList := cfg.DefaultPubMiddleware()
+	pubList := core.DefaultPubMiddleware()
 	for _, mw := range pubList {
 		pub = mw.apply(pub)
 	}
 
 	return &ConnContext{
-		conn: conn,
-
-		subMeter: sb,
-		config:   cfg,
-		Publish:  pub,
-
-		list: cfg.Middleware(),
+		conn:    conn,
+		Core:    core,
+		Publish: pub,
 	}
 }
 
 // wrap Middleware wrap
-func (c *ConnContext) wrap(in MsgHandler) nats.MsgHandler {
+func (c *Core) wrap(in MsgHandler) nats.MsgHandler {
 	for _, cb := range c.list {
 		in = cb.apply(in)
 	}
@@ -66,6 +78,19 @@ func (c *ConnContext) wrap(in MsgHandler) nats.MsgHandler {
 // Conn unwrap connection
 func (c *ConnContext) Conn() *nats.Conn {
 	return c.conn
+}
+
+// JetStream returns a JetStreamContext wrapper for consumer
+func (c *ConnContext) JetStream(opts ...nats.JSOpt) (*JetStreamContext, error) {
+	js, err := c.conn.JetStream(opts...)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return &JetStreamContext{
+		js:   js,
+		Core: c.Core,
+	}, nil
 }
 
 // Subscribe will express interest in the given subject. The subject
