@@ -47,7 +47,7 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	connection := mw.WrapConn(con, mw.WithTel(t))
+	connection := mw.New(con, mw.WithTel(t))
 
 	for i := 0; i < threads; i++ {
 		go run(ctx, connection, i)
@@ -56,7 +56,7 @@ func main() {
 	<-ctx.Done()
 }
 
-func run(ctx context.Context, con *mw.Conn, i int) {
+func run(ctx context.Context, con *mw.ConnContext, i int) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -67,11 +67,18 @@ func run(ctx context.Context, con *mw.Conn, i int) {
 				_ = con.PublishWithContext(ctx, "nats.err", []byte("HELLO"))
 			case 1:
 				_ = con.PublishWithContext(ctx, "nats.crash", []byte("HELLO"))
-			default:
+			case 3:
 				cxx, cancel := context.WithTimeout(ctx, time.Second)
+				_, _ = con.RequestWithContext(cxx, "nats.timeout", []byte("HELLO"))
+				cancel()
+			case 4:
+				cxx, cancel := context.WithTimeout(ctx, time.Millisecond)
+				_, _ = con.RequestWithContext(cxx, "nats.no-respond", []byte("HELLO"))
+				cancel()
+			default:
+				cxx, cancel := context.WithTimeout(ctx, time.Minute)
 				_, _ = con.RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
 				cancel()
-
 			}
 		}
 	}

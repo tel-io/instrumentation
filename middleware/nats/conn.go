@@ -6,23 +6,23 @@ import (
 	"github.com/tel-io/tel/v2"
 )
 
-// Conn wrapper for nats.Conn aks mw connection approach
+// ConnContext wrapper for nats.ConnContext aks mw connection approach
 //
 // Features:
 // Expose subscription stats via function overwrite
-type Conn struct {
+type ConnContext struct {
 	conn *nats.Conn
 	Publish
 
 	*config
 
-	list    []Middleware
-	pubList []PubMiddleware
+	list []Middleware
 
 	subMeter *SubscriptionStatMetric
 }
 
-func WrapConn(conn *nats.Conn, opts ...Option) *Conn {
+// New wraps nats Core connection with middleware functionality
+func New(conn *nats.Conn, opts ...Option) *ConnContext {
 	cfg := newConfig(opts)
 
 	sb, err := NewSubscriptionStatMetrics(opts...)
@@ -39,7 +39,7 @@ func WrapConn(conn *nats.Conn, opts ...Option) *Conn {
 		pub = mw.apply(pub)
 	}
 
-	return &Conn{
+	return &ConnContext{
 		conn: conn,
 
 		subMeter: sb,
@@ -50,19 +50,8 @@ func WrapConn(conn *nats.Conn, opts ...Option) *Conn {
 	}
 }
 
-// hook for subscription handling
-func (c *Conn) hook(s *nats.Subscription, err error) (*nats.Subscription, error) {
-	if err != nil {
-		return nil, err
-	}
-
-	c.subMeter.Register(s)
-
-	return s, nil
-}
-
 // wrap Middleware wrap
-func (c *Conn) wrap(in MsgHandler) nats.MsgHandler {
+func (c *ConnContext) wrap(in MsgHandler) nats.MsgHandler {
 	for _, cb := range c.list {
 		in = cb.apply(in)
 	}
@@ -75,7 +64,7 @@ func (c *Conn) wrap(in MsgHandler) nats.MsgHandler {
 }
 
 // Conn unwrap connection
-func (c *Conn) Conn() *nats.Conn {
+func (c *ConnContext) Conn() *nats.Conn {
 	return c.conn
 }
 
@@ -87,8 +76,8 @@ func (c *Conn) Conn() *nats.Conn {
 // time.us.east and time.us.east.atlanta, while time.us.* would only match time.us.east
 // since it can't match more than one token.
 // Messages will be delivered to the associated MsgHandler.
-func (c *Conn) Subscribe(subj string, cb MsgHandler) (*nats.Subscription, error) {
-	return c.hook(
+func (c *ConnContext) Subscribe(subj string, cb MsgHandler) (*nats.Subscription, error) {
+	return c.subMeter.Hook(
 		c.conn.Subscribe(subj, c.wrap(cb)),
 	)
 }
@@ -97,15 +86,15 @@ func (c *Conn) Subscribe(subj string, cb MsgHandler) (*nats.Subscription, error)
 // All subscribers with the same queue name will form the queue group and
 // only one member of the group will be selected to receive any given
 // message asynchronously.
-func (c *Conn) QueueSubscribe(subj, queue string, cb MsgHandler) (*nats.Subscription, error) {
-	return c.hook(
+func (c *ConnContext) QueueSubscribe(subj, queue string, cb MsgHandler) (*nats.Subscription, error) {
+	return c.subMeter.Hook(
 		c.conn.QueueSubscribe(subj, queue, c.wrap(cb)),
 	)
 }
 
 // QueueSubscribeMW mw callback function, just legacy
 // Deprecated: just backport compatibility for PostFn legacy
-func (c *Conn) QueueSubscribeMW(subj, queue string, next PostFn) (*nats.Subscription, error) {
+func (c *ConnContext) QueueSubscribeMW(subj, queue string, next PostFn) (*nats.Subscription, error) {
 	return c.QueueSubscribe(subj, queue, func(ctx context.Context, msg *nats.Msg) error {
 		resp, err := next(ctx, msg.Subject, msg.Data)
 		if err != nil || c.config.postHook == nil {
@@ -119,6 +108,6 @@ func (c *Conn) QueueSubscribeMW(subj, queue string, next PostFn) (*nats.Subscrip
 
 // SubscribeMW backport compatible function for previous mw approach
 // Deprecated: just backport compatibility for PostFn legacy
-func (c *Conn) SubscribeMW(subj string, cb PostFn) (*nats.Subscription, error) {
+func (c *ConnContext) SubscribeMW(subj string, cb PostFn) (*nats.Subscription, error) {
 	return c.QueueSubscribeMW(subj, "", cb)
 }

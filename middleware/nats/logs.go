@@ -19,9 +19,7 @@ func NewLogs(cfg *config) *Logs {
 }
 
 func (t *Logs) apply(next MsgHandler) MsgHandler {
-	return func(ctx context.Context, msg *nats.Msg) error {
-		var err error
-
+	return func(ctx context.Context, msg *nats.Msg) (err error) {
 		defer func(start time.Time) {
 			l := tel.FromCtx(ctx).With(
 				zap.String("duration", time.Since(start).String()),
@@ -41,8 +39,6 @@ func (t *Logs) apply(next MsgHandler) MsgHandler {
 
 		}(time.Now())
 
-		err = next(ctx, msg)
-
-		return err
+		return next(ctx, msg)
 	}
 }

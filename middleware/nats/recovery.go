@@ -15,9 +15,7 @@ func NewRecovery() *Recovery {
 }
 
 func (t *Recovery) apply(next MsgHandler) MsgHandler {
-	return func(ctx context.Context, msg *nats.Msg) error {
-		var err error
-
+	return func(ctx context.Context, msg *nats.Msg) (err error) {
 		defer func() {
 			hasRecovery := recover()
 

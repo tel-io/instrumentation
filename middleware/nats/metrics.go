@@ -60,10 +60,13 @@ func NewMetrics(m *metrics) *SubMetrics {
 }
 
 func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
-	return func(ctx context.Context, msg *nats.Msg) error {
-		var err error
-
+	return func(ctx context.Context, msg *nats.Msg) (err error) {
 		defer func(start time.Time) {
+			if ctx.Err() != nil {
+				err = ctx.Err()
+				ctx = tel.FromCtx(ctx).Ctx()
+			}
+
 			attr := []attribute.KeyValue{
 				IsError.Bool(err != nil),
 				Subject.String(msg.Subject),
@@ -76,9 +79,7 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 
 		}(time.Now())
 
-		err = next(ctx, msg)
-
-		return err
+		return next(ctx, msg)
 	}
 }
 
@@ -106,6 +107,11 @@ func (p *PubMetric) apply(in PubMiddleware) PubMiddleware {
 
 func (p *PubMetric) PublishWithContext(ctx context.Context, subj string, data []byte) (err error) {
 	defer func(start time.Time) {
+		if ctx.Err() != nil {
+			err = ctx.Err()
+			ctx = tel.FromCtx(ctx).Ctx()
+		}
+
 		attr := []attribute.KeyValue{
 			IsError.Bool(err != nil),
 			Subject.String(subj),
@@ -122,6 +128,11 @@ func (p *PubMetric) PublishWithContext(ctx context.Context, subj string, data []
 
 func (p *PubMetric) PublishMsgWithContext(ctx context.Context, msg *nats.Msg) (err error) {
 	defer func(start time.Time) {
+		if ctx.Err() != nil {
+			err = ctx.Err()
+			ctx = tel.FromCtx(ctx).Ctx()
+		}
+
 		attr := []attribute.KeyValue{
 			IsError.Bool(err != nil),
 			Subject.String(msg.Subject),
@@ -138,6 +149,11 @@ func (p *PubMetric) PublishMsgWithContext(ctx context.Context, msg *nats.Msg) (e
 
 func (p *PubMetric) PublishRequestWithContext(ctx context.Context, subj, reply string, data []byte) (err error) {
 	defer func(start time.Time) {
+		if ctx.Err() != nil {
+			err = ctx.Err()
+			ctx = tel.FromCtx(ctx).Ctx()
+		}
+
 		attr := []attribute.KeyValue{
 			IsError.Bool(err != nil),
 			Subject.String(subj),
@@ -160,6 +176,11 @@ func (p *PubMetric) RequestWithContext(ctx context.Context, subj string, data []
 
 func (p *PubMetric) RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (resp *nats.Msg, err error) {
 	defer func(start time.Time) {
+		if ctx.Err() != nil {
+			err = ctx.Err()
+			ctx = tel.FromCtx(ctx).Ctx()
+		}
+
 		reqAttr := []attribute.KeyValue{
 			IsError.Bool(err != nil),
 			Subject.String(msg.Subject),
@@ -167,10 +188,10 @@ func (p *PubMetric) RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (r
 		}
 
 		p.counters[Count].Add(ctx, 1, reqAttr...)
-		p.counters[ContentLength].Add(ctx, int64(len(msg.Subject)), reqAttr...)
+		p.counters[ContentLength].Add(ctx, int64(len(msg.Data)), reqAttr...)
 		p.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), reqAttr...)
 
-		if err == nil {
+		if resp != nil {
 			resAttr := []attribute.KeyValue{
 				IsError.Bool(err != nil),
 				Subject.String(msg.Subject),
@@ -217,6 +238,16 @@ func NewSubscriptionStatMetrics(opts ...Option) (*SubscriptionStatMetric, error)
 	}
 
 	return res, nil
+}
+
+func (s *SubscriptionStatMetric) Hook(sub *nats.Subscription, err error) (*nats.Subscription, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	s.Register(sub)
+
+	return sub, nil
 }
 
 func (s *SubscriptionStatMetric) Register(sub ...*nats.Subscription) {

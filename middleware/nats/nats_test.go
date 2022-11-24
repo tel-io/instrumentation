@@ -12,7 +12,7 @@ func Example_handler() {
 	ctx := tele.Ctx()
 
 	conn, _ := nats.Connect("example.com")
-	nConn, _ := WrapConn(conn, WithTel(tele))
+	nConn := New(conn, WithTel(tele))
 
 	// legacy backport
 	cbLegacy := func(ctx context.Context, sub string, data []byte) ([]byte, error) {

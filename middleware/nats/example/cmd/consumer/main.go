@@ -46,13 +46,12 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	mw := natsmw.WrapConn(con, natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true))
+	mw := natsmw.New(con, natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true))
 
 	for i := 0; i < 1; i++ {
 		go func() {
 			subscribe, err := mw.QueueSubscribe("nats.demo", "consumer", func(ctx context.Context, msg *nats.Msg) error {
 				// send as reply
-				time.Sleep(time.Second)
 				fmt.Println(string(msg.Data))
 				return msg.Respond([]byte("HELLO"))
 			})
@@ -71,11 +70,18 @@ func main() {
 			})
 			nullErr(err)
 
+			tmout, err := mw.QueueSubscribe("nats.timeout", "consumer", func(ctx context.Context, msg *nats.Msg) error {
+				time.Sleep(time.Second)
+				return msg.Respond([]byte("HELLO"))
+			})
+			nullErr(err)
+
 			<-ctx.Done()
 
 			_ = subscribe.Unsubscribe()
 			_ = crash.Unsubscribe()
 			_ = someErr.Unsubscribe()
+			_ = tmout.Unsubscribe()
 		}()
 	}
 
