@@ -6,7 +6,7 @@ import (
 
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
-	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
+	"github.com/tel-io/instrumentation/middleware/nats/v2/natsprop"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/metric"
 )
@@ -170,5 +170,12 @@ func WithDumpPayloadOnError(enable bool) Option {
 func WithNameFunction(fn NameFn) Option {
 	return optionFunc(func(c *config) {
 		c.subNameFn = fn
+	})
+}
+
+// WithMiddleWare add custom middlewares
+func WithMiddleWare(list ...Middleware) Option {
+	return optionFunc(func(c *config) {
+		c.list = append(c.list, list...)
 	})
 }

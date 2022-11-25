@@ -3,7 +3,7 @@ package nats
 import (
 	"context"
 	"github.com/nats-io/nats.go"
-	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
+	"github.com/tel-io/instrumentation/middleware/nats/v2/natsprop"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"

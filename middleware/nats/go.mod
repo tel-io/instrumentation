@@ -1,4 +1,4 @@
-module github.com/tel-io/instrumentation/middleware/nats
+module github.com/tel-io/instrumentation/middleware/nats/v2
 
 go 1.17
 
