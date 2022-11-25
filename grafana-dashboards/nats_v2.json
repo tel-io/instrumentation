@@ -211,7 +211,7 @@
             "uid": "${DS_MIMIR}"
           },
           "exemplar": false,
-          "expr": "sum(rate(runtime_uptime{service_namespace=\"$NS\"}[1m])) by ( namespace, service, service_version)",
+          "expr": "sum(rate(runtime_uptime{service_namespace=\"$NS\"}[$__range])) by ( namespace, service, service_version)",
           "format": "table",
           "hide": false,
           "instant": true,
@@ -2671,6 +2671,7 @@
         "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
+        "queryValue": "",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -2693,7 +2694,7 @@
           "query": "label_values(nats_duration_count{}, service_namespace)",
           "refId": "StandardVariableQuery"
         },
-        "refresh": 1,
+        "refresh": 2,
         "regex": "",
         "skipUrlSync": false,
         "sort": 0,
@@ -2819,7 +2820,7 @@
     ]
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -2849,7 +2850,7 @@
   },
   "timezone": "",
   "title": "NATS v2",
-  "uid": "j7GXrJj7zww",
-  "version": 4,
+  "uid": "j7GXrJj7",
+  "version": 1,
   "weekStart": ""
 }
