@@ -14,7 +14,7 @@ Thus, we offer replacement of `MsgHandler` with context and error return.
 ## How to start
 
 ```bash
-go get github.com/tel-io/instrumentation/middleware/nats 
+go get github.com/tel-io/instrumentation/middleware/nats/v2@latest 
 ```
 
 ```go

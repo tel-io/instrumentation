@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
-	mw "github.com/tel-io/instrumentation/middleware/nats"
+	mw "github.com/tel-io/instrumentation/middleware/nats/v2"
 	"github.com/tel-io/tel/v2"
 )
 

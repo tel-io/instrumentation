@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	natsmw "github.com/tel-io/instrumentation/middleware/nats"
+	natsmw "github.com/tel-io/instrumentation/middleware/nats/v2"
 	"github.com/tel-io/tel/v2"
 
 	_ "github.com/joho/godotenv/autoload"
