@@ -6,7 +6,7 @@ const (
 
 // Version is the current release version of the otelnats instrumentation.
 func Version() string {
-	return "0.32.0"
+	return "1.00.0"
 	// This string is updated by the pre_release.sh script during release
 }
 

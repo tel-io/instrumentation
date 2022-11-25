@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/nats-io/nats.go"
+	mw "github.com/tel-io/instrumentation/middleware/nats"
 	"github.com/tel-io/tel/v2"
 )
 
@@ -31,11 +32,11 @@ func main() {
 	cfg := tel.GetConfigFromEnv()
 	cfg.LogEncode = "console"
 	cfg.Namespace = "TEST"
-	cfg.Service = "NATS.PRODUCER"
+	cfg.Service = "NATS_PRODUCER"
 	cfg.MonitorConfig.Enable = false
 
-	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())
-	defer cc()
+	t, closer := tel.New(ccx, cfg, tel.WithHealthCheckers())
+	defer closer()
 
 	ctx := tel.WithContext(ccx, t)
 
@@ -46,14 +47,18 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
+	connection := mw.New(con, mw.WithTel(t))
+
 	for i := 0; i < threads; i++ {
-		go run(ctx, con)
+		go run(ctx, connection, i)
 	}
 
 	<-ctx.Done()
 }
 
-func run(ctx context.Context, con *nats.Conn) {
+func run(ctx context.Context, con *mw.ConnContext, i int) {
+	//js, _ := con.JetStream()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -61,13 +66,25 @@ func run(ctx context.Context, con *nats.Conn) {
 		case <-time.After(time.Second):
 			switch rand.Int63n(20) {
 			case 0:
-				_ = con.Publish("nats.err", []byte("HELLO"))
+				_ = con.PublishWithContext(ctx, "nats.err", []byte("HELLO"))
 			case 1:
-				_ = con.Publish("nats.crash", []byte("HELLO"))
+				_ = con.PublishWithContext(ctx, "nats.crash", []byte("HELLO"))
+			case 3:
+				cxx, cancel := context.WithTimeout(ctx, time.Second)
+				_, _ = con.RequestWithContext(cxx, "nats.timeout", []byte("HELLO"))
+				cancel()
+			case 4:
+				cxx, cancel := context.WithTimeout(ctx, time.Millisecond)
+				_, _ = con.RequestWithContext(cxx, "nats.no-respond", []byte("HELLO"))
+				cancel()
+			//case 5:
+			//	_, _ = js.JS().Publish("stream.demo", []byte("HELLO")) //nats.ExpectStream("demo"),
+			case 6:
+				_ = con.PublishWithContext(context.Background(), "nats.bad_context", []byte("HELLO"))
 			default:
-				go func() {
-					_, _ = con.Request("nats.demo", []byte("HELLO"), time.Minute)
-				}()
+				cxx, cancel := context.WithTimeout(ctx, time.Minute)
+				_, _ = con.RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
+				cancel()
 			}
 		}
 	}

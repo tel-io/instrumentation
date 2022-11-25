@@ -31,7 +31,7 @@ func main() {
 	cfg := tel.GetConfigFromEnv()
 	cfg.LogEncode = "console"
 	cfg.Namespace = "TEST"
-	cfg.Service = "NATS.CONSUMER"
+	cfg.Service = "NATS_CONSUMER"
 	cfg.MonitorConfig.Enable = false
 
 	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())
@@ -46,39 +46,42 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	mw := natsmw.New(natsmw.WithTel(t))
+	mw := natsmw.New(con, natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true))
 
-	x, err := natsmw.NewSubscriptionMetrics(natsmw.WithTel(t))
-	nullErr(err)
-
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1; i++ {
 		go func() {
-			subscribe, err := con.QueueSubscribe("nats.demo", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+			subscribe, err := mw.QueueSubscribe("nats.demo", "consumer", func(ctx context.Context, msg *nats.Msg) error {
 				// send as reply
-				time.Sleep(time.Second)
-				return []byte("HELLO"), nil
-			}))
+				fmt.Println(string(msg.Data))
+				return msg.Respond([]byte("HELLO"))
+			})
 			nullErr(err)
+			//subscribe.SetPendingLimits(1, 10000000)
 
-			crash, err := con.QueueSubscribe("nats.crash", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+			crash, err := mw.QueueSubscribe("nats.crash", "consumer", func(ctx context.Context, msg *nats.Msg) error {
 				time.Sleep(time.Microsecond)
 				panic("some panic")
-			}))
+			})
 			nullErr(err)
 
-			someErr, err := con.QueueSubscribe("nats.err", "consumer", mw.Handler(func(ctx context.Context, sub string, data []byte) ([]byte, error) {
+			someErr, err := mw.QueueSubscribe("nats.err", "consumer", func(ctx context.Context, msg *nats.Msg) error {
 				time.Sleep(time.Millisecond)
-				return nil, fmt.Errorf("some errro")
-			}))
+				return fmt.Errorf("some errro")
+			})
 			nullErr(err)
 
-			x.Register(subscribe, crash, someErr)
+			tmout, err := mw.QueueSubscribe("nats.timeout", "consumer", func(ctx context.Context, msg *nats.Msg) error {
+				time.Sleep(time.Second)
+				return msg.Respond([]byte("HELLO"))
+			})
+			nullErr(err)
 
 			<-ctx.Done()
 
 			_ = subscribe.Unsubscribe()
 			_ = crash.Unsubscribe()
 			_ = someErr.Unsubscribe()
+			_ = tmout.Unsubscribe()
 		}()
 	}
 
