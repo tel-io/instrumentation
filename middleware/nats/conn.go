@@ -136,3 +136,8 @@ func (c *ConnContext) QueueSubscribeMW(subj, queue string, next PostFn) (*nats.S
 func (c *ConnContext) SubscribeMW(subj string, cb PostFn) (*nats.Subscription, error) {
 	return c.QueueSubscribeMW(subj, "", cb)
 }
+
+// BuildWrappedHandler allow to create own mw, for bach processing for example or so on
+func (c *ConnContext) BuildWrappedHandler(cb MsgHandler) nats.MsgHandler {
+	return c.wrap(cb)
+}

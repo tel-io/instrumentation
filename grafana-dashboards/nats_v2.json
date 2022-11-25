@@ -1477,7 +1477,6 @@
         "type": "prometheus",
         "uid": "${DS_MIMIR}"
       },
-      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1488,21 +1487,21 @@
             "axisPlacement": "auto",
             "barAlignment": 0,
             "drawStyle": "line",
-            "fillOpacity": 10,
+            "fillOpacity": 0,
             "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": true,
+            "showPoints": "auto",
+            "spanNulls": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -1511,7 +1510,6 @@
               "mode": "off"
             }
           },
-          "links": [],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -1525,48 +1523,112 @@
                 "value": 80
               }
             ]
-          },
-          "unit": "ms"
+          }
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "count"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "dropped"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-purple",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "pending"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "dark-red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 10,
-        "w": 8,
+        "w": 10,
         "x": 12,
         "y": 22
       },
-      "id": 88,
-      "links": [],
+      "id": 95,
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "hidden",
-          "placement": "bottom"
+          "displayMode": "list",
+          "placement": "right"
         },
         "tooltip": {
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.4",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_MIMIR}"
           },
-          "exemplar": true,
-          "expr": "(sum(increase(nats_duration_sum{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)\n/ sum(increase(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[$__range])) by (subject)) >= 0",
-          "format": "time_series",
-          "instant": false,
-          "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{url}}",
+          "editorMode": "code",
+          "expr": "sum(rate(nats_subscriptions_send_count{}[$__rate_interval]))",
+          "legendFormat": "count",
+          "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_MIMIR}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(nats_subscriptions_dropped_count{}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "dropped",
+          "range": true,
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_MIMIR}"
+          },
+          "editorMode": "code",
+          "expr": "sum(rate(nats_subscriptions_pending_msgs{}[$__rate_interval]))",
+          "hide": false,
+          "legendFormat": "pending",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "Incoming Avg. Response Time",
+      "title": "Subscription rate",
       "type": "timeseries"
     },
     {
@@ -1613,7 +1675,7 @@
       "gridPos": {
         "h": 6,
         "w": 2,
-        "x": 20,
+        "x": 22,
         "y": 22
       },
       "hideTimeOverride": true,
@@ -1703,7 +1765,7 @@
         "h": 6,
         "w": 2,
         "x": 22,
-        "y": 22
+        "y": 28
       },
       "hideTimeOverride": true,
       "id": 92,
@@ -1825,7 +1887,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "true"
+              "options": "IsError: false"
             },
             "properties": [
               {
@@ -1840,7 +1902,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "E: false"
+              "options": "IsError: true"
             },
             "properties": [
               {
@@ -1899,6 +1961,7 @@
         "type": "prometheus",
         "uid": "${DS_MIMIR}"
       },
+      "description": "",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -1917,7 +1980,7 @@
               "viz": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 2,
+            "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -1934,7 +1997,6 @@
           },
           "links": [],
           "mappings": [],
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1948,30 +2010,30 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "ms"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
-        "w": 12,
+        "h": 9,
+        "w": 10,
         "x": 12,
         "y": 32
       },
-      "id": 2,
+      "id": 88,
       "links": [],
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "table",
-          "placement": "right"
+          "displayMode": "hidden",
+          "placement": "bottom"
         },
         "tooltip": {
           "mode": "multi",
           "sort": "none"
         }
       },
-      "pluginVersion": "9.0.7",
+      "pluginVersion": "8.4.4",
       "targets": [
         {
           "datasource": {
@@ -1979,15 +2041,16 @@
             "uid": "${DS_MIMIR}"
           },
           "exemplar": true,
-          "expr": "sum(irate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)",
+          "expr": "(sum(increase(nats_duration_sum{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)\n/ sum(increase(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[$__range])) by (subject)) >= 0",
           "format": "time_series",
+          "instant": false,
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{url}}",
           "refId": "A"
         }
       ],
-      "title": "QPS",
+      "title": "Incoming Avg. Response Time",
       "type": "timeseries"
     },
     {
@@ -2109,7 +2172,7 @@
               "viz": false
             },
             "lineInterpolation": "linear",
-            "lineWidth": 1,
+            "lineWidth": 2,
             "pointSize": 5,
             "scaleDistribution": {
               "type": "linear"
@@ -2140,7 +2203,7 @@
               }
             ]
           },
-          "unit": "percentunit"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -2148,9 +2211,9 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 39
+        "y": 41
       },
-      "id": 6,
+      "id": 2,
       "links": [],
       "options": {
         "legend": {
@@ -2163,7 +2226,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.4",
+      "pluginVersion": "9.0.7",
       "targets": [
         {
           "datasource": {
@@ -2171,7 +2234,7 @@
             "uid": "${DS_MIMIR}"
           },
           "exemplar": true,
-          "expr": "sum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", error=\"false\"}[$__range])) by (subject)\n/ \nsum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)",
+          "expr": "sum(irate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
@@ -2179,7 +2242,7 @@
           "refId": "A"
         }
       ],
-      "title": "Request error percentage",
+      "title": "QPS",
       "type": "timeseries"
     },
     {
@@ -2283,58 +2346,83 @@
       "type": "timeseries"
     },
     {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
       "datasource": {
         "type": "prometheus",
         "uid": "${DS_MIMIR}"
       },
       "fieldConfig": {
         "defaults": {
-          "links": []
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "links": [],
+          "mappings": [],
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percentunit"
         },
         "overrides": []
       },
-      "fill": 1,
-      "fillGradient": 0,
       "gridPos": {
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 46
+        "y": 48
       },
-      "hiddenSeries": false,
-      "id": 4,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": false,
-        "hideZero": false,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
+      "id": 6,
       "links": [],
-      "nullPointMode": "null",
       "options": {
-        "alertThreshold": true
+        "legend": {
+          "calcs": [],
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
       },
-      "percentage": false,
-      "pluginVersion": "9.0.7",
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
+      "pluginVersion": "8.4.4",
       "targets": [
         {
           "datasource": {
@@ -2342,46 +2430,16 @@
             "uid": "${DS_MIMIR}"
           },
           "exemplar": true,
-          "expr": "sum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", error=\"true\", kind_of=~\"$kind\"}[$__range])) by (subject)",
+          "expr": "sum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", error=\"false\"}[$__range])) by (subject)\n/ \nsum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)",
           "format": "time_series",
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{code}}",
+          "legendFormat": "{{url}}",
           "refId": "A"
         }
       ],
-      "thresholds": [],
-      "timeRegions": [],
-      "title": "Request error rate",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "mode": "time",
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "$$hashKey": "object:144",
-          "format": "none",
-          "logBase": 1,
-          "min": "0",
-          "show": true
-        },
-        {
-          "$$hashKey": "object:145",
-          "format": "Bps",
-          "logBase": 1,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false
-      }
+      "title": "Request error percentage",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -2490,6 +2548,107 @@
       ],
       "title": "Throughput",
       "type": "timeseries"
+    },
+    {
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_MIMIR}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "links": []
+        },
+        "overrides": []
+      },
+      "fill": 1,
+      "fillGradient": 0,
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 55
+      },
+      "hiddenSeries": false,
+      "id": 4,
+      "legend": {
+        "alignAsTable": true,
+        "avg": false,
+        "current": false,
+        "hideZero": false,
+        "max": false,
+        "min": false,
+        "rightSide": true,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [],
+      "nullPointMode": "null",
+      "options": {
+        "alertThreshold": true
+      },
+      "percentage": false,
+      "pluginVersion": "9.0.7",
+      "pointradius": 5,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_MIMIR}"
+          },
+          "exemplar": true,
+          "expr": "sum(rate(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\", error=\"true\", kind_of=~\"$kind\"}[$__range])) by (subject)",
+          "format": "time_series",
+          "interval": "",
+          "intervalFactor": 1,
+          "legendFormat": "{{code}}",
+          "refId": "A"
+        }
+      ],
+      "thresholds": [],
+      "timeRegions": [],
+      "title": "Request error rate",
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "graph",
+      "xaxis": {
+        "mode": "time",
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:144",
+          "format": "none",
+          "logBase": 1,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:145",
+          "format": "Bps",
+          "logBase": 1,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false
+      }
     }
   ],
   "refresh": "5s",
@@ -2660,7 +2819,7 @@
     ]
   },
   "time": {
-    "from": "now-1h",
+    "from": "now-15m",
     "to": "now"
   },
   "timepicker": {
@@ -2691,6 +2850,6 @@
   "timezone": "",
   "title": "NATS v2",
   "uid": "j7GXrJj7zww",
-  "version": 1,
+  "version": 4,
   "weekStart": ""
 }

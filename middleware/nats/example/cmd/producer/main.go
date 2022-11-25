@@ -35,8 +35,8 @@ func main() {
 	cfg.Service = "NATS_PRODUCER"
 	cfg.MonitorConfig.Enable = false
 
-	t, cc := tel.New(ccx, cfg, tel.WithHealthCheckers())
-	defer cc()
+	t, closer := tel.New(ccx, cfg, tel.WithHealthCheckers())
+	defer closer()
 
 	ctx := tel.WithContext(ccx, t)
 
@@ -57,6 +57,8 @@ func main() {
 }
 
 func run(ctx context.Context, con *mw.ConnContext, i int) {
+	//js, _ := con.JetStream()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -75,6 +77,10 @@ func run(ctx context.Context, con *mw.ConnContext, i int) {
 				cxx, cancel := context.WithTimeout(ctx, time.Millisecond)
 				_, _ = con.RequestWithContext(cxx, "nats.no-respond", []byte("HELLO"))
 				cancel()
+			//case 5:
+			//	_, _ = js.JS().Publish("stream.demo", []byte("HELLO")) //nats.ExpectStream("demo"),
+			case 6:
+				_ = con.PublishWithContext(context.Background(), "nats.bad_context", []byte("HELLO"))
 			default:
 				cxx, cancel := context.WithTimeout(ctx, time.Minute)
 				_, _ = con.RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
