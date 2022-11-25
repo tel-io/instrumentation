@@ -84,8 +84,8 @@ func (c *config) apply(opts []Option) {
 
 func (c *config) DefaultMiddleware() []Middleware {
 	return []Middleware{
-		NewTracer(c.subNameFn),
 		NewRecovery(),
+		NewTracer(c.subNameFn),
 		NewLogs(c),
 		NewMetrics(c.metrics),
 	}

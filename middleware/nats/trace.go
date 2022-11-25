@@ -6,16 +6,18 @@ import (
 	"github.com/tel-io/instrumentation/middleware/nats/natsprop"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/baggage"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/trace"
 )
 
 // Tracer for subscribers implementing Middleware
 type Tracer struct {
 	subNameFn NameFn
+	kind      trace.SpanKind
 }
 
 func NewTracer(fn NameFn) *Tracer {
-	return &Tracer{subNameFn: fn}
+	return &Tracer{subNameFn: fn, kind: trace.SpanKindClient}
 }
 
 func (t *Tracer) apply(next MsgHandler) MsgHandler {
@@ -26,15 +28,20 @@ func (t *Tracer) apply(next MsgHandler) MsgHandler {
 		cxt = trace.ContextWithRemoteSpanContext(cxt, spanContext)
 		cxt = baggage.ContextWithBaggage(cxt, bg)
 
-		span, ctx := tel.StartSpanFromContext(cxt, opr)
-		defer span.End()
+		span, ctx := tel.StartSpanFromContext(cxt, opr,
+			trace.WithSpanKind(t.kind),
+		)
+		defer span.End(trace.WithStackTrace(true))
 
 		tel.FromCtx(ctx).PutAttr(extract...)
 		tel.UpdateTraceFields(cxt)
 
 		err := next(ctx, msg)
 		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
 		}
 
 		return err
@@ -68,7 +75,7 @@ func (p *PubTrace) PublishMsgWithContext(cxt context.Context, msg *nats.Msg) (er
 	cxt = trace.ContextWithRemoteSpanContext(cxt, spanContext)
 	cxt = baggage.ContextWithBaggage(cxt, bg)
 
-	span, ctx := tel.StartSpanFromContext(cxt, opr)
+	span, ctx := tel.StartSpanFromContext(cxt, opr, trace.WithSpanKind(trace.SpanKindProducer))
 
 	tel.FromCtx(ctx).PutAttr(extract...)
 
@@ -76,7 +83,10 @@ func (p *PubTrace) PublishMsgWithContext(cxt context.Context, msg *nats.Msg) (er
 
 	defer func() {
 		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
 		}
 
 		span.End()
@@ -98,7 +108,7 @@ func (p *PubTrace) RequestMsgWithContext(cxt context.Context, msg *nats.Msg) (re
 	cxt = trace.ContextWithRemoteSpanContext(cxt, spanContext)
 	cxt = baggage.ContextWithBaggage(cxt, bg)
 
-	span, ctx := tel.StartSpanFromContext(cxt, opr)
+	span, ctx := tel.StartSpanFromContext(cxt, opr, trace.WithSpanKind(trace.SpanKindProducer))
 
 	tel.FromCtx(ctx).PutAttr(extract...)
 
@@ -106,7 +116,10 @@ func (p *PubTrace) RequestMsgWithContext(cxt context.Context, msg *nats.Msg) (re
 
 	defer func() {
 		if err != nil {
+			span.SetStatus(codes.Error, err.Error())
 			span.RecordError(err)
+		} else {
+			span.SetStatus(codes.Ok, "")
 		}
 
 		span.End()
