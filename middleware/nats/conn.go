@@ -5,13 +5,19 @@ import (
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"github.com/tel-io/tel/v2"
+	"sync"
 )
+
+var mx sync.RWMutex
+
+var ErrMultipleMiddleWare = errors.New("not allow create multiple instances")
 
 // Core features for context
 type Core struct {
 	*config
 
-	list []Middleware
+	list    []Middleware
+	pubList []PubMiddleware
 
 	subMeter *SubscriptionStatMetric
 }
@@ -27,38 +33,49 @@ type ConnContext struct {
 	*Core
 }
 
-func newCore(opts ...Option) *Core {
+// New middleware instance
+func New(opts ...Option) *Core {
+	// We don't allow to create multiple instances
+	if !mx.TryLock() {
+		panic(ErrMultipleMiddleWare)
+	}
+
 	cfg := newConfig(opts)
 
+	// create only once
 	sb, err := NewSubscriptionStatMetrics(opts...)
 	if err != nil {
 		cfg.tele.Panic("wrap connection", tel.Error(err))
 	}
 
+	// create instances of pub mw only once
+	plist := cfg.DefaultPubMiddleware()
+
+	// create instances of mw only once
+	list := cfg.Middleware()
+
 	return &Core{
+		pubList:  plist,
 		config:   cfg,
 		subMeter: sb,
-		list:     cfg.Middleware(),
+		list:     list,
 	}
 }
 
-// New wraps nats Core connection with middleware functionality
-func New(conn *nats.Conn, opts ...Option) *ConnContext {
-	core := newCore(opts...)
-
+// Use connection with middleware
+func (c *Core) Use(conn *nats.Conn) *ConnContext {
 	// init publish
 	var pub PubMiddleware
 	pub = NewCommonPublish(conn)
 
-	pubList := core.DefaultPubMiddleware()
-	for _, mw := range pubList {
+	for _, mw := range c.pubList {
 		pub = mw.apply(pub)
 	}
 
 	return &ConnContext{
 		conn:    conn,
-		Core:    core,
 		Publish: pub,
+		Core:    c,
 	}
 }
 
@@ -126,7 +143,7 @@ func (c *ConnContext) QueueSubscribeMW(subj, queue string, next PostFn) (*nats.S
 			return nil
 		}
 
-		err = c.config.postHook(ctx, msg, resp)
+		_ = c.config.postHook(ctx, msg, resp)
 		return nil
 	})
 }

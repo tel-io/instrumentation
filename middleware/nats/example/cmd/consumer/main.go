@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -41,12 +42,14 @@ func main() {
 
 	t.Info("nats", tel.String("collector", cfg.Addr))
 
+	xxx(ctx)
+
 	con, err := nats.Connect(addr)
 	if err != nil {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	mw := natsmw.New(con, natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true))
+	mw := natsmw.New(natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true)).Use(con)
 
 	for i := 0; i < 1; i++ {
 		go func() {
@@ -92,4 +95,58 @@ func nullErr(err error) {
 	if err != nil {
 		tel.Global().Panic("err", tel.Error(err))
 	}
+}
+
+func xxx(ccx context.Context) {
+	span, ctx := tel.FromCtx(ccx).StartSpan(ccx, "SOME INFO")
+	defer span.End()
+
+	// fiels
+	tel.FromCtx(ctx).PutFields(tel.String("SOME KEY", "SOME VALUE"))
+
+	tel.FromCtx(ccx).Info(">>>>>> INFO IT IS",
+		tel.Bool("xxx", true), tel.String("vvv", "qqq"))
+
+	tel.FromCtx(ctx).Info(">>>>> EMBED INFO",
+		tel.Bool("xxx", true), tel.String("vvv", "qqq"))
+
+	// DB
+	func(cci context.Context) {
+		tel.FromCtx(cci).PutFields(tel.String("USER_ID", "123"))
+	}(ctx)
+
+	// Redis
+	func(cci context.Context) {
+		sp, _ := tel.FromCtx(cci).StartSpan(cci, "REDDDD")
+		defer sp.End()
+
+		time.Sleep(time.Second)
+
+		tel.FromCtx(cci).PutFields(tel.String("REDDDD", "xxxxxxx"))
+	}(ctx)
+
+	err := func(cci context.Context) error {
+		e := func() error {
+			return nil
+		}()
+		if e != nil {
+			return errors.WithStack(e)
+		}
+
+		e2 := func() error {
+			return errors.WithStack(fmt.Errorf(">>> error some"))
+		}()
+
+		if e2 != nil {
+			return errors.WithStack(e2)
+		}
+
+		return nil
+
+	}(ctx)
+
+	if err != nil {
+		tel.FromCtx(ctx).Error("some err", tel.Error(err))
+	}
+
 }

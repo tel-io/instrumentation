@@ -7,7 +7,7 @@ replace github.com/tel-io/instrumentation/middleware/nats/v2 => ../
 require (
 	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/nats.go v1.18.0
-	github.com/tel-io/instrumentation/middleware/nats/v2 v2.0.0-20221125122654-ce12032d5cbe
+	github.com/tel-io/instrumentation/middleware/nats/v2 v2.0.0
 	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
 )
 
@@ -54,6 +54,7 @@ require (
 	github.com/nats-io/jwt/v2 v2.3.0 // indirect
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
+	github.com/octu0/nats-pool v1.0.6 // indirect
 	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
 	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/time v0.0.0-20220922220347-f3bd1da661af // indirect

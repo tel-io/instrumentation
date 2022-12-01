@@ -47,7 +47,7 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	connection := mw.New(con, mw.WithTel(t))
+	connection := mw.New(mw.WithTel(t)).Use(con)
 
 	for i := 0; i < threads; i++ {
 		go run(ctx, connection, i)

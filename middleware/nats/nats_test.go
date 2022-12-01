@@ -3,7 +3,6 @@ package nats
 import (
 	"context"
 	"github.com/nats-io/nats.go"
-
 	"github.com/tel-io/tel/v2"
 )
 
@@ -12,7 +11,7 @@ func Example_handler() {
 	ctx := tele.Ctx()
 
 	conn, _ := nats.Connect("example.com")
-	nConn := New(conn, WithTel(tele))
+	nConn := New(WithTel(tele)).Use(conn)
 
 	// legacy backport
 	cbLegacy := func(ctx context.Context, sub string, data []byte) ([]byte, error) {
@@ -27,13 +26,13 @@ func Example_handler() {
 	_, _ = nConn.QueueSubscribeMW("sub2", "queue", cbLegacy)
 
 	// sub
-	nConn.Subscribe("sub", cb)
-	nConn.QueueSubscribe("sub", "xxx", cb)
+	_, _ = nConn.Subscribe("sub", cb)
+	_, _ = nConn.QueueSubscribe("sub", "xxx", cb)
 
 	// pub
-	nConn.PublishWithContext(ctx, "sub", []byte("HELLO"))
-	nConn.PublishMsgWithContext(ctx, &nats.Msg{})
-	nConn.PublishRequestWithContext(ctx, "sub", "reply", []byte("HELLO"))
-	nConn.RequestWithContext(ctx, "sub", []byte("HELLO"))
-	nConn.RequestMsgWithContext(ctx, &nats.Msg{})
+	_ = nConn.PublishWithContext(ctx, "sub", []byte("HELLO"))
+	_ = nConn.PublishMsgWithContext(ctx, &nats.Msg{})
+	_ = nConn.PublishRequestWithContext(ctx, "sub", "reply", []byte("HELLO"))
+	_, _ = nConn.RequestWithContext(ctx, "sub", []byte("HELLO"))
+	_, _ = nConn.RequestMsgWithContext(ctx, &nats.Msg{})
 }

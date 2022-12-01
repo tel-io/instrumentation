@@ -12,7 +12,10 @@ require (
 	go.uber.org/zap v1.21.0
 )
 
-require go.opentelemetry.io/otel/metric v0.33.1-0.20221111171059-308d0362e6c5
+require (
+	github.com/octu0/nats-pool v1.0.6
+	go.opentelemetry.io/otel/metric v0.33.1-0.20221111171059-308d0362e6c5
+)
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
