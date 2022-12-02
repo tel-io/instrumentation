@@ -75,7 +75,7 @@
   "gnetId": 9186,
   "graphTooltip": 0,
   "id": null,
-  "iteration": 1669974537667,
+  "iteration": 1669974537882,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -1763,7 +1763,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 4,
         "w": 2,
         "x": 22,
         "y": 28
@@ -2041,7 +2041,7 @@
       },
       "gridPos": {
         "h": 9,
-        "w": 10,
+        "w": 12,
         "x": 12,
         "y": 32
       },
@@ -2050,7 +2050,7 @@
       "options": {
         "legend": {
           "calcs": [],
-          "displayMode": "hidden",
+          "displayMode": "list",
           "placement": "bottom"
         },
         "tooltip": {
@@ -2065,17 +2065,18 @@
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
           "expr": "(sum(increase(nats_duration_sum{service=~\"$service\", service_namespace=\"$NS\", kind_of=~\"$kind\"}[$__range])) by (subject)\n/ sum(increase(nats_duration_count{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[$__range])) by (subject)) >= 0",
           "format": "time_series",
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{url}}",
+          "legendFormat": "{{subject}}",
           "refId": "A"
         }
       ],
-      "title": "Incoming Avg. Response Time",
+      "title": "Average handling time",
       "type": "timeseries"
     },
     {
@@ -2107,7 +2108,7 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "spanNulls": true,
+            "spanNulls": false,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2118,7 +2119,6 @@
           },
           "links": [],
           "mappings": [],
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -2134,7 +2134,32 @@
           },
           "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "__systemRef": "hideSeriesFrom",
+            "matcher": {
+              "id": "byNames",
+              "options": {
+                "mode": "exclude",
+                "names": [
+                  "pinup.product.com.stat_service.player.stat.get_player_statistic"
+                ],
+                "prefix": "All except:",
+                "readOnly": true
+              }
+            },
+            "properties": [
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": true
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 7,
@@ -2142,13 +2167,19 @@
         "x": 0,
         "y": 39
       },
-      "id": 16,
+      "id": 8,
       "links": [],
       "options": {
         "legend": {
-          "calcs": [],
+          "calcs": [
+            "mean",
+            "max",
+            "min"
+          ],
           "displayMode": "table",
-          "placement": "right"
+          "placement": "right",
+          "sortBy": "Max",
+          "sortDesc": false
         },
         "tooltip": {
           "mode": "multi",
@@ -2163,15 +2194,16 @@
             "uid": "${DS_PROMETHEUS}"
           },
           "exemplar": true,
-          "expr": "avg(rate(nats_duration_sum{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[$__range])) by (subject)",
+          "expr": "histogram_quantile($quantile,\nsum(rate(nats_duration_bucket{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[1m])) by (subject,le)\n)",
           "format": "time_series",
+          "instant": false,
           "interval": "",
           "intervalFactor": 1,
           "legendFormat": "{{nats_subject}}",
           "refId": "A"
         }
       ],
-      "title": "Average handling time",
+      "title": "[[quantile]]-quantile latency of requests",
       "type": "timeseries"
     },
     {
@@ -2286,7 +2318,7 @@
             "barAlignment": 0,
             "drawStyle": "line",
             "fillOpacity": 10,
-            "gradientMode": "none",
+            "gradientMode": "opacity",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -2298,8 +2330,8 @@
             "scaleDistribution": {
               "type": "linear"
             },
-            "showPoints": "never",
-            "spanNulls": false,
+            "showPoints": "auto",
+            "spanNulls": true,
             "stacking": {
               "group": "A",
               "mode": "none"
@@ -2308,7 +2340,6 @@
               "mode": "off"
             }
           },
-          "links": [],
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
@@ -2323,51 +2354,60 @@
               }
             ]
           },
-          "unit": "ms"
+          "unit": "binBps"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 7,
+        "h": 8,
         "w": 12,
         "x": 0,
         "y": 46
       },
-      "id": 8,
-      "links": [],
+      "id": 84,
       "options": {
         "legend": {
           "calcs": [
-            "mean",
-            "max",
-            "min"
+            "lastNotNull",
+            "min",
+            "max"
           ],
-          "displayMode": "table",
-          "placement": "right"
+          "displayMode": "list",
+          "placement": "bottom"
         },
         "tooltip": {
-          "mode": "multi",
+          "mode": "single",
           "sort": "none"
         }
       },
-      "pluginVersion": "8.4.4",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
             "uid": "${DS_PROMETHEUS}"
           },
+          "editorMode": "code",
           "exemplar": true,
-          "expr": "histogram_quantile($quantile,\nsum(rate(nats_duration_bucket{service=~\"$service\", service_namespace=\"$NS\",kind_of=~\"$kind\"}[1m])) by (subject,le)\n)",
-          "format": "time_series",
-          "instant": false,
+          "expr": "sum(irate((nats_content_length{service=~\"$service\",kind_of=~\"$kind\"}[$__range]))) by(kind_of)",
           "interval": "",
-          "intervalFactor": 1,
-          "legendFormat": "{{nats_subject}}",
+          "legendFormat": "{{kind_of}}",
+          "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "editorMode": "code",
+          "expr": "sum(irate((nats_content_length{service=~\"$service\"}[$__range]))) by(kind_of)",
+          "hide": false,
+          "legendFormat": "total",
+          "range": true,
+          "refId": "B"
         }
       ],
-      "title": "[[quantile]]-quantile latency of requests",
+      "title": "Throughput",
       "type": "timeseries"
     },
     {
@@ -2464,114 +2504,6 @@
         }
       ],
       "title": "Request error percentage",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "${DS_PROMETHEUS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 10,
-            "gradientMode": "opacity",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": true,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          },
-          "unit": "binBps"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 53
-      },
-      "id": 84,
-      "options": {
-        "legend": {
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ],
-          "displayMode": "list",
-          "placement": "bottom"
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "exemplar": true,
-          "expr": "sum(irate((nats_content_length{service=~\"$service\",kind_of=~\"$kind\"}[$__range]))) by(kind_of)",
-          "interval": "",
-          "legendFormat": "{{kind_of}}",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${DS_PROMETHEUS}"
-          },
-          "editorMode": "code",
-          "expr": "sum(irate((nats_content_length{service=~\"$service\"}[$__range]))) by(kind_of)",
-          "hide": false,
-          "legendFormat": "total",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Throughput",
       "type": "timeseries"
     },
     {
@@ -2845,7 +2777,7 @@
     ]
   },
   "time": {
-    "from": "now-24h",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -2876,6 +2808,6 @@
   "timezone": "",
   "title": "NATS v2",
   "uid": "j7GXrJj7",
-  "version": 4,
+  "version": 5,
   "weekStart": ""
 }
