@@ -2625,7 +2625,7 @@
         "includeAll": false,
         "label": "datasource",
         "multi": false,
-        "name": "DS_MIMIR",
+        "name": "DS_PROMETHEUS",
         "options": [],
         "query": "prometheus",
         "queryValue": "",
