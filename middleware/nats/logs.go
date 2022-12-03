@@ -11,16 +11,25 @@ import (
 
 // Logs dump some payload
 type Logs struct {
-	*config
+	nameFn NameFn
+
+	dumpPayloadOnError bool
+	dumpRequest        bool
 }
 
-func NewLogs(cfg *config) *Logs {
-	return &Logs{config: cfg}
+func NewLogs(fn NameFn, dumpPayloadOnError, dumpRequest bool) *Logs {
+	return &Logs{
+		nameFn:             fn,
+		dumpPayloadOnError: dumpPayloadOnError,
+		dumpRequest:        dumpRequest,
+	}
 }
 
 func (t *Logs) apply(next MsgHandler) MsgHandler {
 	return func(ctx context.Context, msg *nats.Msg) (err error) {
 		defer func(start time.Time) {
+			kind := extractBaggageKind(ctx)
+
 			l := tel.FromCtx(ctx).With(
 				zap.String("duration", time.Since(start).String()),
 			)
@@ -31,12 +40,11 @@ func (t *Logs) apply(next MsgHandler) MsgHandler {
 				l = l.With(zap.Error(err))
 			}
 
-			if ((t.config.dumpPayloadOnError && err != nil) || t.config.dumpRequest) && msg.Data != nil {
+			if ((t.dumpPayloadOnError && err != nil) || t.dumpRequest) && msg.Data != nil {
 				l = l.With(zap.String("request", string(msg.Data)))
 			}
 
-			l.Check(lvl, t.subNameFn(msg)).Write()
-
+			l.Check(lvl, t.nameFn(kind, msg)).Write()
 		}(time.Now())
 
 		return next(ctx, msg)

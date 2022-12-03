@@ -1,19 +1,29 @@
 package nats
 
-import "go.opentelemetry.io/otel/attribute"
+import (
+	"context"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/baggage"
+)
+
+const (
+	KindKey = "kind_of"
+)
 
 // Attribute keys that can be added to a span.
 const (
 	Subject = attribute.Key("subject")
 	IsError = attribute.Key("error")
-	Kind    = attribute.Key("kind_of")
+	Kind    = attribute.Key(KindKey)
 )
 
 const (
-	KindSub     = "sub"
-	KindPub     = "pub"
-	KindRequest = "request"
-	KindRespond = "respond"
+	KindUnk     = "UNK"
+	KindSub     = "SUB"
+	KindPub     = "PUB"
+	KindRequest = "REQUEST"
+	KindRespond = "RESPOND"
+	KindReply   = "REPLY"
 )
 
 // Server NATS metrics
@@ -27,3 +37,12 @@ const (
 	SubscriptionsDroppedMsgs  = "nats.subscriptions.dropped.count"
 	SubscriptionCountMsgs     = "nats.subscriptions.send.count"
 )
+
+func extractBaggageKind(ctx context.Context) string {
+	b := baggage.FromContext(ctx)
+	if v := b.Member(KindKey).Value(); v != "" {
+		return v
+	}
+
+	return KindUnk
+}

@@ -65,11 +65,11 @@ func Inject(ctx context.Context, msg *nats.Msg, opts ...Option) {
 
 func NewAttributesFromNATSRequest(msg *nats.Msg) []attribute.KeyValue {
 	attrs := []attribute.KeyValue{
-		SubjectReplySub.String(msg.Reply),
+		SubjectKey.String(msg.Subject),
 	}
 
-	if msg.Sub != nil {
-		attrs = append(attrs, SubjectKey.String(msg.Sub.Subject))
+	if msg.Reply != "" {
+		attrs = append(attrs, SubjectReplySub.String(msg.Reply))
 	}
 
 	return attrs

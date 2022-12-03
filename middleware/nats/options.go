@@ -26,15 +26,15 @@ func (o optionFunc) apply(c *config) {
 type PostHook func(ctx context.Context, msg *nats.Msg, data []byte) error
 
 // NameFn operation name description
-type NameFn func(msg *nats.Msg) string
+type NameFn func(kind string, msg *nats.Msg) string
 
-// defaultSubOperationFn default name convention
-func defaultSubOperationFn(msg *nats.Msg) string {
-	return fmt.Sprintf("NATS:SUB/%s/%s", msg.Sub.Queue, msg.Subject)
-}
+// defaultOperationFn default name convention
+func defaultOperationFn(kind string, msg *nats.Msg) string {
+	if msg.Sub != nil {
+		return fmt.Sprintf("NATS:%s/%s/%s", kind, msg.Sub.Queue, msg.Subject)
+	}
 
-func defaultPubOperationFn(msg *nats.Msg) string {
-	return fmt.Sprintf("NATS:PUB/%s", msg.Subject)
+	return fmt.Sprintf("NATS:%s/%s", kind, msg.Subject)
 }
 
 type config struct {
@@ -49,19 +49,17 @@ type config struct {
 	dumpResponse       bool
 	dumpPayloadOnError bool
 
-	subNameFn NameFn
-	pubNameFn NameFn
+	nameFn NameFn
 
 	list    []Middleware
-	pubList []PubMiddleware
+	pubList []Middleware
 }
 
 func newConfig(opts []Option) *config {
 	c := &config{
 		tele:               tel.Global(),
 		dumpPayloadOnError: true,
-		subNameFn:          defaultSubOperationFn,
-		pubNameFn:          defaultPubOperationFn,
+		nameFn:             defaultOperationFn,
 	}
 
 	c.apply(opts)
@@ -82,28 +80,30 @@ func (c *config) apply(opts []Option) {
 	}
 }
 
+// DefaultMiddleware subInter interceptor
 func (c *config) DefaultMiddleware() []Middleware {
 	return []Middleware{
 		NewRecovery(),
-		NewTracer(c.subNameFn),
-		NewLogs(c),
+		NewLogs(c.nameFn, c.dumpPayloadOnError, c.dumpRequest),
+		NewTracer(c.nameFn),
 		NewMetrics(c.metrics),
 	}
 }
 
-func (c *config) Middleware() []Middleware {
+func (c *config) middleware() []Middleware {
 	return append(c.DefaultMiddleware(), c.list...)
 }
 
-func (c *config) DefaultPubMiddleware() []PubMiddleware {
-	return []PubMiddleware{
-		NewPubTrace(c.pubNameFn),
-		NewPubMetric(c.metrics),
+func (c *config) defaultPubMiddleware() []Middleware {
+	return []Middleware{
+		NewLogs(c.nameFn, c.dumpPayloadOnError, c.dumpRequest),
+		NewTracer(c.nameFn),
+		NewMetrics(c.metrics),
 	}
 }
 
-func (c *config) PubMiddleware() []PubMiddleware {
-	return append(c.DefaultPubMiddleware(), c.pubList...)
+func (c *config) pubMiddleware() []Middleware {
+	return append(c.defaultPubMiddleware(), c.pubList...)
 }
 
 // WithReply extend mw with automatically sending reply on nats requests if they ask with data provided
@@ -169,7 +169,7 @@ func WithDumpPayloadOnError(enable bool) Option {
 
 func WithNameFunction(fn NameFn) Option {
 	return optionFunc(func(c *config) {
-		c.subNameFn = fn
+		c.nameFn = fn
 	})
 }
 

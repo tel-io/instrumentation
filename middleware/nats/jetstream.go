@@ -38,7 +38,7 @@ func (j *JetStreamContext) JS() nats.JetStreamContext {
 // then the Subscribe() call will return an error.
 func (j *JetStreamContext) Subscribe(subj string, cb MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
 	return j.subMeter.Hook(
-		j.js.Subscribe(subj, j.wrap(cb), opts...),
+		j.js.Subscribe(subj, j.subWrap(cb), opts...),
 	)
 }
 
@@ -47,7 +47,7 @@ func (j *JetStreamContext) Subscribe(subj string, cb MsgHandler, opts ...nats.Su
 // See important note in Subscribe()
 func (j *JetStreamContext) QueueSubscribe(subj, queue string, cb MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
 	return j.subMeter.Hook(
-		j.js.QueueSubscribe(subj, queue, j.wrap(cb), opts...),
+		j.js.QueueSubscribe(subj, queue, j.subWrap(cb), opts...),
 	)
 }
 
