@@ -1,4 +1,4 @@
-== latest
+== middleware/nats/v2.0.2
 * one simple middleware for all
 * separate publisher
 * ubiquitous name function
