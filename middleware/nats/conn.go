@@ -13,7 +13,7 @@ type ConnContext struct {
 	conn *nats.Conn
 
 	Publish
-	Subscribe
+	Subscriber
 
 	*Core
 }

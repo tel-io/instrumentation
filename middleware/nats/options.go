@@ -45,20 +45,22 @@ type config struct {
 	meter   metric.Meter
 	metrics *metrics
 
-	dumpRequest        bool
-	dumpResponse       bool
+	dump               bool
 	dumpPayloadOnError bool
 
 	nameFn NameFn
 
-	list    []Middleware
-	pubList []Middleware
+	// subMiddleware processors
+	notUserDefaultMW bool
+	pubList          []Middleware
+	subList          []Middleware
 }
 
 func newConfig(opts []Option) *config {
 	c := &config{
 		tele:               tel.Global(),
 		dumpPayloadOnError: true,
+		notUserDefaultMW:   false,
 		nameFn:             defaultOperationFn,
 	}
 
@@ -84,26 +86,77 @@ func (c *config) apply(opts []Option) {
 func (c *config) DefaultMiddleware() []Middleware {
 	return []Middleware{
 		NewRecovery(),
-		NewLogs(c.nameFn, c.dumpPayloadOnError, c.dumpRequest),
+		NewLogs(c.nameFn, c.dumpPayloadOnError, c.dump),
 		NewTracer(c.nameFn),
 		NewMetrics(c.metrics),
 	}
 }
 
-func (c *config) middleware() []Middleware {
-	return append(c.DefaultMiddleware(), c.list...)
-}
-
-func (c *config) defaultPubMiddleware() []Middleware {
-	return []Middleware{
-		NewLogs(c.nameFn, c.dumpPayloadOnError, c.dumpRequest),
-		NewTracer(c.nameFn),
-		NewMetrics(c.metrics),
+func (c *config) subMiddleware() []Middleware {
+	if c.notUserDefaultMW {
+		return c.subList
 	}
+
+	return append(c.DefaultMiddleware(), c.subList...)
 }
 
 func (c *config) pubMiddleware() []Middleware {
-	return append(c.defaultPubMiddleware(), c.pubList...)
+	if c.notUserDefaultMW {
+		return c.pubList
+	}
+
+	return append(c.DefaultMiddleware(), c.pubList...)
+}
+
+// WithTel in some cases we should put another version
+func WithTel(t tel.Telemetry) Option {
+	return optionFunc(func(c *config) {
+		c.tele = t
+	})
+}
+
+// WithDump dump request as plain text to log and trace
+// i guess we can go further and perform option with encoding requests
+func WithDump(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dump = enable
+	})
+}
+
+// WithDumpPayloadOnError write dump request and response on faults
+//
+// Default: true
+func WithDumpPayloadOnError(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.dumpPayloadOnError = enable
+	})
+}
+
+func WithNameFunction(fn NameFn) Option {
+	return optionFunc(func(c *config) {
+		c.nameFn = fn
+	})
+}
+
+// WithSubMiddleware for subscriptions
+func WithSubMiddleware(list ...Middleware) Option {
+	return optionFunc(func(c *config) {
+		c.subList = append(c.subList, list...)
+	})
+}
+
+// WithPubMiddleware for publish
+func WithPubMiddleware(list ...Middleware) Option {
+	return optionFunc(func(c *config) {
+		c.pubList = append(c.subList, list...)
+	})
+}
+
+// WithDisableDefaultMiddleware disable default middleware usage
+func WithDisableDefaultMiddleware() Option {
+	return optionFunc(func(c *config) {
+		c.notUserDefaultMW = true
+	})
 }
 
 // WithReply extend mw with automatically sending reply on nats requests if they ask with data provided
@@ -133,49 +186,5 @@ func WithReply(inject bool) Option {
 func WithPostHook(cb PostHook) Option {
 	return optionFunc(func(c *config) {
 		c.postHook = cb
-	})
-}
-
-// WithTel in some cases we should put another version
-func WithTel(t tel.Telemetry) Option {
-	return optionFunc(func(c *config) {
-		c.tele = t
-	})
-}
-
-// WithDumpRequest dump request as plain text to log and trace
-// i guess we can go further and perform option with encoding requests
-func WithDumpRequest(enable bool) Option {
-	return optionFunc(func(c *config) {
-		c.dumpRequest = enable
-	})
-}
-
-// WithDumpResponse dump response as plain text to log and trace
-func WithDumpResponse(enable bool) Option {
-	return optionFunc(func(c *config) {
-		c.dumpResponse = enable
-	})
-}
-
-// WithDumpPayloadOnError write dump request and response on faults
-//
-// Default: true
-func WithDumpPayloadOnError(enable bool) Option {
-	return optionFunc(func(c *config) {
-		c.dumpPayloadOnError = enable
-	})
-}
-
-func WithNameFunction(fn NameFn) Option {
-	return optionFunc(func(c *config) {
-		c.nameFn = fn
-	})
-}
-
-// WithMiddleWare add custom middlewares
-func WithMiddleWare(list ...Middleware) Option {
-	return optionFunc(func(c *config) {
-		c.list = append(c.list, list...)
 	})
 }

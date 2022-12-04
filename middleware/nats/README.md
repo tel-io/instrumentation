@@ -22,7 +22,7 @@ go get github.com/tel-io/instrumentation/middleware/nats/v2@latest
 con, _ := nats.Connect(addr)
 
 // wrap it 
-mw := natsmw.New(con, natsmw.WithTel(t))
+mw := natsmw.New(natsmw.WithTel(t)).Use(con)
 ```
 
 ## Features
@@ -51,7 +51,7 @@ func main(){
     // create nats connection
     con, _ := nats.Connect(addr)
     // create our mw from nats connection
-    mw := natsmw.New(con, natsmw.WithTel(t))
+    mw := natsmw.New(natsmw.WithTel(t)).Use(con)
     // we have handler already used our new-brand handler
     ourHandler := func(ctx context.Context, msg *nats.Msg) error {
         // perform respond with possible error returning
@@ -65,6 +65,31 @@ func main(){
     subscribe, _ := mw.Subscribe("nats.demo",  ourHandler)
 }
 ```
+
+##### QueueSubscribeSyncWithChan
+```go
+func main(){
+    // create nats connection
+    con, _ := nats.Connect(addr)
+    // create our mw from nats connection
+    mw := natsmw.New(natsmw.WithTel(t)).Use(con)
+    // we have handler already used our new-brand handler
+    ourHandler := nConn.BuildWrappedHandler(func(ctx context.Context, msg *nats.Msg) error{
+        // perform respond with possible error returning
+        return msg.Respond([]byte("HELLO"))
+    })
+	
+	//create channel
+	ch := make(chan *nats.Msg)
+	// create subscription
+	_, _ = nConn.QueueSubscribeSyncWithChan("sub", "queue", ch)
+	// just read
+	for msg := range ch {
+        ourHandler(msg)
+	}
+}
+```
+
 #### JetStream
 You should create JetStream from our wrapper
 For subscription, we covered `Subscribe` and `QueueSubscribe` as `push` stack, which quite less popular as it provide not optimized for horizontal scale
@@ -75,7 +100,7 @@ func main(){
 	// create nats connection
     con, _ := nats.Connect(addr)
     // create our mw from nats connection
-    mw := natsmw.New(con, natsmw.WithTel(t))
+    mw := natsmw.New(natsmw.WithTel(t)).Use(con)
 	
     // we have handler already used our new-brand handler
     ourHandler := func(ctx context.Context, msg *nats.Msg) error {
@@ -110,7 +135,7 @@ func main(){
 	// create nats connection
     con, _ := nats.Connect(addr)
     // create our mw from nats connection
-    mw := natsmw.New(con, natsmw.WithTel(t))
+    mw := natsmw.New(natsmw.WithTel(t)).Use(con)
 	
     // we have handler already used our new-brand handler
     ourHandler := func(ctx context.Context, msg *nats.Msg) error {
@@ -158,7 +183,7 @@ func main(){
     con, _ := nats.Connect(addr)
 	
     // create our mw from nats connection
-    mw := natsmw.New(con, natsmw.WithTel(t))
+    mw := natsmw.New(natsmw.WithTel(t)).Use(con)
 	
 	// send just with subject and body
     _ = con.PublishWithContext(ctx, "nats.test", []byte("HELLO_WORLD"))

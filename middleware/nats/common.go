@@ -7,14 +7,17 @@ import (
 )
 
 const (
-	KindKey = "kind_of"
+	KindKey    = "kind_of"
+	PayloadKey = "payload"
 )
 
 // Attribute keys that can be added to a span.
 const (
-	Subject = attribute.Key("subject")
-	IsError = attribute.Key("error")
-	Kind    = attribute.Key(KindKey)
+	Subject  = attribute.Key("subject")
+	Reply    = attribute.Key("reply")
+	IsError  = attribute.Key("error")
+	Kind     = attribute.Key(KindKey)
+	Duration = attribute.Key("duration")
 )
 
 const (

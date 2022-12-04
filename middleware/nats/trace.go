@@ -21,10 +21,13 @@ func NewTracer(fn NameFn) *Tracer {
 
 func (t *Tracer) apply(next MsgHandler) MsgHandler {
 	return func(cxt context.Context, msg *nats.Msg) error {
-		kind := extractBaggageKind(cxt)
-		opr := t.nameFn(kind, msg)
+		var (
+			kind = extractBaggageKind(cxt)
+			opr  = t.nameFn(kind, msg)
+			attr = ExtractAttributes(msg, kind, true)
+		)
 
-		extract, bg, spanContext := natsprop.Extract(cxt, msg)
+		_, bg, spanContext := natsprop.Extract(cxt, msg)
 		cxt = trace.ContextWithRemoteSpanContext(cxt, spanContext)
 		cxt = baggage.ContextWithBaggage(cxt, bg)
 
@@ -33,8 +36,10 @@ func (t *Tracer) apply(next MsgHandler) MsgHandler {
 		)
 		defer span.End(trace.WithStackTrace(true))
 
-		tel.FromCtx(ctx).PutAttr(extract...)
+		tel.FromCtx(ctx).PutAttr(attr...)
 		tel.UpdateTraceFields(cxt)
+
+		natsprop.Inject(ctx, msg)
 
 		err := next(ctx, msg)
 		if err != nil {

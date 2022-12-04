@@ -28,7 +28,7 @@ type Core struct {
 	subMeter *SubscriptionStatMetric
 }
 
-// New middleware instance
+// New subMiddleware instance
 func New(opts ...Option) *Core {
 	// We don't allow to create multiple instances
 	if !mx.TryLock() {
@@ -44,10 +44,10 @@ func New(opts ...Option) *Core {
 	}
 
 	// create instances of pub mw only once
-	plist := cfg.defaultPubMiddleware()
+	plist := cfg.pubMiddleware()
 
 	// create instances of mw only once
-	list := cfg.middleware()
+	list := cfg.subMiddleware()
 
 	return &Core{
 		config:   cfg,
@@ -57,13 +57,13 @@ func New(opts ...Option) *Core {
 	}
 }
 
-// Use connection with middleware
+// Use connection with subMiddleware
 func (c *Core) Use(conn *nats.Conn) *ConnContext {
 	return &ConnContext{
-		conn:      conn,
-		Publish:   NewCommonPublish(conn, c.pubInter),
-		Subscribe: NewCommonSubscriber(conn, c),
-		Core:      c,
+		conn:       conn,
+		Publish:    NewCommonPublish(conn, c.pubInter),
+		Subscriber: NewCommonSubscriber(conn, c),
+		Core:       c,
 	}
 }
 

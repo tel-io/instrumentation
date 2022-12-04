@@ -3,7 +3,6 @@ package nats
 import (
 	"context"
 	"github.com/nats-io/nats.go"
-	"go.opentelemetry.io/otel/baggage"
 )
 
 type Publish interface {
@@ -14,12 +13,21 @@ type Publish interface {
 	RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (*nats.Msg, error)
 }
 
+//go:generate mockery --name natsPublisher --dir . --outpkg natsmockery  --exported
+type natsPublisher interface {
+	PublishMsg(m *nats.Msg) error
+	RequestMsgWithContext(ctx context.Context, msg *nats.Msg) (*nats.Msg, error)
+}
+
+var _ natsPublisher = &nats.Conn{}
+
 type CommonPublish struct {
 	interceptor Interceptor
 
-	*nats.Conn
+	Conn natsPublisher
 }
 
+// NewCommonPublish create instance of wrapper publisher
 func NewCommonPublish(conn *nats.Conn, interceptor Interceptor) *CommonPublish {
 	return &CommonPublish{Conn: conn, interceptor: interceptor}
 }
@@ -27,11 +35,7 @@ func NewCommonPublish(conn *nats.Conn, interceptor Interceptor) *CommonPublish {
 // PublishMsgWithContext publishes the Msg structure, which includes the
 // Subject, an optional Reply and an optional Data field.
 func (c *CommonPublish) PublishMsgWithContext(ctx context.Context, msg *nats.Msg) error {
-	if k, e := baggage.NewMember(KindKey, KindPub); e == nil {
-		if b, ee := baggage.New(k); ee == nil {
-			ctx = baggage.ContextWithBaggage(ctx, b)
-		}
-	}
+	ctx = WrapKindOfContext(ctx, KindPub)
 
 	return c.interceptor(func(ctx context.Context, msg *nats.Msg) error {
 		return c.Conn.PublishMsg(msg)
@@ -54,16 +58,10 @@ func (c *CommonPublish) PublishRequestWithContext(ctx context.Context, subj, rep
 
 // RequestMsgWithContext takes a context, a subject and payload
 // in bytes and request expecting a single response.
-func (c *CommonPublish) RequestMsgWithContext(ccx context.Context, msg *nats.Msg) (res *nats.Msg, err error) {
-	var ctx = ccx
+func (c *CommonPublish) RequestMsgWithContext(ccx context.Context, m *nats.Msg) (res *nats.Msg, err error) {
+	var ctx = WrapKindOfContext(ccx, KindRequest)
 
-	if k, e := baggage.NewMember(KindKey, KindPub); e == nil {
-		if b, ee := baggage.New(k); ee == nil {
-			ctx = baggage.ContextWithBaggage(ctx, b)
-		}
-	}
-
-	_ = c.interceptor(func(ctx context.Context, msg *nats.Msg) error {
+	err = c.interceptor(func(ctx context.Context, msg *nats.Msg) error {
 		res, err = c.Conn.RequestMsgWithContext(ctx, msg)
 		var infRes = res
 
@@ -75,11 +73,19 @@ func (c *CommonPublish) RequestMsgWithContext(ccx context.Context, msg *nats.Msg
 				Header:  res.Header,
 				Data:    res.Data,
 			}
+
+			if infRes.Header == nil {
+				infRes.Header = nats.Header{}
+			}
+
+			// just pass reply info for some usage
+			infRes.Header.Set(KindReply, res.Subject)
 		}
 
+		// ccx - none-wrapped context
 		c.infiltrateResponse(ccx, infRes, err)
 		return err
-	})(ctx, msg)
+	})(ctx, m)
 
 	return res, err
 }
@@ -92,11 +98,7 @@ func (c *CommonPublish) RequestWithContext(ctx context.Context, subj string, dat
 
 // infiltrateResponse just register
 func (c *CommonPublish) infiltrateResponse(ctx context.Context, msg *nats.Msg, err error) {
-	if k, e := baggage.NewMember(KindKey, KindRespond); e == nil {
-		if b, ee := baggage.New(k); ee == nil {
-			ctx = baggage.ContextWithBaggage(ctx, b)
-		}
-	}
+	ctx = WrapKindOfContext(ctx, KindRespond)
 
 	_ = c.interceptor(func(ctx context.Context, _ *nats.Msg) error {
 		return err

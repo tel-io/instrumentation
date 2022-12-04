@@ -5,11 +5,13 @@ import (
 	"github.com/nats-io/nats.go"
 )
 
-type Subscribe interface {
+type Subscriber interface {
 	Subscribe(subj string, cb MsgHandler) (*nats.Subscription, error)
 	QueueSubscribe(subj, queue string, cb MsgHandler) (*nats.Subscription, error)
 	QueueSubscribeMW(subj, queue string, next PostFn) (*nats.Subscription, error)
 	SubscribeMW(subj string, cb PostFn) (*nats.Subscription, error)
+
+	QueueSubscribeSyncWithChan(subj, queue string, ch chan *nats.Msg) (*nats.Subscription, error)
 
 	BuildWrappedHandler(next MsgHandler) nats.MsgHandler
 }
@@ -49,6 +51,17 @@ func (c *CommonSubscribe) QueueSubscribe(subj, queue string, cb MsgHandler) (*na
 	return c.subMeter.Hook(
 		c.conn.QueueSubscribe(subj, queue, c.BuildWrappedHandler(cb)),
 	)
+}
+
+// QueueSubscribeSyncWithChan will express interest in the given subject.
+// All subscribers with the same queue name will form the queue group
+// and only one member of the group will be selected to receive any given message,
+// which will be placed on the channel.
+// You should not close the channel until sub.Unsubscribe() has been called.
+//
+// NOTE: middleware only subscription hook performed
+func (c *CommonSubscribe) QueueSubscribeSyncWithChan(subj, queue string, ch chan *nats.Msg) (*nats.Subscription, error) {
+	return c.subMeter.Hook(c.conn.QueueSubscribeSyncWithChan(subj, queue, ch))
 }
 
 // QueueSubscribeMW mw callback function, just legacy

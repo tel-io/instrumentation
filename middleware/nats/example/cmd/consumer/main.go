@@ -49,7 +49,7 @@ func main() {
 		t.Panic("connect", tel.Error(err))
 	}
 
-	mw := natsmw.New(natsmw.WithTel(t), natsmw.WithDumpRequest(true), natsmw.WithDumpResponse(true)).Use(con)
+	mw := natsmw.New(natsmw.WithTel(t), natsmw.WithDump(true), natsmw.WithDump(true)).Use(con)
 
 	for i := 0; i < 1; i++ {
 		go func() {
@@ -79,7 +79,25 @@ func main() {
 			})
 			nullErr(err)
 
-			<-ctx.Done()
+			// sync
+			sh := mw.BuildWrappedHandler(func(ctx context.Context, msg *nats.Msg) error {
+				// perform respond with possible error returning
+				return msg.Respond([]byte("SYNC HANDLER"))
+			})
+			ch := make(chan *nats.Msg)
+			_, _ = mw.QueueSubscribeSyncWithChan("nats.ch_subscriber", "consumer", ch)
+
+		X:
+			for {
+				select {
+				case <-ctx.Done():
+					break X
+				case msg := <-ch:
+					sh(msg)
+				}
+			}
+
+			//<-ctx.Done()
 
 			_ = subscribe.Unsubscribe()
 			_ = crash.Unsubscribe()

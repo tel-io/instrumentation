@@ -56,12 +56,13 @@ func main() {
 	<-ctx.Done()
 }
 
-func run(ctx context.Context, core *mw.Core, cc *nats.Conn) {
+func run(cxt context.Context, core *mw.Core, cc *nats.Conn) {
 	//js, _ := con.JetStream()
-
 	for {
+		ctx := tel.FromCtx(cxt).Copy().Ctx()
+
 		select {
-		case <-ctx.Done():
+		case <-cxt.Done():
 			return
 		case <-time.After(time.Second):
 			switch rand.Int63n(20) {
@@ -81,6 +82,8 @@ func run(ctx context.Context, core *mw.Core, cc *nats.Conn) {
 			//	_, _ = js.JS().Publish("stream.demo", []byte("HELLO")) //nats.ExpectStream("demo"),
 			case 6:
 				_ = core.Use(cc).PublishWithContext(context.Background(), "nats.bad_context", []byte("HELLO"))
+			case 7:
+				_, _ = core.Use(cc).RequestWithContext(ctx, "nats.ch_subscriber", []byte("HELLO"))
 			default:
 				cxx, cancel := context.WithTimeout(ctx, time.Minute)
 				_, _ = core.Use(cc).RequestWithContext(cxx, "nats.demo", []byte("HELLO"))

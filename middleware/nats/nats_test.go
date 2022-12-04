@@ -29,6 +29,17 @@ func Example_handler() {
 	_, _ = nConn.Subscribe("sub", cb)
 	_, _ = nConn.QueueSubscribe("sub", "xxx", cb)
 
+	// sync sub with wrap
+	ourHandler := nConn.BuildWrappedHandler(func(ctx context.Context, msg *nats.Msg) error {
+		// perform respond with possible error returning
+		return msg.Respond([]byte("HELLO"))
+	})
+	ch := make(chan *nats.Msg)
+	_, _ = nConn.QueueSubscribeSyncWithChan("sub", "queue", ch)
+	for msg := range ch {
+		ourHandler(msg)
+	}
+
 	// pub
 	_ = nConn.PublishWithContext(ctx, "sub", []byte("HELLO"))
 	_ = nConn.PublishMsgWithContext(ctx, &nats.Msg{})

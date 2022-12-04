@@ -11,14 +11,14 @@ type Middleware interface {
 
 //MsgHandler our desired way to handle subscriptions
 // ctx allow inside function continue traces or pass log attachment
-// error return allow middleware to understand behaviour of system what has gone here,
+// error return allow subMiddleware to understand behaviour of system what has gone here,
 // and it could change differently
 type MsgHandler func(ctx context.Context, msg *nats.Msg) error
 
 // Interceptor  ...
 type Interceptor func(next MsgHandler) MsgHandler
 
-// MiddlewareChain - MsgHandler decorator with middleware
+// MiddlewareChain - MsgHandler decorator with subMiddleware
 func MiddlewareChain(mw ...Middleware) Interceptor {
 	return func(next MsgHandler) MsgHandler {
 		for _, m := range mw {
