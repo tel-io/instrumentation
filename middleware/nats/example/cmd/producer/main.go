@@ -59,36 +59,42 @@ func main() {
 func run(cxt context.Context, core *mw.Core, cc *nats.Conn) {
 	//js, _ := con.JetStream()
 	for {
-		ctx := tel.FromCtx(cxt).Copy().Ctx()
+		tele := tel.FromCtx(cxt).Copy()
 
-		select {
-		case <-cxt.Done():
-			return
-		case <-time.After(time.Second):
-			switch rand.Int63n(20) {
-			case 0:
-				_ = core.Use(cc).PublishWithContext(ctx, "nats.err", []byte("HELLO"))
-			case 1:
-				_ = core.Use(cc).PublishWithContext(ctx, "nats.crash", []byte("HELLO"))
-			case 3:
-				cxx, cancel := context.WithTimeout(ctx, time.Second)
-				_, _ = core.Use(cc).RequestWithContext(cxx, "nats.timeout", []byte("HELLO"))
-				cancel()
-			case 4:
-				cxx, cancel := context.WithTimeout(ctx, time.Millisecond)
-				_, _ = core.Use(cc).RequestWithContext(cxx, "nats.no-respond", []byte("HELLO"))
-				cancel()
-			//case 5:
-			//	_, _ = js.JS().Publish("stream.demo", []byte("HELLO")) //nats.ExpectStream("demo"),
-			case 6:
-				_ = core.Use(cc).PublishWithContext(context.Background(), "nats.bad_context", []byte("HELLO"))
-			case 7:
-				_, _ = core.Use(cc).RequestWithContext(ctx, "nats.ch_subscriber", []byte("HELLO"))
-			default:
-				cxx, cancel := context.WithTimeout(ctx, time.Minute)
-				_, _ = core.Use(cc).RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
-				cancel()
+		func() {
+			span, ctx := tele.StartSpan(tele.Ctx(), "test producer")
+			defer span.End()
+
+			select {
+			case <-cxt.Done():
+				return
+			case <-time.After(time.Second):
+				switch rand.Int63n(20) {
+				case 0:
+					_ = core.Use(cc).PublishWithContext(ctx, "nats.err", []byte("HELLO"))
+				case 1:
+					_ = core.Use(cc).PublishWithContext(ctx, "nats.crash", []byte("HELLO"))
+				case 3:
+					cxx, cancel := context.WithTimeout(ctx, time.Second)
+					_, _ = core.Use(cc).RequestWithContext(cxx, "nats.timeout", []byte("HELLO"))
+					cancel()
+				case 4:
+					cxx, cancel := context.WithTimeout(ctx, time.Millisecond)
+					_, _ = core.Use(cc).RequestWithContext(cxx, "nats.no-respond", []byte("HELLO"))
+					cancel()
+				//case 5:
+				//	_, _ = js.JS().Publish("stream.demo", []byte("HELLO")) //nats.ExpectStream("demo"),
+				case 6:
+					_ = core.Use(cc).PublishWithContext(context.Background(), "nats.bad_context", []byte("HELLO"))
+				case 7:
+					_, _ = core.Use(cc).RequestWithContext(ctx, "nats.ch_subscriber", []byte("HELLO"))
+				default:
+					cxx, cancel := context.WithTimeout(ctx, time.Minute)
+					_, _ = core.Use(cc).RequestWithContext(cxx, "nats.demo", []byte("HELLO"))
+					cancel()
+				}
 			}
-		}
+		}()
+
 	}
 }
