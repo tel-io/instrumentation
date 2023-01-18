@@ -1,8 +1,9 @@
-package echo_test
+package echo
 
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"net/http"
 	"testing"
@@ -11,7 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
-	emw "github.com/tel-io/instrumentation/middleware/echo"
 	mw "github.com/tel-io/instrumentation/middleware/http"
 	"github.com/tel-io/tel/v2"
 )
@@ -26,7 +26,7 @@ func TestGorillaWS(t *testing.T) {
 	ok := make(chan struct{})
 
 	app := echo.New()
-	app.Use(emw.HTTPServerMiddlewareAll(mw.WithTel(&tele)))
+	app.Use(HTTPServerMiddlewareAll(mw.WithTel(&tele)))
 
 	app.GET("/ws", func(ctx echo.Context) error {
 		upgrader := websocket.Upgrader{
@@ -54,6 +54,10 @@ func TestGorillaWS(t *testing.T) {
 		}
 	})
 
+	app.GET("/users/:id", func(ctx echo.Context) error {
+		return nil
+	})
+
 	l, err := net.Listen("tcp", ":")
 	assert.NoError(t, err)
 
@@ -73,4 +77,39 @@ func TestGorillaWS(t *testing.T) {
 		assert.True(t, false)
 	case <-ok:
 	}
+}
+
+func TestPathExtraction(t *testing.T) {
+	var (
+		mask = "/users/:id"
+		ID   = fmt.Sprintf("%d", rand.Int63())
+	)
+
+	cfg := tel.DefaultDebugConfig()
+	cfg.OtelConfig.Enable = false
+
+	tele, closer := tel.New(context.Background(), cfg)
+	defer closer()
+
+	app := echo.New()
+	app.Use(HTTPServerMiddlewareAll(mw.WithTel(&tele)))
+
+	app.GET(mask, func(ctx echo.Context) error {
+		path := extractor(ctx.Request())
+		assert.Equal(t, mask, path)
+		return nil
+	})
+
+	l, err := net.Listen("tcp", ":")
+	assert.NoError(t, err)
+
+	go func() {
+		assert.NoError(t, app.Server.Serve(l))
+	}()
+
+	fmt.Println(l.Addr().String())
+
+	_, err = http.Get(fmt.Sprintf("http://%s/users/%s", l.Addr().String(), ID))
+	assert.NoError(t, err)
+
 }
