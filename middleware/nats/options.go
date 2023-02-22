@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"github.com/nats-io/nats.go"
-	"github.com/pkg/errors"
-	"github.com/tel-io/instrumentation/middleware/nats/v2/natsprop"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/metric"
 )
@@ -164,20 +162,7 @@ func WithDisableDefaultMiddleware() Option {
 // Deprecated: legacy usage only
 func WithReply(inject bool) Option {
 	return WithPostHook(func(ctx context.Context, msg *nats.Msg, data []byte) error {
-		if msg.Reply == "" {
-			return nil
-		}
-
-		resMsg := &nats.Msg{Data: data}
-		if inject {
-			natsprop.Inject(ctx, msg)
-		}
-
-		if err := msg.RespondMsg(resMsg); err != nil {
-			return errors.WithStack(err)
-		}
-
-		return nil
+		return ReplyFn(ctx, msg, data)
 	})
 }
 
