@@ -61,8 +61,6 @@ func ServerMiddleware(opts ...Option) Middleware {
 				}
 			}
 
-			var err error
-
 			rww := &respWriterWrapper{ResponseWriter: w}
 
 			// inject log
@@ -93,7 +91,7 @@ func ServerMiddleware(opts ...Option) Middleware {
 			// we should replace reader before handler call
 			// even with readRequest == false we should have copy of body as it would be used during error
 			var reqBody []byte
-			if !(s.readRequest == false && s.dumpPayloadOnError == false) && r.Body != nil {
+			if !(!s.readRequest && !s.dumpPayloadOnError) && r.Body != nil {
 				reqBody, _ = ioutil.ReadAll(r.Body)
 				r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
 			}
@@ -123,17 +121,13 @@ func ServerMiddleware(opts ...Option) Middleware {
 					tel.String("status_code", http.StatusText(rww.statusCode)),
 				)
 
-				lvl := zapcore.DebugLevel
-				if err != nil {
-					lvl = zapcore.ErrorLevel
-					l = l.With(tel.Error(err))
-				}
+				lvl := getLogLevel(rww.statusCode)
 
-				if ((err != nil && s.dumpPayloadOnError) || s.readRequest) && reqBody != nil {
+				if ((lvl != zapcore.DebugLevel && s.dumpPayloadOnError) || s.readRequest) && reqBody != nil {
 					l = tel.FromCtx(ctx).With(tel.String("request", string(reqBody)))
 				}
 
-				if ((err != nil && s.dumpPayloadOnError) || s.writeResponse) && rww.response != nil {
+				if ((lvl != zapcore.DebugLevel && s.dumpPayloadOnError) || s.writeResponse) && rww.response != nil {
 					l = l.With(tel.String("response", string(rww.response)))
 				}
 
@@ -156,4 +150,15 @@ func ServerMiddleware(opts ...Option) Middleware {
 
 		return http.HandlerFunc(fn)
 	}
+}
+
+func getLogLevel(status int) zapcore.Level {
+	switch {
+	case status >= http.StatusInternalServerError:
+		return zapcore.ErrorLevel
+	case status >= http.StatusBadRequest:
+		return zapcore.WarnLevel
+	}
+
+	return zapcore.DebugLevel
 }
