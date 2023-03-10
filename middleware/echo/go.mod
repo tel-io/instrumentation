@@ -6,7 +6,7 @@ require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.8.1
-	github.com/tel-io/instrumentation/middleware/http v1.2.2
+	github.com/tel-io/instrumentation/middleware/http v1.2.3
 	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
 )
 
