@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/tracelog"
 	"github.com/stretchr/testify/assert"
 	"github.com/tel-io/tel/v2"
 )
@@ -13,55 +13,55 @@ import (
 func TestLogger(t *testing.T) {
 	tests := []struct {
 		name  string
-		level pgx.LogLevel
+		level tracelog.LogLevel
 		data  map[string]interface{}
 		check []string
 	}{
 		{
 			"LogLevelTrace",
-			pgx.LogLevelTrace,
+			tracelog.LogLevelTrace,
 			map[string]interface{}{"X": true},
 			[]string{"PGX_LOG_LEVEL", "trace"},
 		},
 		{
 			"LogLevelDebug",
-			pgx.LogLevelDebug,
+			tracelog.LogLevelDebug,
 			map[string]interface{}{"PGX_LOG_LEVEL": true},
 			[]string{"PGX_LOG_LEVEL", "true"},
 		},
 		{
 			"LogLevelInfo",
-			pgx.LogLevelInfo,
+			tracelog.LogLevelInfo,
 			map[string]interface{}{"PGX_LOG_LEVEL": true},
 			[]string{"PGX_LOG_LEVEL", "true"},
 		},
 		{
 			"LogLevelWarn",
-			pgx.LogLevelWarn,
+			tracelog.LogLevelWarn,
 			map[string]interface{}{"PGX_LOG_LEVEL": true},
 			[]string{"PGX_LOG_LEVEL", "true"},
 		},
 		{
 			"LogLevelError",
-			pgx.LogLevelError,
+			tracelog.LogLevelError,
 			map[string]interface{}{"PGX_LOG_LEVEL": true},
 			[]string{"PGX_LOG_LEVEL", "true"},
 		},
 		{
 			"check sql and args fields",
-			pgx.LogLevelInfo,
+			tracelog.LogLevelInfo,
 			map[string]interface{}{fSql: "insert * from table where user = $1", fArgs: []interface{}{100500}},
 			[]string{"insert * from table where user = 100500"},
 		},
 		{
 			"check sql no args",
-			pgx.LogLevelInfo,
+			tracelog.LogLevelInfo,
 			map[string]interface{}{fSql: "insert * from table where user = $1"},
 			[]string{"insert * from table where user = $"},
 		},
 		{
 			"multi-line",
-			pgx.LogLevelInfo,
+			tracelog.LogLevelInfo,
 			map[string]interface{}{fSql: `UPDATE tx SET revert = true WHERE
 						created_at < current_timestamp  AND  created_at > current_timestamp - interval '3' month AND
 						id = $1 AND "accountId" = $2 `},

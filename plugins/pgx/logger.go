@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/tracelog"
 	"github.com/tel-io/tel/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
@@ -24,7 +24,7 @@ const (
 	fArgs = "args"
 )
 
-func (pl *Logger) Log(ctx context.Context, level pgx.LogLevel, msg string, data map[string]interface{}) {
+func (pl *Logger) Log(ctx context.Context, level tracelog.LogLevel, msg string, data map[string]interface{}) {
 	defer func() {
 		if r := recover(); r != nil {
 			tel.FromCtx(ctx).Error("possible unsafe cast",
@@ -46,14 +46,14 @@ func (pl *Logger) Log(ctx context.Context, level pgx.LogLevel, msg string, data 
 	var zLvl zapcore.Level
 
 	switch level {
-	case pgx.LogLevelTrace:
+	case tracelog.LogLevelTrace:
 		zLvl = zapcore.DebugLevel
 		logger = logger.With(zap.Stringer("PGX_LOG_LEVEL", level))
-	case pgx.LogLevelDebug, pgx.LogLevelInfo:
+	case tracelog.LogLevelDebug, tracelog.LogLevelInfo:
 		zLvl = zapcore.DebugLevel
-	case pgx.LogLevelWarn:
+	case tracelog.LogLevelWarn:
 		zLvl = zapcore.WarnLevel
-	case pgx.LogLevelError:
+	case tracelog.LogLevelError:
 		zLvl = zapcore.ErrorLevel
 	default:
 		logger = logger.With(zap.Stringer("PGX_LOG_LEVEL", level))
