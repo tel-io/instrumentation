@@ -518,11 +518,9 @@ github.com/jstemmer/go-junit-report v0.9.1/go.mod h1:Brl9GWCQeLvo8nXZwPNNblvFj/X
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pretty v0.2.1/go.mod h1:ipq/a2n7PKx3OHsz4KJII5eveXtPO4qwEXGdVfWzfnI=
-github.com/kr/pretty v0.3.0 h1:WgNl7dwNpEZ6jJ9k1snq4pZsg7DOEN8hP9Xw0Tsjwk0=
 github.com/kr/pretty v0.3.0/go.mod h1:640gp4NfQd8pI5XOwp5fnNeVWj67G7CFk/SaSQn7NBk=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
-github.com/kr/text v0.2.0 h1:5Nx0Ya0ZqY2ygV366QzturHI13Jq95ApcVaJBhpS+AY=
 github.com/kr/text v0.2.0/go.mod h1:eLer722TekiGuMkidMxC/pM04lWEeraHUUmBw8l2grE=
 github.com/lufia/plan9stats v0.0.0-20211012122336-39d0f177ccd0/go.mod h1:zJYVVT2jmtg6P3p1VtQj7WsuWi/y4VnjVBn7F8KPB3I=
 github.com/lufia/plan9stats v0.0.0-20220913051719-115f729f3c8c h1:VtwQ41oftZwlMnOEbMWQtSEUgU64U4s+GHk7hZK+jtY=
@@ -540,7 +538,6 @@ github.com/prometheus/client_model v0.0.0-20190812154241-14fe0d1b01d4/go.mod h1:
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/rogpeppe/go-internal v1.3.0/go.mod h1:M8bDsm7K2OlrFYOpmOWEs/qY81heoFRclV5y23lUDJ4=
 github.com/rogpeppe/go-internal v1.6.1/go.mod h1:xXDCJY+GAPziupqXw64V24skbSoqbTEfhy4qGm1nDQc=
-github.com/rogpeppe/go-internal v1.8.0 h1:FCbCCtXNOY3UtUuHUYaghJg4y7Fd14rXifAYUAtL9R8=
 github.com/rogpeppe/go-internal v1.8.0/go.mod h1:WmiCO8CzOY8rg0OYDC4/i/2WRWAB6poM+XZ2dLUbcbE=
 github.com/shirou/gopsutil/v3 v3.22.9/go.mod h1:bBYl1kjgEJpWpxeHmLI+dVHWtyAwfcmSBLDsp2TNT8A=
 github.com/shirou/gopsutil/v3 v3.22.10 h1:4KMHdfBRYXGF9skjDWiL4RA2N+E8dRdodU/bOZpPoVg=
@@ -559,6 +556,8 @@ github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.1 h1:w7B6lhMri9wdJUVmEZPGGhZzrYTPvgJArz7wNPgYKsk=
 github.com/stretchr/testify v1.8.1/go.mod h1:w2LPCIKwWwSfY2zedu0+kehJoqGctiVI29o6fzry7u4=
+github.com/tel-io/instrumentation/plugins/otelsql v1.1.0 h1:fd+8vfWnqyJtU1CmaLbE6DpnDhK5nrLZQOMcPVUJmNY=
+github.com/tel-io/instrumentation/plugins/otelsql v1.1.0/go.mod h1:fBlu52OnrrstrJ2VsMWqSfckWqH2CSNUoZCgECY8+E8=
 github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053 h1:PhjGShIR+goX23Dob3EcsnyMFK3tdZKH/3PHltU45pE=
 github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053/go.mod h1:TRDkENW7qY+VN4Wp1EmzizfC6sbpGis34mqrmelLHhQ=
 github.com/tklauser/go-sysconf v0.3.10/go.mod h1:C8XykCvCb+Gn0oNCWPIlcb0RuglQTYaQ2hGm7jmxEFk=
@@ -586,6 +585,7 @@ go.opentelemetry.io/contrib/instrumentation/host v0.36.4 h1:2D0q/69KewnkCkOI9I9u
 go.opentelemetry.io/contrib/instrumentation/host v0.36.4/go.mod h1:IQdse+GFHec/g2M4wtj6cE4uA5PJGQjjXP/602LjHBQ=
 go.opentelemetry.io/contrib/instrumentation/runtime v0.36.4 h1:7AY5NdRzyU5s1ek3E4VK3FBnPtQ6La1i7sIn9hNgjsk=
 go.opentelemetry.io/contrib/instrumentation/runtime v0.36.4/go.mod h1:yFSLOnffweT7Es+IzY1DF5KP0xa2Wl15SJfKqAyDXq8=
+go.opentelemetry.io/otel v1.8.0/go.mod h1:2pkj+iMj0o03Y+cW6/m8Y4WkRdYN3AvCXCnzRMp9yvM=
 go.opentelemetry.io/otel v1.11.1/go.mod h1:1nNhXBbWSD0nsL38H6btgnFN2k4i0sNLHNNMZMSbUGE=
 go.opentelemetry.io/otel v1.11.2-0.20221111171059-308d0362e6c5 h1:xDzBpUVAcHRJQGeAGb81+1umSYFOA9MIl8LNXrFQD+A=
 go.opentelemetry.io/otel v1.11.2-0.20221111171059-308d0362e6c5/go.mod h1:cm/RAhWqIWUIpqCwgb88/aA1BNGh3/sgFOD4T6ylL7Q=
@@ -602,6 +602,7 @@ go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.2-0.20221111171059-308d0
 go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.11.2-0.20221111171059-308d0362e6c5/go.mod h1:cQarJ517eZpypAFSEmndTdbi45UhS6XZHahR9m/yI3A=
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.11.2-0.20221111171059-308d0362e6c5 h1:HXazuMYimskmEUk3AANsy++QIi7c17paJ3mk3fLMk/Q=
 go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.11.2-0.20221111171059-308d0362e6c5/go.mod h1:6KQ8tn1japzzHNVqb+JPz24AkmqKCFNsLTYo6nPDPqA=
+go.opentelemetry.io/otel/metric v0.31.0/go.mod h1:ohmwj9KTSIeBnDBm/ZwH2PSZxZzoOaG2xZeekTRzL5A=
 go.opentelemetry.io/otel/metric v0.33.0/go.mod h1:QlTYc+EnYNq/M2mNk1qDDMRLpqCOj2f/r5c7Fd5FYaI=
 go.opentelemetry.io/otel/metric v0.33.1-0.20221111171059-308d0362e6c5 h1:3KKlpSdZeqIY+hxlWH9ryJcNMIEiIwrsYUzG8MKh3oU=
 go.opentelemetry.io/otel/metric v0.33.1-0.20221111171059-308d0362e6c5/go.mod h1:+0c2/rgDeBhLYu2/sUbgLY4HcSdePG5Xhfat1jPmvJc=
@@ -610,6 +611,7 @@ go.opentelemetry.io/otel/sdk v1.11.1/go.mod h1:/l3FE4SupHJ12TduVjUkZtlfFqDCQJlOl
 go.opentelemetry.io/otel/sdk/metric v0.33.0/go.mod h1:xdypMeA21JBOvjjzDUtD0kzIcHO/SPez+a8HOzJPGp0=
 go.opentelemetry.io/otel/sdk/metric v0.33.1-0.20221111171059-308d0362e6c5 h1:mb6ReYNbryMYQePbUbLnTgWEW3y6KzaKCIRkf3BSgF4=
 go.opentelemetry.io/otel/sdk/metric v0.33.1-0.20221111171059-308d0362e6c5/go.mod h1:OKgNig6QK9xLWLHeGJh4jbZ11X34RJC2jxQ952igYGU=
+go.opentelemetry.io/otel/trace v1.8.0/go.mod h1:0Bt3PXY8w+3pheS3hQUt+wow8b1ojPaTBoTCh2zIFI4=
 go.opentelemetry.io/otel/trace v1.11.1 h1:ofxdnzsNrGBYXbP7t7zpUK281+go5rF7dvdIZXF8gdQ=
 go.opentelemetry.io/otel/trace v1.11.1/go.mod h1:f/Q9G7vzk5u91PhbmKbg1Qn0rzH1LJ4vbPHFGkTPtOk=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
@@ -1131,7 +1133,6 @@ google.golang.org/protobuf v1.28.1 h1:d0NfwRgPtno5B1Wa6L2DAG+KivqkdutMf1UhdNx175
 google.golang.org/protobuf v1.28.1/go.mod h1:HV8QOd/L58Z+nl8r43ehVNZIU/HEI6OcFqwMG9pJV4I=
 gopkg.in/check.v1 v0.0.0-20161208181325-20d25e280405/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
 gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127/go.mod h1:Co6ibVJAznAaIkqp8huTwlJQCZ016jof/cbN4VW5Yz0=
-gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntNwaWcugrBjAiHlqqRiVk=
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/errgo.v2 v2.1.0/go.mod h1:hNsd1EY+bozCKY1Ytp96fpM3vjJbqLJn88ws8XvfDNI=
 gopkg.in/yaml.v2 v2.2.2/go.mod h1:hI93XBmqTisBFMUTm0b8Fm+jr3Dg1NNxqwp+5A1VGuI=

@@ -17,7 +17,7 @@ opentelemetry-go-contrib: https://github.com/open-telemetry/opentelemetry-go-con
 |            [net/http](./middleware/http)             |    ✓    |   ✓    |  ✓   |    ✓    |
 |   [github.com/nats-io/nats.go](./middleware/nats)    |    ✓    |   ✓    |  ✓   |         |
 |          [database/sql](./plugins/otelsql)           |    ✓    |   ✓    |      |         |
-|       [github.com/jackc/pgx/v4](./plugins/pgx)       |         |        |  ✓   |         |
+|       [github.com/jackc/pgx/v4](./plugins/pgx)       |    ✓     |    ✓    |  ✓   |         |
 | [go.mongodb.org/mongo-driver/mongo](./plugins/mingo) |         |   ✓    |      |         |
 
 
