@@ -1,6 +1,6 @@
 module github.com/tel-io/instrumentation/plugins/pgx/v2
 
-go 1.17
+go 1.18
 
 require (
 	github.com/jackc/pgx/v5 v5.3.1
