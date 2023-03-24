@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	semconv "go.opentelemetry.io/otel/semconv/v1.10.0"
@@ -17,11 +18,9 @@ import (
 	sqlattribute "github.com/tel-io/instrumentation/plugins/otelsql/attribute"
 )
 
-type SpanNameFormatter func(ctx context.Context, op string) string
+type NameFormatter func(ctx context.Context, op string) string
 
-type errorToSpanStatus func(err error) (codes.Code, string)
-
-type queryTracer func(ctx context.Context, query string, args []driver.NamedValue) []attribute.KeyValue
+type ErrorToSpanStatus func(err error) (codes.Code, string)
 
 // methodTracer traces a sql method.
 type methodTracer interface {
@@ -32,12 +31,7 @@ type methodTracer interface {
 }
 
 type methodTracerImpl struct {
-	tracer trace.Tracer
-
-	formatSpanName SpanNameFormatter
-	errorToStatus  func(err error) (codes.Code, string)
-	allowRoot      bool
-	attributes     []attribute.KeyValue
+	*TraceConfig
 }
 
 func (t *methodTracerImpl) Trace(ctx context.Context) (context.Context, func(method string, err error)) {
@@ -56,19 +50,19 @@ func (t *methodTracerImpl) Trace(ctx context.Context) (context.Context, func(met
 	return ctx, end
 }
 func (t *methodTracerImpl) MustTrace(ctx context.Context) (context.Context, func(method string, err error)) {
-	ctx, span := t.tracer.Start(ctx, t.formatSpanName(ctx, "in_progress"),
+	span, ctx := tel.StartSpanFromContext(ctx, t.NameFormatter(ctx, "in_progress"),
 		trace.WithTimestamp(time.Now()),
 		trace.WithSpanKind(trace.SpanKindClient),
 	)
 
-	attrs := make([]attribute.KeyValue, 0, len(t.attributes)+1)
+	attrs := make([]attribute.KeyValue, 0, len(t.DefaultAttributes)+1)
 
-	attrs = append(attrs, t.attributes...)
+	attrs = append(attrs, t.DefaultAttributes...)
 
 	return ctx, func(method string, err error) {
-		code, desc := t.errorToStatus(err)
+		code, desc := t.ErrorToStatus(err)
 
-		span.SetName(t.formatSpanName(ctx, method))
+		span.SetName(t.NameFormatter(ctx, method))
 		span.SetAttributes(attrs...)
 		span.SetStatus(code, desc)
 
@@ -88,7 +82,7 @@ func (t *methodTracerImpl) Query(ctx context.Context, data pgx.TraceQueryStartDa
 	cxt, f := t.Trace(ctx)
 
 	return cxt, func(conn *pgx.Conn, data pgx.TraceQueryEndData) {
-		f(fmt.Sprintln("SQL Query", data.CommandTag), data.Err)
+		f(fmt.Sprintln("Query", data.CommandTag), data.Err)
 	}
 }
 
@@ -97,7 +91,7 @@ func (t *methodTracerImpl) Batch(ctx context.Context, data pgx.TraceBatchStartDa
 
 	return cxt, func(conn *pgx.Conn, data pgx.TraceBatchQueryData) {},
 		func(conn *pgx.Conn, data pgx.TraceBatchEndData) {
-			f("SQL Batch", data.Err)
+			f("Batch", data.Err)
 		}
 }
 
@@ -105,7 +99,7 @@ func (t *methodTracerImpl) Copy(ctx context.Context, data pgx.TraceCopyFromStart
 	cxt, f := t.Trace(ctx)
 
 	return cxt, func(conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
-		f("SQL CopyFrom", data.Err)
+		f("CopyFrom", data.Err)
 	}
 }
 
@@ -113,7 +107,7 @@ func (t *methodTracerImpl) Connect(ctx context.Context, data pgx.TraceConnectSta
 	cxt, f := t.Trace(ctx)
 
 	return cxt, func(data pgx.TraceConnectEndData) {
-		f("SQL Connect", data.Err)
+		f("Connect", data.Err)
 	}
 }
 
@@ -121,53 +115,20 @@ func (t *methodTracerImpl) Prepare(ctx context.Context, data pgx.TracePrepareSta
 	cxt, f := t.Trace(ctx)
 
 	return cxt, func(conn *pgx.Conn, data pgx.TracePrepareEndData) {
-		f("SQL Prepare", data.Err)
+		f("Prepare", data.Err)
 	}
 }
 
 func (t *methodTracerImpl) ShouldTrace(ctx context.Context) (bool, bool) {
-	hasSpan := trace.SpanContextFromContext(ctx).IsValid()
+	hasSpan := trace.SpanContextFromContext(ctx).IsValid() ||
+		(tel.FromCtx(ctx).Span() != nil && tel.FromCtx(ctx).Span().IsRecording())
 
-	return t.allowRoot || hasSpan, hasSpan
+	return t.AllowRootTrace || hasSpan, hasSpan
 }
 
-func newMethodTracer(tracer trace.Tracer, opts ...func(t *methodTracerImpl)) *methodTracerImpl {
-	t := &methodTracerImpl{
-		tracer:         tracer,
-		formatSpanName: formatSpanName,
-		errorToStatus:  spanStatusFromError,
-	}
-
-	for _, o := range opts {
-		o(t)
-	}
-
-	return t
-}
-
-func tracerOrNil(t methodTracer, shouldTrace bool) methodTracer {
-	if shouldTrace {
-		return t
-	}
-
-	return nil
-}
-
-func traceWithAllowRoot(allow bool) func(t *methodTracerImpl) {
-	return func(t *methodTracerImpl) {
-		t.allowRoot = allow
-	}
-}
-
-func traceWithDefaultAttributes(attrs ...attribute.KeyValue) func(t *methodTracerImpl) {
-	return func(t *methodTracerImpl) {
-		t.attributes = append(t.attributes, attrs...)
-	}
-}
-
-func traceWithSpanNameFormatter(f SpanNameFormatter) func(t *methodTracerImpl) {
-	return func(t *methodTracerImpl) {
-		t.formatSpanName = f
+func newMethodTracer(cfg *TraceConfig) *methodTracerImpl {
+	return &methodTracerImpl{
+		TraceConfig: cfg,
 	}
 }
 
@@ -175,7 +136,7 @@ func formatSpanName(_ context.Context, method string) string {
 	var sb strings.Builder
 
 	sb.Grow(len(method) + 4)
-	sb.WriteString("sql:")
+	sb.WriteString("pgx:")
 	sb.WriteString(method)
 
 	return sb.String()

@@ -5,10 +5,6 @@ import (
 
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/unit"
-	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
-	"go.opentelemetry.io/otel/trace"
 )
 
 const instrumentationName = "github.com/tel-io/instrumentation/plugins/pgx"
@@ -29,49 +25,19 @@ var _ pgx.QueryTracer = &TraceLog{}
 func New(opts ...Option) (*TraceLog, error) {
 	cfg := newConfig(opts...)
 
-	tracer := newMethodTracer(
-		cfg.tracerProvider.Tracer(instrumentationName,
-			trace.WithSchemaURL(semconv.SchemaURL),
-		),
-		traceWithDefaultAttributes(cfg.defaultAttributes...),
-		traceWithSpanNameFormatter(cfg.spanNameFormatter),
-	)
+	tracer := newMethodTracer(&cfg.TraceConfig)
 
-	rec, err := newRecorder(cfg)
+	rec, err := newRecorder(&cfg.RecordConfig)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	logger := &methodLoggerImpl{logger: cfg.loggerProvider, dumpSQL: cfg.dumpSQL}
+	logger := &methodLoggerImpl{cfg: &cfg.LoggerConfig}
 
 	return &TraceLog{
 		config: cfg,
 		cb:     []Callback{tracer, rec, logger},
 	}, nil
-}
-
-func newRecorder(opts *config) (Callback, error) {
-	meter := opts.meterProvider.Meter(instrumentationName)
-
-	latencyMsHistogram, err := meter.SyncFloat64().Histogram(dbSQLClientLatencyMs,
-		instrument.WithUnit(unit.Milliseconds),
-		instrument.WithDescription(`The distribution of latencies of various calls in milliseconds`),
-	)
-
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	callsCounter, err := meter.SyncInt64().Counter(dbSQLClientCalls,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription(`The number of various calls of methods`),
-	)
-
-	if err != nil {
-		return nil, errors.WithStack(err)
-	}
-
-	return newMethodRecorder(latencyMsHistogram.Record, callsCounter.Add, opts.defaultAttributes...), nil
 }
 
 type ctxKey int

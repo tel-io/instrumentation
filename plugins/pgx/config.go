@@ -4,18 +4,34 @@ import (
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/trace"
 )
 
+type LoggerConfig struct {
+	Dump bool
+
+	NameFormatter NameFormatter
+}
+
+type TraceConfig struct {
+	AllowRootTrace    bool
+	NameFormatter     NameFormatter
+	DefaultAttributes []attribute.KeyValue
+	ErrorToStatus     ErrorToSpanStatus
+}
+
+type RecordConfig struct {
+	meterProvider metric.MeterProvider
+
+	DefaultAttributes []attribute.KeyValue
+	NameFormatter     NameFormatter
+}
+
 type config struct {
-	loggerProvider tel.Logger
-	tracerProvider trace.TracerProvider
-	meterProvider  metric.MeterProvider
+	tele *tel.Telemetry
 
-	defaultAttributes []attribute.KeyValue
-	spanNameFormatter SpanNameFormatter
-
-	dumpSQL bool
+	RecordConfig
+	TraceConfig
+	LoggerConfig
 }
 
 // Option interface used for setting optional config properties.
@@ -34,11 +50,21 @@ func newConfig(opts ...Option) *config {
 	l := tel.Global()
 
 	c := &config{
-		loggerProvider:    l,
-		meterProvider:     l.MetricProvider(),
-		tracerProvider:    l.TracerProvider(),
-		dumpSQL:           false,
-		spanNameFormatter: formatSpanName,
+		tele: &l,
+
+		LoggerConfig: LoggerConfig{
+			Dump:          false,
+			NameFormatter: formatSpanName,
+		},
+		TraceConfig: TraceConfig{
+			AllowRootTrace: false,
+			NameFormatter:  formatSpanName,
+			ErrorToStatus:  spanStatusFromError,
+		},
+		RecordConfig: RecordConfig{
+			NameFormatter: formatSpanName,
+			meterProvider: l.MetricProvider(),
+		},
 	}
 
 	for _, opt := range opts {
@@ -51,16 +77,22 @@ func newConfig(opts ...Option) *config {
 // WithTel also add options to pass own metric and trace provider
 func WithTel(t *tel.Telemetry) Option {
 	return optionFunc(func(c *config) {
-		c.loggerProvider = t
+		c.tele = t
 		c.meterProvider = t.MetricProvider()
-		c.tracerProvider = t.TracerProvider()
 	})
 }
 
-// WithDumpSQL perform debug dump sql and argument
-func WithDumpSQL(enable bool) Option {
+// WithLoggerDumpSQL perform by logging debug dump sql and arguments
+func WithLoggerDumpSQL(enable bool) Option {
 	return optionFunc(func(c *config) {
-		c.dumpSQL = enable
+		c.LoggerConfig.Dump = enable
+	})
+}
+
+// WithTraceRoot create trace if nod parent span occurred
+func WithTraceRoot(enable bool) Option {
+	return optionFunc(func(c *config) {
+		c.TraceConfig.AllowRootTrace = enable
 	})
 }
 
@@ -71,15 +103,53 @@ func WithMeterProvider(p metric.MeterProvider) Option {
 	})
 }
 
-// WithTracerProvider sets tracer provider.
-func WithTracerProvider(p trace.TracerProvider) Option {
+func WithLoggerNameFormatter(fn NameFormatter) Option {
 	return optionFunc(func(c *config) {
-		c.tracerProvider = p
+		c.LoggerConfig.NameFormatter = fn
 	})
 }
 
-func WithDefaultArgs(args ...attribute.KeyValue) Option {
+func WithTracerNameFormatter(fn NameFormatter) Option {
 	return optionFunc(func(c *config) {
-		c.defaultAttributes = args
+		c.TraceConfig.NameFormatter = fn
+	})
+}
+
+func WithRecordNameFormatter(fn NameFormatter) Option {
+	return optionFunc(func(c *config) {
+		c.RecordConfig.NameFormatter = fn
+	})
+}
+
+func WithTraceDefaultArgs(args ...attribute.KeyValue) Option {
+	return optionFunc(func(c *config) {
+		c.TraceConfig.DefaultAttributes = args
+	})
+}
+
+func WithRecordDefaultArgs(args ...attribute.KeyValue) Option {
+	return optionFunc(func(c *config) {
+		c.RecordConfig.DefaultAttributes = args
+	})
+}
+
+// WithLoggerConfig overwrite default logger configuration
+func WithLoggerConfig(cfg LoggerConfig) Option {
+	return optionFunc(func(c *config) {
+		c.LoggerConfig = cfg
+	})
+}
+
+// WithTraceConfig overwrite default trace configuration
+func WithTraceConfig(cfg TraceConfig) Option {
+	return optionFunc(func(c *config) {
+		c.TraceConfig = cfg
+	})
+}
+
+// WithRecordConfig overwrite default metric configuration
+func WithRecordConfig(cfg RecordConfig) Option {
+	return optionFunc(func(c *config) {
+		c.RecordConfig = cfg
 	})
 }
