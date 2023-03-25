@@ -23,7 +23,6 @@ type RecordConfig struct {
 	meterProvider metric.MeterProvider
 
 	DefaultAttributes []attribute.KeyValue
-	NameFormatter     NameFormatter
 }
 
 type config struct {
@@ -62,7 +61,6 @@ func newConfig(opts ...Option) *config {
 			ErrorToStatus:  spanStatusFromError,
 		},
 		RecordConfig: RecordConfig{
-			NameFormatter: formatSpanName,
 			meterProvider: l.MetricProvider(),
 		},
 	}
@@ -112,12 +110,6 @@ func WithLoggerNameFormatter(fn NameFormatter) Option {
 func WithTracerNameFormatter(fn NameFormatter) Option {
 	return optionFunc(func(c *config) {
 		c.TraceConfig.NameFormatter = fn
-	})
-}
-
-func WithRecordNameFormatter(fn NameFormatter) Option {
-	return optionFunc(func(c *config) {
-		c.RecordConfig.NameFormatter = fn
 	})
 }
 

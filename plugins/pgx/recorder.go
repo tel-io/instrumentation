@@ -97,9 +97,7 @@ func (r *methodRecorderImpl) Query(ctx context.Context, start pgx.TraceQueryStar
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TraceQueryEndData) {
-		method := r.cfg.NameFormatter(ctx, start.SQL)
-
-		cb(method, data.Err)
+		cb(start.SQL, data.Err)
 	}
 }
 
@@ -108,9 +106,7 @@ func (r *methodRecorderImpl) Batch(ctx context.Context, start pgx.TraceBatchStar
 
 	return ctx, func(conn *pgx.Conn, data pgx.TraceBatchQueryData) {},
 		func(conn *pgx.Conn, data pgx.TraceBatchEndData) {
-			method := r.cfg.NameFormatter(ctx, "Batch")
-
-			cb(method, data.Err)
+			cb("Batch", data.Err)
 		}
 }
 
@@ -118,9 +114,7 @@ func (r *methodRecorderImpl) Copy(ctx context.Context, data pgx.TraceCopyFromSta
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
-		method := r.cfg.NameFormatter(ctx, "CopyFrom")
-
-		cb(method, data.Err)
+		cb("CopyFrom", data.Err)
 	}
 }
 
@@ -128,9 +122,7 @@ func (r *methodRecorderImpl) Connect(ctx context.Context, data pgx.TraceConnectS
 	cb := r.Record(ctx)
 
 	return ctx, func(data pgx.TraceConnectEndData) {
-		method := r.cfg.NameFormatter(ctx, "Connect")
-
-		cb(method, data.Err)
+		cb("Connect", data.Err)
 	}
 }
 
@@ -138,7 +130,7 @@ func (r *methodRecorderImpl) Prepare(ctx context.Context, start pgx.TracePrepare
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TracePrepareEndData) {
-		method := r.cfg.NameFormatter(ctx, fmt.Sprintf("Prepare.%s", start.SQL))
+		method := fmt.Sprintf("Prepare: %s %s", start.Name, start.SQL)
 
 		cb(method, data.Err)
 	}
