@@ -2,6 +2,7 @@ package pgx
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/jackc/pgx/v5"
@@ -92,11 +93,11 @@ func (r *methodRecorderImpl) Record(ctx context.Context) func(method string, err
 	}
 }
 
-func (r *methodRecorderImpl) Query(ctx context.Context, data pgx.TraceQueryStartData) (context.Context, QueryFn) {
+func (r *methodRecorderImpl) Query(ctx context.Context, start pgx.TraceQueryStartData) (context.Context, QueryFn) {
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TraceQueryEndData) {
-		method := r.cfg.NameFormatter(ctx, "Query")
+		method := r.cfg.NameFormatter(ctx, start.SQL)
 
 		cb(method, data.Err)
 	}
@@ -133,11 +134,11 @@ func (r *methodRecorderImpl) Connect(ctx context.Context, data pgx.TraceConnectS
 	}
 }
 
-func (r *methodRecorderImpl) Prepare(ctx context.Context, data pgx.TracePrepareStartData) (context.Context, PrepareFn) {
+func (r *methodRecorderImpl) Prepare(ctx context.Context, start pgx.TracePrepareStartData) (context.Context, PrepareFn) {
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TracePrepareEndData) {
-		method := r.cfg.NameFormatter(ctx, "Prepare")
+		method := r.cfg.NameFormatter(ctx, fmt.Sprintf("Prepare.%s", start.SQL))
 
 		cb(method, data.Err)
 	}
