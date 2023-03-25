@@ -25,7 +25,7 @@ type ErrorToSpanStatus func(err error) (codes.Code, string)
 // methodTracer traces a sql method.
 type methodTracer interface {
 	// ShouldTrace checks whether it should trace a method and the given context has a parent span
-	ShouldTrace(ctx context.Context) (bool, bool)
+	ShouldTrace(ctx context.Context) bool
 	MustTrace(ctx context.Context) (context.Context, func(method string, err error))
 	Trace(ctx context.Context) (context.Context, func(method string, err error))
 }
@@ -35,20 +35,13 @@ type methodTracerImpl struct {
 }
 
 func (t *methodTracerImpl) Trace(ctx context.Context) (context.Context, func(method string, err error)) {
-	shouldTrace, hasParentSpan := t.ShouldTrace(ctx)
-
-	if !shouldTrace {
+	if !t.ShouldTrace(ctx) {
 		return ctx, func(_ string, _ error) {}
 	}
 
-	newCtx, end := t.MustTrace(ctx)
-
-	if !hasParentSpan {
-		ctx = newCtx
-	}
-
-	return ctx, end
+	return t.MustTrace(ctx)
 }
+
 func (t *methodTracerImpl) MustTrace(ctx context.Context) (context.Context, func(method string, err error)) {
 	span, ctx := tel.StartSpanFromContext(ctx, t.NameFormatter(ctx, "in_progress"),
 		trace.WithTimestamp(time.Now()),
@@ -119,11 +112,11 @@ func (t *methodTracerImpl) Prepare(ctx context.Context, data pgx.TracePrepareSta
 	}
 }
 
-func (t *methodTracerImpl) ShouldTrace(ctx context.Context) (bool, bool) {
+func (t *methodTracerImpl) ShouldTrace(ctx context.Context) bool {
 	hasSpan := trace.SpanContextFromContext(ctx).IsValid() ||
 		(tel.FromCtx(ctx).Span() != nil && tel.FromCtx(ctx).Span().IsRecording())
 
-	return t.AllowRootTrace || hasSpan, hasSpan
+	return t.AllowRootTrace || hasSpan
 }
 
 func newMethodTracer(cfg *TraceConfig) *methodTracerImpl {
