@@ -7,13 +7,25 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	inxTrace  = 0
+	idxLog    = 1
+	idxRecord = 2
+	idxMax    = 3
+)
+
+var (
+	listStart = []int{inxTrace, idxLog, idxRecord}
+	listEnd   = []int{idxLog, idxRecord, inxTrace}
+)
+
 const instrumentationName = "github.com/tel-io/instrumentation/plugins/pgx"
 
 // TraceLog implements pgx.QueryTracer, pgx.BatchTracer, pgx.ConnectTracer, and pgx.CopyFromTracer. All fields are
 // required.
 type TraceLog struct {
 	*config
-	cb []Callback
+	cb [idxMax]Callback
 }
 
 var _ pgx.BatchTracer = &TraceLog{}
@@ -36,7 +48,7 @@ func New(opts ...Option) (*TraceLog, error) {
 
 	return &TraceLog{
 		config: cfg,
-		cb:     []Callback{tracer, rec, logger},
+		cb:     [idxMax]Callback{tracer, logger, rec}, // inxTrace, idxLog, idxRecord
 	}, nil
 }
 
@@ -59,10 +71,10 @@ func (tl *TraceLog) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pg
 	res := &traceQueryData{}
 	cxt := ctx
 
-	for _, callback := range tl.cb {
+	for _, idx := range listStart {
 		var ff QueryFn
 
-		cxt, ff = callback.Query(cxt, data)
+		cxt, ff = tl.cb[idx].Query(cxt, data)
 
 		res.list = append(res.list, ff)
 	}
@@ -73,8 +85,8 @@ func (tl *TraceLog) TraceQueryStart(ctx context.Context, conn *pgx.Conn, data pg
 func (tl *TraceLog) TraceQueryEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceQueryEndData) {
 	queryData := ctx.Value(tracelogQueryCtxKey).(*traceQueryData)
 
-	for _, fn := range queryData.list {
-		fn(conn, data)
+	for _, idx := range listEnd {
+		queryData.list[idx](conn, data)
 	}
 }
 
@@ -88,13 +100,13 @@ func (tl *TraceLog) TraceBatchStart(ctx context.Context, conn *pgx.Conn, data pg
 
 	cxt := ctx
 
-	for _, callback := range tl.cb {
+	for _, idx := range listStart {
 		var (
 			ff1 BatchQueryFn
 			ff2 BatchEndFn
 		)
 
-		cxt, ff1, ff2 = callback.Batch(cxt, data)
+		cxt, ff1, ff2 = tl.cb[idx].Batch(cxt, data)
 
 		res.listA = append(res.listA, ff1)
 		res.listB = append(res.listB, ff2)
@@ -112,8 +124,9 @@ func (tl *TraceLog) TraceBatchQuery(ctx context.Context, conn *pgx.Conn, data pg
 
 func (tl *TraceLog) TraceBatchEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceBatchEndData) {
 	queryData := ctx.Value(tracelogBatchCtxKey).(*traceBatchData)
-	for _, fn := range queryData.listB {
-		fn(conn, data)
+
+	for _, idx := range listEnd {
+		queryData.listB[idx](conn, data)
 	}
 }
 
@@ -125,10 +138,10 @@ func (tl *TraceLog) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data
 	res := &traceCopyFromData{}
 	cxt := ctx
 
-	for _, callback := range tl.cb {
+	for _, idx := range listStart {
 		var ff CopyFn
 
-		cxt, ff = callback.Copy(cxt, data)
+		cxt, ff = tl.cb[idx].Copy(cxt, data)
 
 		res.list = append(res.list, ff)
 	}
@@ -139,8 +152,8 @@ func (tl *TraceLog) TraceCopyFromStart(ctx context.Context, conn *pgx.Conn, data
 func (tl *TraceLog) TraceCopyFromEnd(ctx context.Context, conn *pgx.Conn, data pgx.TraceCopyFromEndData) {
 	copyFromData := ctx.Value(tracelogCopyFromCtxKey).(*traceCopyFromData)
 
-	for _, fn := range copyFromData.list {
-		fn(conn, data)
+	for _, idx := range listEnd {
+		copyFromData.list[idx](conn, data)
 	}
 }
 
@@ -152,10 +165,10 @@ func (tl *TraceLog) TraceConnectStart(ctx context.Context, data pgx.TraceConnect
 	res := &traceConnectData{}
 	cxt := ctx
 
-	for _, callback := range tl.cb {
+	for _, idx := range listStart {
 		var ff ConnectFn
 
-		cxt, ff = callback.Connect(cxt, data)
+		cxt, ff = tl.cb[idx].Connect(cxt, data)
 
 		res.list = append(res.list, ff)
 	}
@@ -166,8 +179,8 @@ func (tl *TraceLog) TraceConnectStart(ctx context.Context, data pgx.TraceConnect
 func (tl *TraceLog) TraceConnectEnd(ctx context.Context, data pgx.TraceConnectEndData) {
 	connectData := ctx.Value(tracelogConnectCtxKey).(*traceConnectData)
 
-	for _, fn := range connectData.list {
-		fn(data)
+	for _, idx := range listEnd {
+		connectData.list[idx](data)
 	}
 }
 
@@ -179,10 +192,10 @@ func (tl *TraceLog) TracePrepareStart(ctx context.Context, _ *pgx.Conn, data pgx
 	res := &tracePrepareData{}
 	cxt := ctx
 
-	for _, callback := range tl.cb {
+	for _, idx := range listStart {
 		var ff PrepareFn
 
-		cxt, ff = callback.Prepare(cxt, data)
+		cxt, ff = tl.cb[idx].Prepare(cxt, data)
 
 		res.list = append(res.list, ff)
 	}
@@ -193,8 +206,8 @@ func (tl *TraceLog) TracePrepareStart(ctx context.Context, _ *pgx.Conn, data pgx
 func (tl *TraceLog) TracePrepareEnd(ctx context.Context, conn *pgx.Conn, data pgx.TracePrepareEndData) {
 	prepareData := ctx.Value(tracelogPrepareCtxKey).(*tracePrepareData)
 
-	for _, fn := range prepareData.list {
-		fn(conn, data)
+	for _, idx := range listEnd {
+		prepareData.list[idx](conn, data)
 	}
 }
 
