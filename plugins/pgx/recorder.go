@@ -130,7 +130,7 @@ func (r *methodRecorderImpl) Prepare(ctx context.Context, start pgx.TracePrepare
 	cb := r.Record(ctx)
 
 	return ctx, func(conn *pgx.Conn, data pgx.TracePrepareEndData) {
-		method := fmt.Sprintf("Prepare: %s %s", start.Name, start.SQL)
+		method := fmt.Sprintf("Prepare: %s", start.SQL)
 
 		cb(method, data.Err)
 	}
