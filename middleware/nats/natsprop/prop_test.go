@@ -17,6 +17,7 @@ import (
 func TestTrace(t *testing.T) {
 	prop := propagation.NewCompositeTextMapPropagator(
 		propagation.TraceContext{}, propagation.Baggage{})
+
 	ctx := context.Background()
 	sc := trace.NewSpanContext(trace.SpanContextConfig{
 		TraceID: trace.TraceID{0x03},

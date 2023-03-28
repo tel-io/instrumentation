@@ -5,10 +5,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	mw "github.com/tel-io/instrumentation/middleware/fasthttp"
 	"github.com/tel-io/tel/v2"
 	"github.com/valyala/fasthttp"
+	"go.opentelemetry.io/otel"
 )
 
 const (
@@ -58,5 +60,44 @@ func main() {
 		}
 	}()
 
+	// client communication
+	worker(ccx)
+
 	<-ccx.Done()
+}
+
+func worker(ccx context.Context) {
+	cfg := tel.GetConfigFromEnv()
+	cfg.LogEncode = "console"
+	cfg.Namespace = "TEST"
+	cfg.Service = "DEMO-CLIENT"
+
+	t, cc := tel.New(ccx, cfg)
+	defer cc()
+
+	// client communication
+	propagators := otel.GetTextMapPropagator()
+	c := fasthttp.Client{}
+
+	for {
+		select {
+		case <-ccx.Done():
+			return
+		case <-time.After(time.Second):
+			cxt := t.Copy().Ctx()
+			span, ctx := tel.FromCtx(cxt).StartSpan(cxt, "req")
+
+			req := fasthttp.AcquireRequest()
+			res := fasthttp.AcquireResponse()
+			req.SetHost("127.0.0.1" + port)
+
+			propagators.Inject(ctx, mw.NewCarrier(&req.Header))
+
+			if err := c.Do(req, res); err != nil {
+				span.RecordError(err)
+			}
+
+			span.End()
+		}
+	}
 }
