@@ -20,24 +20,24 @@ func NewTracer(fn NameFn) *Tracer {
 }
 
 func (t *Tracer) apply(next MsgHandler) MsgHandler {
-	return func(cxt context.Context, msg *nats.Msg) error {
+	return func(ctx context.Context, msg *nats.Msg) error {
 		var (
-			kind = extractBaggageKind(cxt)
+			kind = extractBaggageKind(ctx)
 			opr  = t.nameFn(kind, msg)
 			attr = ExtractAttributes(msg, kind, true)
 		)
 
-		_, bg, spanContext := natsprop.Extract(cxt, msg)
-		cxt = trace.ContextWithRemoteSpanContext(cxt, spanContext)
-		cxt = baggage.ContextWithBaggage(cxt, bg)
+		_, bg, spanContext := natsprop.Extract(ctx, msg)
+		ctx = trace.ContextWithRemoteSpanContext(ctx, spanContext)
+		ctx = baggage.ContextWithBaggage(ctx, bg)
 
-		span, ctx := tel.StartSpanFromContext(cxt, opr,
+		span, ctx := tel.StartSpanFromContext(ctx, opr,
 			trace.WithSpanKind(convSpanToKind(kind)),
 		)
 		defer span.End(trace.WithStackTrace(true))
 
 		tel.FromCtx(ctx).PutAttr(attr...)
-		tel.UpdateTraceFields(cxt)
+		tel.UpdateTraceFields(ctx)
 
 		natsprop.Inject(ctx, msg)
 
