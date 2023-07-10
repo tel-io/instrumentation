@@ -1,8 +1,8 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/tel-io/tel/v2"
@@ -11,8 +11,30 @@ import (
 )
 
 var (
+	reID       = regexp.MustCompile(`\d+`)
+	reResource = regexp.MustCompile(`.*\.\w{2,3}`)
+	reUUID     = regexp.MustCompile(`[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}`)
+
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
-		return fmt.Sprintf("%s: %s", r.Method, r.URL.Path)
+		var b strings.Builder
+
+		b.WriteString(r.Method)
+		b.WriteString(":")
+
+		parts := strings.Split(r.URL.Path, "/")
+		for _, part := range parts {
+			p := part
+			if reID.MatchString(part) {
+				p = ":id:"
+			} else if reResource.MatchString(part) {
+				p = ":resource:"
+			} else if reUUID.MatchString(part) {
+				p = ":uuid:"
+			}
+			b.WriteString(p)
+		}
+
+		return b.String()
 	}
 
 	DefaultFilter = func(r *http.Request) bool {
