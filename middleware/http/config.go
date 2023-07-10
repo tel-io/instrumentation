@@ -23,6 +23,8 @@ var (
 
 		parts := strings.Split(r.URL.Path, "/")
 		for _, part := range parts {
+			b.WriteString("/")
+
 			p := part
 			if reID.MatchString(part) {
 				p = ":id:"
