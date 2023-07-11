@@ -82,7 +82,7 @@ func (s *Suite) TestNewLogs() {
 			s.buf.Reset()
 
 			// any function should notify about kind of message
-			ctx := WrapKindOfContext(s.tel.Copy().Ctx(), tt.handlers.kindOf)
+			ctx := WrapKindOfContext(s.tel.Ctx(), tt.handlers.kindOf)
 
 			got := NewLogs(tt.args.fn, tt.args.dumpPayloadOnError, tt.args.dumpRequest)
 			_ = got.apply(func(ctx context.Context, msg *nats.Msg) error {

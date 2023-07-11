@@ -24,9 +24,9 @@ type Middleware func(next http.Handler) http.Handler
 
 // ServerMiddlewareAll represent all essential metrics
 // Execution order:
-//  * opentracing injection via nethttp.Middleware
-//  * recovery + measure execution time + debug log via own ServerMiddleware
-//  * metrics via metrics.NewHTTPMiddlewareWithOption
+//   - opentracing injection via nethttp.Middleware
+//   - recovery + measure execution time + debug log via own ServerMiddleware
+//   - metrics via metrics.NewHTTPMiddlewareWithOption
 func ServerMiddlewareAll(opts ...Option) Middleware {
 	s := newConfig(opts...)
 
@@ -93,6 +93,7 @@ func ServerMiddleware(opts ...Option) Middleware {
 			var reqBody []byte
 			if !(!s.readRequest && !s.dumpPayloadOnError) && r.Body != nil {
 				reqBody, _ = ioutil.ReadAll(r.Body)
+				r.Body.Close()
 				r.Body = ioutil.NopCloser(bytes.NewBuffer(reqBody)) // Reset
 			}
 

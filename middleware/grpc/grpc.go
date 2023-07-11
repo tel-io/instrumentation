@@ -25,9 +25,9 @@ var ErrGrpcInternal = status.New(codes.Internal, "internal server error").Err()
 
 // UnaryClientInterceptorAll setup recovery, metrics, tracing and debug option according goal of our framework
 // Execution order:
-//  * opentracing injection via otgrpc.OpenTracingClientInterceptor
-//  * recovery, measure execution time + debug log via own UnaryClientInterceptor
-//  * metrics via metrics.UnaryClientInterceptor
+//   - opentracing injection via otgrpc.OpenTracingClientInterceptor
+//   - recovery, measure execution time + debug log via own UnaryClientInterceptor
+//   - metrics via metrics.UnaryClientInterceptor
 func UnaryClientInterceptorAll(o ...Option) grpc.UnaryClientInterceptor {
 	c := newConfig(o...)
 	otmetr := otelgrpc.NewClientMetrics(c.metricsOpts...)
@@ -42,9 +42,9 @@ func UnaryClientInterceptorAll(o ...Option) grpc.UnaryClientInterceptor {
 // UnaryClientInterceptor input ctx assume that it contain telemetry instance
 // as well as invoker already under our telemetry
 // UnaryClientInterceptor implement:
-//  * recovery
-//  * detail log during errors (+ in recovery also)
-//  * measure execution time
+//   - recovery
+//   - detail log during errors (+ in recovery also)
+//   - measure execution time
 func UnaryClientInterceptor(o ...Option) grpc.UnaryClientInterceptor {
 	c := newConfig(o...)
 
@@ -61,6 +61,9 @@ func UnaryClientInterceptor(o ...Option) grpc.UnaryClientInterceptor {
 				rpcError = status.Convert(err)
 				name     = fmt.Sprintf("GRPC:CLIENT/%s", method)
 			)
+
+			tele := tel.FromCtx(ctx).Copy()
+			ctx = tel.WrapContext(ctx, &tele)
 
 			// this is safe, nil error just return status Unknown
 			putGrpcError(ctx, name, rpcError)
@@ -81,9 +84,9 @@ func UnaryClientInterceptor(o ...Option) grpc.UnaryClientInterceptor {
 
 // UnaryServerInterceptorAll setup recovery, metrics, tracing and debug option according goal of our framework
 // Execution order:otracer
-//  * opentracing injection via otgrpc.OpenTracingServerInterceptor
-//  * ctx new instance, recovery, measure execution time + debug log via own UnaryServerInterceptor
-//  * metrics via metrics.UnaryServerInterceptor
+//   - opentracing injection via otgrpc.OpenTracingServerInterceptor
+//   - ctx new instance, recovery, measure execution time + debug log via own UnaryServerInterceptor
+//   - metrics via metrics.UnaryServerInterceptor
 func UnaryServerInterceptorAll(o ...Option) grpc.UnaryServerInterceptor {
 	c := newConfig(o...)
 	otmetr := otelgrpc.NewServerMetrics(c.metricsOpts...)
@@ -96,12 +99,13 @@ func UnaryServerInterceptorAll(o ...Option) grpc.UnaryServerInterceptor {
 }
 
 // UnaryServerInterceptor the most important create new telepresence instance + fill trace ids
-//  implements:
-//  * new telepresence instance
-//  * fill trace ids
-//  * recovery
-//  * detail log during errors (+ in recovery also)
-//  * measure execution time
+//
+//	implements:
+//	* new telepresence instance
+//	* fill trace ids
+//	* recovery
+//	* detail log during errors (+ in recovery also)
+//	* measure execution time
 func UnaryServerInterceptor(o ...Option) grpc.UnaryServerInterceptor {
 	c := newConfig(o...)
 

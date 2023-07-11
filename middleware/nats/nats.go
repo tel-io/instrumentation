@@ -80,12 +80,12 @@ func (c *Core) subWrap(next MsgHandler) nats.MsgHandler {
 
 	return func(msg *nats.Msg) {
 		// init context for instance
-		cxt := c.config.tele.Copy().Ctx()
+		ctx := c.config.tele.Ctx()
 
 		if bag != nil {
-			cxt = baggage.ContextWithBaggage(cxt, *bag)
+			ctx = baggage.ContextWithBaggage(ctx, *bag)
 		}
 
-		_ = in(cxt, msg)
+		_ = in(ctx, msg)
 	}
 }
