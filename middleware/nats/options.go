@@ -2,7 +2,6 @@ package nats
 
 import (
 	"context"
-	"fmt"
 	"regexp"
 	"strings"
 
