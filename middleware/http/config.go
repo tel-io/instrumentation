@@ -12,7 +12,7 @@ import (
 
 var (
 	reID       = regexp.MustCompile(`\d+`)
-	reResource = regexp.MustCompile(`.*\.\w{2,3}`)
+	reResource = regexp.MustCompile(`[a-zA-Z0-9\-]+\.\w{2,4}`) // .css, .js, .png, .jpeg, etc.
 	reUUID     = regexp.MustCompile(`[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}`)
 
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
@@ -21,8 +21,9 @@ var (
 		b.WriteString(r.Method)
 		b.WriteString(":")
 
-		parts := strings.Split(r.URL.Path, "/")
-		for _, part := range parts {
+		path := strings.TrimLeft(r.URL.Path, "/")
+		pathParts := strings.Split(path, "/")
+		for _, part := range pathParts {
 			b.WriteString("/")
 
 			p := part

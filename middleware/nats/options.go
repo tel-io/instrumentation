@@ -2,11 +2,16 @@ package nats
 
 import (
 	"context"
-	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/metric"
+)
+
+var (
+	rePartition = regexp.MustCompile(`\d+`)
 )
 
 // Option allows configuration of the httptrace Extract()
@@ -28,11 +33,36 @@ type NameFn func(kind string, msg *nats.Msg) string
 
 // defaultOperationFn default name convention
 func defaultOperationFn(kind string, msg *nats.Msg) string {
+	var b strings.Builder
+
+	b.WriteString("NATS:")
+	b.WriteString(kind)
+
 	if msg.Sub != nil {
-		return fmt.Sprintf("NATS:%s/%s/%s", kind, msg.Sub.Queue, msg.Subject)
+		b.WriteByte('/')
+		b.WriteString(msg.Sub.Queue)
 	}
 
-	return fmt.Sprintf("NATS:%s/%s", kind, msg.Subject)
+	b.WriteByte('/')
+	subjectParts := strings.Split(msg.Subject, ".")
+	subjectPartsLastIdx := len(subjectParts) - 1
+	for i, part := range subjectParts {
+		p := part
+		if rePartition.MatchString(part) {
+			p = ":partition:"
+		} else if strings.HasPrefix(part, "_INBOX") {
+			p = ":inbox:"
+		} else if strings.HasPrefix(part, "/") {
+			p = ":url:"
+		}
+
+		b.WriteString(p)
+		if i != subjectPartsLastIdx {
+			b.WriteByte('.')
+		}
+	}
+
+	return b.String()
 }
 
 type config struct {
