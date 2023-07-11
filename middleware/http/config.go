@@ -11,17 +11,14 @@ import (
 )
 
 var (
-	reID       = regexp.MustCompile(`\d+`)
-	reResource = regexp.MustCompile(`[a-zA-Z0-9\-]+\.\w{2,4}`) // .css, .js, .png, .jpeg, etc.
-	reUUID     = regexp.MustCompile(`[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}`)
+	reID       = regexp.MustCompile(`^\d+$`)
+	reResource = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.\w{2,4}$`) // .css, .js, .png, .jpeg, etc.
+	reUUID     = regexp.MustCompile(`^[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}$`)
 
-	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
+	decreasePathCardinality = func(path string) string {
 		var b strings.Builder
 
-		b.WriteString(r.Method)
-		b.WriteString(":")
-
-		path := strings.TrimLeft(r.URL.Path, "/")
+		path = strings.TrimLeft(path, "/")
 		pathParts := strings.Split(path, "/")
 		for _, part := range pathParts {
 			b.WriteString("/")
@@ -36,6 +33,16 @@ var (
 			}
 			b.WriteString(p)
 		}
+
+		return b.String()
+	}
+
+	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
+		var b strings.Builder
+
+		b.WriteString(r.Method)
+		b.WriteString(":")
+		b.WriteString(decreasePathCardinality(r.URL.Path))
 
 		return b.String()
 	}
