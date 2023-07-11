@@ -11,7 +11,31 @@ import (
 )
 
 var (
-	rePartition = regexp.MustCompile(`\d+`)
+	rePartition = regexp.MustCompile(`^\d+$`)
+
+	decreaseSubjectCardinality = func(subject string) string {
+		var b strings.Builder
+
+		subjectParts := strings.Split(subject, ".")
+		subjectPartsLastIdx := len(subjectParts) - 1
+		for i, part := range subjectParts {
+			p := part
+			if rePartition.MatchString(part) {
+				p = ":partition:"
+			} else if strings.HasPrefix(part, "_INBOX") {
+				p = ":inbox:"
+			} else if strings.HasPrefix(part, "/") {
+				p = ":url:"
+			}
+
+			b.WriteString(p)
+			if i != subjectPartsLastIdx {
+				b.WriteByte('.')
+			}
+		}
+
+		return b.String()
+	}
 )
 
 // Option allows configuration of the httptrace Extract()
@@ -44,23 +68,7 @@ func defaultOperationFn(kind string, msg *nats.Msg) string {
 	}
 
 	b.WriteByte('/')
-	subjectParts := strings.Split(msg.Subject, ".")
-	subjectPartsLastIdx := len(subjectParts) - 1
-	for i, part := range subjectParts {
-		p := part
-		if rePartition.MatchString(part) {
-			p = ":partition:"
-		} else if strings.HasPrefix(part, "_INBOX") {
-			p = ":inbox:"
-		} else if strings.HasPrefix(part, "/") {
-			p = ":url:"
-		}
-
-		b.WriteString(p)
-		if i != subjectPartsLastIdx {
-			b.WriteByte('.')
-		}
-	}
+	b.WriteString(decreaseSubjectCardinality(msg.Subject))
 
 	return b.String()
 }

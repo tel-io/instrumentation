@@ -80,13 +80,15 @@ func (s *SubscriptionStatMetric) callback(ctx context.Context) {
 		dropped, _ := v.Dropped()
 		count, _ := v.Delivered()
 
-		vc := data[v.Subject]
+		subject := decreaseSubjectCardinality(v.Subject)
+
+		vc := data[subject]
 		vc.msgs += int64(pMsg)
 		vc.bytes += int64(pBytes)
 		vc.dropped += int64(dropped)
 		vc.count += count
 
-		data[v.Subject] = vc
+		data[subject] = vc
 		return true
 	})
 

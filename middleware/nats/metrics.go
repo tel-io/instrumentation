@@ -66,7 +66,7 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 
 			attr := []attribute.KeyValue{
 				IsError.Bool(err != nil),
-				Subject.String(msg.Subject),
+				Subject.String(decreaseSubjectCardinality(msg.Subject)),
 				Kind.String(kind),
 			}
 
