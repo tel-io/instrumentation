@@ -14,6 +14,14 @@ var (
 	rePartition = regexp.MustCompile(`^\d+$`)
 
 	decreaseSubjectCardinality = func(subject string) string {
+		if strings.HasPrefix(subject, "_INBOX") {
+			return ":inbox:"
+		}
+
+		if strings.HasPrefix(subject, "/") {
+			return ":url:"
+		}
+
 		var b strings.Builder
 
 		subjectParts := strings.Split(subject, ".")
@@ -22,10 +30,6 @@ var (
 			p := part
 			if rePartition.MatchString(part) {
 				p = ":partition:"
-			} else if strings.HasPrefix(part, "_INBOX") {
-				p = ":inbox:"
-			} else if strings.HasPrefix(part, "/") {
-				p = ":url:"
 			}
 
 			b.WriteString(p)
