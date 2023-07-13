@@ -5,13 +5,14 @@ go 1.18
 require (
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/stretchr/testify v1.8.1
-	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
+	github.com/tel-io/tel/v2 v2.3.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4
 	go.opentelemetry.io/otel v1.11.2-0.20221116164004-b0618095a4b0
 	go.uber.org/zap v1.18.1
 )
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logfmt/logfmt v0.5.1 // indirect
