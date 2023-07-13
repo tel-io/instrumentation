@@ -4,15 +4,15 @@ go 1.17
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/http v1.2.3
+	github.com/tel-io/instrumentation/middleware/http v1.2.6
 	go.opentelemetry.io/otel v1.11.2-0.20221116164004-b0618095a4b0
 )
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
-	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
@@ -32,7 +32,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/shirou/gopsutil/v3 v3.22.9 // indirect
-	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053 // indirect
+	github.com/tel-io/tel/v2 v2.3.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.10 // indirect
 	github.com/tklauser/numcpus v0.4.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect

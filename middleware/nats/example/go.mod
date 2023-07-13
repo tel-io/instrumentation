@@ -8,7 +8,7 @@ require (
 	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/nats.go v1.18.0
 	github.com/tel-io/instrumentation/middleware/nats/v2 v2.0.0
-	github.com/tel-io/tel/v2 v2.1.2-0.20221112211207-91b430b16053
+	github.com/tel-io/tel/v2 v2.3.0
 )
 
 require (
@@ -48,6 +48,7 @@ require (
 )
 
 require (
+	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/klauspost/compress v1.15.11 // indirect
 	github.com/minio/highwayhash v1.0.2 // indirect
