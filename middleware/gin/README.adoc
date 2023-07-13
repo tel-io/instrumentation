@@ -2,7 +2,7 @@
 
 [source,bash]
 ----
-go get -v github.com/tel-io/instrumentation/subMiddleware/gin@latest
+go get -v github.com/tel-io/instrumentation/middleware/gin@latest
 ----
 
 [source,go]
