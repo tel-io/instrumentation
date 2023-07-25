@@ -8,7 +8,7 @@ go get -v github.com/tel-io/instrumentation/middleware/gin@latest
 [source,go]
 ----
 import (
- mw "github.com/tel-io/instrumentation/subMiddleware/gin"
+ mw "github.com/tel-io/instrumentation/middleware/gin"
 )
 
 func main(){
@@ -16,8 +16,22 @@ func main(){
 	t, cc := tel.New(ccx, cfg)
 	defer cc()
 
-    app := gin.Default()
-	app.Use(mw.ServerMiddlewareAll())
+        app := gin.Default()
+	
+	//exclude filter example
+	var exclude = map[string]struct{}{
+		"/favicon.ico": {},
+	}
+	filter := func(req *http.Request) bool {
+		_, ok := exclude[req.URL.Path]
+		return !ok
+	}
+	
+	//Both filter for httpMw and OtelMw
+	r.Use(mw.ServerMiddlewareAll(
+		httpMw.WithFilter(filter),
+		httpMw.WithOtelOpts(otelhttp.WithFilter(filter)),
+	))
 }
 ----
 
