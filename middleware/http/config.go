@@ -62,12 +62,16 @@ var (
 
 type PathExtractor func(r *http.Request) string
 
+type CardinalityGrouper func(path string) string
+
 type config struct {
 	log           *tel.Telemetry
 	operation     string
 	otelOpts      []otelhttp.Option
 	pathExtractor PathExtractor
 	filters       []otelhttp.Filter
+
+	cardinalityGrouper CardinalityGrouper
 
 	readRequest        bool
 	readHeader         bool
@@ -98,6 +102,7 @@ func newConfig(opts ...Option) *config {
 			otelhttp.WithFilter(DefaultFilter),
 		},
 		pathExtractor:      DefaultURI,
+		cardinalityGrouper: DefaultCardinalityGrouper,
 		filters:            []otelhttp.Filter{DefaultFilter},
 		dumpPayloadOnError: true,
 	}
@@ -170,6 +175,16 @@ func WithDumpResponse(enable bool) Option {
 	return optionFunc(func(c *config) {
 		c.writeResponse = enable
 	})
+}
+
+func WithCardinalityGrouper(in CardinalityGrouper) Option {
+	return optionFunc(func(c *config) {
+		c.cardinalityGrouper = in
+	})
+}
+
+func DefaultCardinalityGrouper(path string) string {
+	return decreasePathCardinality(path)
 }
 
 func DefaultURI(r *http.Request) string {
