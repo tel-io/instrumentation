@@ -2,7 +2,6 @@ package http
 
 import (
 	"net/http"
-	"regexp"
 	"strings"
 
 	"github.com/tel-io/tel/v2"
@@ -11,32 +10,6 @@ import (
 )
 
 var (
-	reID       = regexp.MustCompile(`^\d+$`)
-	reResource = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.\w{2,4}$`) // .css, .js, .png, .jpeg, etc.
-	reUUID     = regexp.MustCompile(`^[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}$`)
-
-	decreasePathCardinality = func(path string) string {
-		var b strings.Builder
-
-		path = strings.TrimLeft(path, "/")
-		pathParts := strings.Split(path, "/")
-		for _, part := range pathParts {
-			b.WriteString("/")
-
-			p := part
-			if reID.MatchString(part) {
-				p = ":id:"
-			} else if reResource.MatchString(part) {
-				p = ":resource:"
-			} else if reUUID.MatchString(part) {
-				p = ":uuid:"
-			}
-			b.WriteString(p)
-		}
-
-		return b.String()
-	}
-
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
 		var b strings.Builder
 
@@ -62,8 +35,6 @@ var (
 
 type PathExtractor func(r *http.Request) string
 
-type CardinalityGrouper func(path string) string
-
 type config struct {
 	log           *tel.Telemetry
 	operation     string
@@ -71,7 +42,7 @@ type config struct {
 	pathExtractor PathExtractor
 	filters       []otelhttp.Filter
 
-	cardinalityGrouper CardinalityGrouper
+	groupers CardinalityGrouperList
 
 	readRequest        bool
 	readHeader         bool
@@ -102,7 +73,7 @@ func newConfig(opts ...Option) *config {
 			otelhttp.WithFilter(DefaultFilter),
 		},
 		pathExtractor:      DefaultURI,
-		cardinalityGrouper: DefaultCardinalityGrouper,
+		groupers:           []CardinalityGrouper{NewAutoGrouper()},
 		filters:            []otelhttp.Filter{DefaultFilter},
 		dumpPayloadOnError: true,
 	}
@@ -175,16 +146,6 @@ func WithDumpResponse(enable bool) Option {
 	return optionFunc(func(c *config) {
 		c.writeResponse = enable
 	})
-}
-
-func WithCardinalityGrouper(in CardinalityGrouper) Option {
-	return optionFunc(func(c *config) {
-		c.cardinalityGrouper = in
-	})
-}
-
-func DefaultCardinalityGrouper(path string) string {
-	return decreasePathCardinality(path)
 }
 
 func DefaultURI(r *http.Request) string {

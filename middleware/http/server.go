@@ -103,12 +103,12 @@ func ServerMiddleware(opts ...Option) Middleware {
 
 			defer func(start time.Time) {
 				hasRecovery := recover()
-				eUrl := s.pathExtractor(r)
+				extractedUrl := s.pathExtractor(r)
 
 				// inject additional metrics fields: otelhttp.NewHandler
 				if labeler, ok := otelhttp.LabelerFromContext(ctx); ok {
 					labeler.Add(attribute.String("method", r.Method))
-					labeler.Add(attribute.String("url", decreasePathCardinality(eUrl)))
+					labeler.Add(attribute.String("url", s.groupers.Apply(extractedUrl)))
 					labeler.Add(attribute.String("status", http.StatusText(rww.statusCode)))
 					labeler.Add(attribute.Int("code", rww.statusCode))
 				}
@@ -119,7 +119,7 @@ func ServerMiddleware(opts ...Option) Middleware {
 					tel.String("method", r.Method),
 					tel.String("user-agent", r.UserAgent()),
 					tel.String("ip", r.RemoteAddr),
-					tel.String("url", eUrl),
+					tel.String("url", extractedUrl),
 					tel.String("status_code", http.StatusText(rww.statusCode)),
 				)
 
