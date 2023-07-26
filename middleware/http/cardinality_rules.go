@@ -2,7 +2,6 @@ package http
 
 import (
 	"errors"
-	"fmt"
 	"regexp"
 	"strings"
 )
@@ -66,19 +65,8 @@ func newStringList(path string) stringList {
 	return strings.Split(strings.TrimLeft(path, "/"), "/")
 }
 
-func applyPipe(m pipe, path string) (string, bool) {
-	urlParts := newStringList(path)
-
-	urlPartCount := len(urlParts)
-	patternPartCount := len(m.parts)
-
-	if urlPartCount < patternPartCount {
-		return path, false //skip rule (matches by min)
-	}
-
+func applyPipeEqual(urlParts stringList, _ int, patternPartCount int, m pipe, path string) (string, bool) {
 	var startCompareFlag bool
-	var startCompareOffset int
-	var elapsedPattern int
 	var skipped int
 
 	//fmt.Println(path, m.parts)
@@ -92,130 +80,145 @@ func applyPipe(m pipe, path string) (string, bool) {
 			continue
 		}
 
-		elapsedPattern = patternPartCount - p
-
-		for u := 0 + skipped; u < urlPartCount; u++ {
-			if strings.Compare(urlParts[u], m.parts[p].value) == 0 {
-				//fmt.Println(p, u, "+")
-				if !startCompareFlag {
-					startCompareFlag = true
-
-					startCompareOffset = u
-				}
-
-				skipped++
-
-				break
-			} else {
-				return path, false //skip rule (different suffix)
-			}
+		if strings.Compare(urlParts[skipped], m.parts[p].value) != 0 {
+			return path, false //skip rule (different suffix)
 		}
+
+		//fmt.Println(p, u, "+")
+		if !startCompareFlag {
+			startCompareFlag = true
+		}
+
+		skipped++
 	}
 
-	_ = elapsedPattern
-	_ = startCompareOffset
+	if !startCompareFlag {
+		return path, false
+	}
 
 	return urlParts.serialize(), true
 }
 
-func applyPipe2(m pipe, path string) string {
+func applyPipePartial(urlParts stringList, urlPartCount int, patternPartCount int, m pipe, path string) (string, bool) {
+	//TODO
+	return urlParts.serialize(), true
+}
+
+func applyPipe(m pipe, path string) (string, bool) {
 	urlParts := newStringList(path)
 
 	urlPartCount := len(urlParts)
 	patternPartCount := len(m.parts)
 
-	if patternPartCount > urlPartCount {
-		return path //skip rule (matches by min)
+	if urlPartCount < patternPartCount {
+		return path, false //skip rule (matches by min)
 	}
 
-	//only placeholders rule. Depends only on the number of separators
-	if m.skip == nil {
-		if patternPartCount == urlPartCount {
-			//copy from pipe
-			for i, p := range m.parts {
-				urlParts[i] = p.value
-			}
-
-			return urlParts.serialize()
-		}
-
-		return path //skip rule (matches by max)
+	if urlPartCount == patternPartCount {
+		return applyPipeEqual(urlParts, urlPartCount, patternPartCount, m, path)
 	}
 
-	//placeholders at the end
-	if m.skip != nil && *m.skip == 0 && patternPartCount == urlPartCount {
-		for i, p := range m.parts {
-			if p.isPlaceholder {
-				urlParts[i] = p.value
-			}
-
-			if strings.Compare(urlParts[i], p.value) != 0 {
-				return path //skip rule (matches)
-			}
-		}
-
-		return urlParts.serialize()
-	}
-
-	var offset int
-	var startCompareOffset int
-	var startCompareFlag bool
-
-	fmt.Println(path, m.parts)
-	fmt.Println("p", "u")
-	//pattern
-	for p := *m.skip; p < patternPartCount; p++ {
-		//url
-		for u := *m.skip + offset; u < urlPartCount; u++ {
-			fmt.Println(p, u)
-			if m.parts[p].isPlaceholder {
-				urlParts[u] = m.parts[p].value
-				if startCompareFlag {
-					offset++
-				}
-
-				continue
-			}
-
-			if strings.Compare(urlParts[u], m.parts[p].value) == 0 {
-				if startCompareFlag == false {
-					//right scenario
-					if *m.skip == 0 {
-						offset = 0
-						startCompareOffset = 0
-					} else {
-						offset = u
-						startCompareOffset = u - 1
-					}
-
-					startCompareFlag = true
-				} else {
-					offset++
-				}
-
-				break
-			} else if startCompareFlag {
-				return path //skip rule (different suffix)
-			}
-		}
-	}
-
-	if !startCompareFlag {
-		return path
-	}
-
-	//replace the placeholders that are before the beginning of the comparison
-	for j := 0; j < *m.skip; j++ {
-		//fmt.Println(j, j+startCompareOffset)
-		if !m.parts[j].isPlaceholder {
-			continue
-		}
-
-		urlParts[j+startCompareOffset] = m.parts[j].value
-	}
-
-	return urlParts.serialize()
+	return applyPipePartial(urlParts, urlPartCount, patternPartCount, m, path)
 }
+
+//func _(m pipe, path string) string {
+//	urlParts := newStringList(path)
+//
+//	urlPartCount := len(urlParts)
+//	patternPartCount := len(m.parts)
+//
+//	if patternPartCount > urlPartCount {
+//		return path //skip rule (matches by min)
+//	}
+//
+//	//only placeholders rule. Depends only on the number of separators
+//	if m.skip == nil {
+//		if patternPartCount == urlPartCount {
+//			//copy from pipe
+//			for i, p := range m.parts {
+//				urlParts[i] = p.value
+//			}
+//
+//			return urlParts.serialize()
+//		}
+//
+//		return path //skip rule (matches by max)
+//	}
+//
+//	//placeholders at the end
+//	if m.skip != nil && *m.skip == 0 && patternPartCount == urlPartCount {
+//		for i, p := range m.parts {
+//			if p.isPlaceholder {
+//				urlParts[i] = p.value
+//			}
+//
+//			if strings.Compare(urlParts[i], p.value) != 0 {
+//				return path //skip rule (matches)
+//			}
+//		}
+//
+//		return urlParts.serialize()
+//	}
+//
+//	var offset int
+//	var startCompareOffset int
+//	var startCompareFlag bool
+//
+//	fmt.Println(path, m.parts)
+//	fmt.Println("p", "u")
+//	//pattern
+//	for p := *m.skip; p < patternPartCount; p++ {
+//		//url
+//		for u := *m.skip + offset; u < urlPartCount; u++ {
+//			fmt.Println(p, u)
+//			if m.parts[p].isPlaceholder {
+//				urlParts[u] = m.parts[p].value
+//				if startCompareFlag {
+//					offset++
+//				}
+//
+//				continue
+//			}
+//
+//			if strings.Compare(urlParts[u], m.parts[p].value) == 0 {
+//				if startCompareFlag == false {
+//					//right scenario
+//					if *m.skip == 0 {
+//						offset = 0
+//						startCompareOffset = 0
+//					} else {
+//						offset = u
+//						startCompareOffset = u - 1
+//					}
+//
+//					startCompareFlag = true
+//				} else {
+//					offset++
+//				}
+//
+//				break
+//			} else if startCompareFlag {
+//				return path //skip rule (different suffix)
+//			}
+//		}
+//	}
+//
+//	if !startCompareFlag {
+//		return path
+//	}
+//
+//	//replace the placeholders that are before the beginning of the comparison
+//	for j := 0; j < *m.skip; j++ {
+//		//fmt.Println(j, j+startCompareOffset)
+//		if !m.parts[j].isPlaceholder {
+//			continue
+//		}
+//
+//		urlParts[j+startCompareOffset] = m.parts[j].value
+//	}
+//
+//	return urlParts.serialize()
+//}
 
 func rules2Pipe(rules []string) (mutates []pipe, err error) {
 	for _, val := range rules {

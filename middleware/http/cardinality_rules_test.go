@@ -7,6 +7,28 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCardinalityGrouperPartial(t *testing.T) {
+	gP, errP := NewRulesGrouper([]string{
+		"a20/:XX",
+		":XX/b21",
+		"b22/:XX",
+		":XX/c23",
+	})
+	assert.NoError(t, errP)
+
+	tests := map[string]string{
+		"/a20/b20/c20": "/a20/:XX/c20",
+		"/a21/b21/c21": "/:XX/b21/c21",
+		"/a22/b22/c22": "/a22/b22/:XX",
+		"/a23/b23/c23": "/a23/:XX/c23",
+	}
+
+	var list = CardinalityGrouperList{gP}
+	for url, exp := range tests {
+		assert.Equal(t, exp, list.Apply(url))
+	}
+}
+
 func TestCardinalityGrouper(t *testing.T) {
 	gP, errP := NewRulesGrouper([]string{
 		"/:AA/b01/c01/:DD",
@@ -121,6 +143,22 @@ func TestCardinalityGrouperRulesByLen2(t *testing.T) {
 		"/a13/b13/c13": "/:AA/b13/c13",
 		"/a14/b14":     "/:AA/b14",
 		"/a15":         "/:AA",
+	}
+
+	var list = CardinalityGrouperList{gP}
+	for url, exp := range tests {
+		assert.Equal(t, exp, list.Apply(url))
+	}
+}
+
+func TestCardinalityGrouperBreak(t *testing.T) {
+	gP, errP := NewRulesGrouper([]string{
+		"/:AA/b01/:DD/e01",
+	})
+	assert.NoError(t, errP)
+
+	tests := map[string]string{
+		"/a01/b01/c01/d01": "/a01/b01/c01/d01",
 	}
 
 	var list = CardinalityGrouperList{gP}
