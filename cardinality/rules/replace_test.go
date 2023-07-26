@@ -81,10 +81,10 @@ func TestCardinalityGrouperInvalidRules(t *testing.T) {
 	var errP error
 
 	_, errP = rules.New(nil)
-	assert.Error(t, errP)
+	assert.NoError(t, errP)
 
 	_, errP = rules.New([]string{})
-	assert.Error(t, errP)
+	assert.NoError(t, errP)
 
 	_, errP = rules.New([]string{""})
 	assert.Error(t, errP)

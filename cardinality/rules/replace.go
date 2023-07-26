@@ -20,10 +20,6 @@ func New(rules []string, options ...Option) (cardinality.Replacer, error) {
 		opt.apply(c)
 	}
 
-	if len(rules) == 0 {
-		return nil, errors.New("redundant using empty list of rules")
-	}
-
 	if len(rules) >= c.maxRuleCount {
 		return nil, errors.New("using too large a list of rules slows down processing")
 	}
