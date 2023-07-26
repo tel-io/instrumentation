@@ -38,13 +38,13 @@ func New(rules []string, options ...Option) (cardinality.Replacer, error) {
 
 type module struct {
 	cfg     *config
-	mutates []pipe
+	mutates []mutate
 }
 
 // Replace cardinality parts in path
 func (m *module) Replace(path string) string {
-	for _, p := range m.mutates {
-		if nv, state := p.exec(path); state {
+	for _, mu := range m.mutates {
+		if nv, state := m.exec(mu, path); state {
 			path = nv
 
 			break
@@ -66,7 +66,7 @@ func (m *module) prepareRules(rules []string) (err error) {
 		pLen := len(pathParts)
 
 		if pLen >= m.cfg.maxSeparatorCount {
-			return errors.New("using too large condition slows down processing")
+			return errors.New("using too large rule slows down processing")
 		}
 
 		var parts = make([]part, 0, pLen)
@@ -90,10 +90,10 @@ func (m *module) prepareRules(rules []string) (err error) {
 		}
 
 		if placeholderPos == nil {
-			return errors.New("the condition without placeholder")
+			return errors.New("redundant rule without placeholder")
 		}
 
-		m.mutates = append(m.mutates, pipe{
+		m.mutates = append(m.mutates, mutate{
 			parts:            parts,
 			skip:             valuePos,
 			firstPlaceholder: *placeholderPos,
@@ -109,15 +109,28 @@ type part struct {
 	value         string
 }
 
-type pipe struct {
+type mutate struct {
 	parts            []part
 	skip             *int
 	firstPlaceholder int
 	isPartial        bool
 }
 
-func (m *pipe) exec(path string) (string, bool) {
-	return "", true
+func (m *module) exec(mu mutate, path string) (string, bool) {
+	urlParts := m.newStringList(path)
+
+	urlPartCount := len(urlParts)
+	patternPartCount := len(mu.parts)
+
+	if urlPartCount < patternPartCount {
+		return path, false //skip rule (matches by min)
+	}
+
+	if urlPartCount == patternPartCount {
+		return m.applyPipeEqual(urlParts, patternPartCount, mu, path)
+	}
+
+	return m.applyPipePartial(urlParts, urlPartCount, patternPartCount, mu, path)
 }
 
 func (m *module) serialize(list []string) string {
@@ -128,14 +141,14 @@ func (m *module) newStringList(path string) []string {
 	return strings.Split(strings.TrimLeft(path, m.cfg.pathSeparator), m.cfg.pathSeparator)
 }
 
-func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, p pipe, path string) (string, bool) {
+func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, mu mutate, path string) (string, bool) {
 	for i := 0; i < patternPartCount; i++ {
-		if p.parts[i].isPlaceholder {
-			urlParts[i] = p.parts[i].value
+		if mu.parts[i].isPlaceholder {
+			urlParts[i] = mu.parts[i].value
 			continue
 		}
 
-		if strings.Compare(urlParts[i], p.parts[i].value) != 0 {
+		if strings.Compare(urlParts[i], mu.parts[i].value) != 0 {
 			return path, false //skip rule
 		}
 	}
@@ -143,23 +156,7 @@ func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, p pipe,
 	return m.serialize(urlParts), true
 }
 
-func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, p pipe, path string) (string, bool) {
+func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, mu mutate, path string) (string, bool) {
+	//TODO implementation
 	return m.serialize(urlParts), true
-}
-
-func (m *module) applyPipe(p pipe, path string) (string, bool) {
-	urlParts := m.newStringList(path)
-
-	urlPartCount := len(urlParts)
-	patternPartCount := len(p.parts)
-
-	if urlPartCount < patternPartCount {
-		return path, false //skip rule (matches by min)
-	}
-
-	if urlPartCount == patternPartCount {
-		return m.applyPipeEqual(urlParts, patternPartCount, p, path)
-	}
-
-	return m.applyPipePartial(urlParts, urlPartCount, patternPartCount, p, path)
 }

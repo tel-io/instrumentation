@@ -25,6 +25,7 @@ func WithPathSeparator(separator string) Option {
 const (
 	DefaultMaxRuleCount      = 100
 	DefaultMaxSeparatorCount = 10
+	DefaultPathSeparator     = cardinality.PathSeparator
 )
 
 type Option interface {
@@ -45,7 +46,7 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		pathSeparator:     cardinality.PathSeparator,
+		pathSeparator:     DefaultPathSeparator,
 		maxRuleCount:      DefaultMaxRuleCount,
 		maxSeparatorCount: DefaultMaxSeparatorCount,
 	}

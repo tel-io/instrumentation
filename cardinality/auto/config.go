@@ -13,26 +13,28 @@ var (
 )
 
 const (
-	keyId       = "id"
-	keyResource = "resource"
-	keyUUID     = "uuid"
+	KeyId       = "id"
+	KeyResource = "resource"
+	KeyUUID     = "uuid"
+
+	DefaultPathSeparator = cardinality.PathSeparator
 )
 
 func WithoutId() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(keyId))
+		delete(c.Matches, cardinality.PlaceholderFormatter(KeyId))
 	})
 }
 
 func WithoutResource() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(keyResource))
+		delete(c.Matches, cardinality.PlaceholderFormatter(KeyResource))
 	})
 }
 
 func WithoutUUID() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(keyUUID))
+		delete(c.Matches, cardinality.PlaceholderFormatter(KeyUUID))
 	})
 }
 
@@ -53,11 +55,11 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		RuleSeparator: cardinality.PathSeparator,
+		RuleSeparator: DefaultPathSeparator,
 		Matches: map[string]*regexp.Regexp{
-			cardinality.PlaceholderFormatter(keyId):       reID,
-			cardinality.PlaceholderFormatter(keyResource): reResource,
-			cardinality.PlaceholderFormatter(keyUUID):     reUUID,
+			cardinality.PlaceholderFormatter(KeyId):       reID,
+			cardinality.PlaceholderFormatter(KeyResource): reResource,
+			cardinality.PlaceholderFormatter(KeyUUID):     reUUID,
 		},
 	}
 }
