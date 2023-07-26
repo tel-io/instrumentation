@@ -157,6 +157,7 @@ func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, mu muta
 }
 
 func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, mu mutate, path string) (string, bool) {
+
 	//TODO implementation
 	return m.serialize(urlParts), true
 }

@@ -245,24 +245,24 @@ func BenchmarkPartial(b *testing.B) {
 		var rpl []string
 
 		if repIndex < 2 {
-			right = 2 + randInt(len(rp)-1)
+			right = 2 + randInt(0, len(rp)-2)
 
 			//fmt.Printf("A(len:%d, rep:%d) [:%d]\n", len(rp), repIndex, right)
 			rpl = rp[:right]
 		} else if repIndex == len(rp)-1 {
-			left = randInt(len(rp) - 1)
+			left = randInt(0, len(rp)-2)
 
 			//fmt.Printf("B(len:%d, rep:%d) [%d:]\n", len(rp), repIndex, left)
 			rpl = rp[left:]
 		} else {
 			if repIndex > 1 {
-				left = randInt(repIndex - 1)
+				left = randInt(0, repIndex-2)
 			}
 			if repIndex > 1 {
 				right = len(rp) - 1
 
 				if rm := len(rp) - 1 - repIndex; rm >= 1 {
-					right = randInt(rm) + repIndex + 1
+					right = randInt(0, rm-1) + repIndex + 1
 				}
 			}
 
@@ -282,8 +282,7 @@ func BenchmarkPartial(b *testing.B) {
 	}
 }
 
-// randInt(2) -> [0|1]
-func randInt(max int) int {
-	r, _ := rand.Int(rand.Reader, big.NewInt(int64(max)))
-	return int(r.Int64())
+func randInt(min, max int) int {
+	r, _ := rand.Int(rand.Reader, big.NewInt(int64(max+1-min)))
+	return int(r.Int64()) + min
 }
