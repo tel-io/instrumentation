@@ -4,18 +4,21 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/tel-io/instrumentation/cardinality"
+	"github.com/tel-io/instrumentation/cardinality/auto"
 	"github.com/tel-io/tel/v2"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
+	autoReplacer             = auto.New()
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
 		var b strings.Builder
 
 		b.WriteString(r.Method)
 		b.WriteString(":")
-		b.WriteString(decreasePathCardinality(r.URL.Path))
+		b.WriteString(autoReplacer.Replace(r.URL.Path))
 
 		return b.String()
 	}
@@ -42,7 +45,7 @@ type config struct {
 	pathExtractor PathExtractor
 	filters       []otelhttp.Filter
 
-	groupers CardinalityGrouperList
+	replacers cardinality.ReplacerList
 
 	readRequest        bool
 	readHeader         bool
@@ -73,7 +76,7 @@ func newConfig(opts ...Option) *config {
 			otelhttp.WithFilter(DefaultFilter),
 		},
 		pathExtractor:      DefaultURI,
-		groupers:           []CardinalityGrouper{NewAutoGrouper()},
+		replacers:          cardinality.ReplacerList{autoReplacer},
 		filters:            []otelhttp.Filter{DefaultFilter},
 		dumpPayloadOnError: true,
 	}

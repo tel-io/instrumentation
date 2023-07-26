@@ -2,9 +2,13 @@ module github.com/tel-io/instrumentation/middleware/http
 
 go 1.18
 
+//TODO Remove this after merge cardinality to tel-io
+replace github.com/tel-io/instrumentation/cardinality => ../../cardinality
+require github.com/tel-io/instrumentation/cardinality v0.0.0-00010101000000-000000000000
+
 require (
 	github.com/felixge/httpsnoop v1.0.3
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/tel-io/tel/v2 v2.3.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4
 	go.opentelemetry.io/otel v1.11.2-0.20221116164004-b0618095a4b0
@@ -15,7 +19,6 @@ require (
 	github.com/caarlos0/env/v9 v9.0.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/go-logfmt/logfmt v0.5.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
