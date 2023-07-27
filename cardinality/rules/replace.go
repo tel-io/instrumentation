@@ -28,7 +28,7 @@ func New(rules []string, options ...Option) (cardinality.Replacer, error) {
 		cfg: c,
 	}
 
-	err := m.prepareRules(rules)
+	err := m.preparePatterns(rules)
 	if err != nil {
 		return nil, err
 	}
@@ -37,13 +37,13 @@ func New(rules []string, options ...Option) (cardinality.Replacer, error) {
 }
 
 type module struct {
-	cfg     *config
-	mutates []mutate
+	cfg      *config
+	patterns []pattern
 }
 
 // Replace cardinality parts in path
 func (m *module) Replace(path string) string {
-	for _, mu := range m.mutates {
+	for _, mu := range m.patterns {
 		if nv, state := m.exec(mu, path); state {
 			path = nv
 
@@ -54,9 +54,9 @@ func (m *module) Replace(path string) string {
 	return path
 }
 
-func (m *module) prepareRules(rules []string) (err error) {
+func (m *module) preparePatterns(rules []string) (err error) {
 	for _, val := range rules {
-		var isPartial bool
+		var isPartial, withValue bool
 		if strings.HasPrefix(val, m.cfg.pathSeparator) {
 			isPartial = true
 			val = strings.TrimLeft(val, m.cfg.pathSeparator)
@@ -71,6 +71,8 @@ func (m *module) prepareRules(rules []string) (err error) {
 
 		var parts = make([]part, 0, pLen)
 		var valuePos, placeholderPos *int
+		var placeholderCount int
+
 		for i, p := range pathParts {
 			placeholderMatch := cardinality.PlaceholderRegexp.MatchString(p)
 			if !placeholderMatch && valuePos == nil {
@@ -83,6 +85,10 @@ func (m *module) prepareRules(rules []string) (err error) {
 				placeholderPos = &iC
 			}
 
+			if placeholderMatch {
+				placeholderCount++
+			}
+
 			parts = append(parts, part{
 				isPlaceholder: placeholderMatch,
 				value:         p,
@@ -93,11 +99,20 @@ func (m *module) prepareRules(rules []string) (err error) {
 			return errors.New("redundant rule without placeholder")
 		}
 
-		m.mutates = append(m.mutates, mutate{
+		var v int
+		if valuePos != nil {
+			v = *valuePos
+			withValue = true
+		}
+
+		m.patterns = append(m.patterns, pattern{
+			index:            len(m.patterns),
 			parts:            parts,
-			skip:             valuePos,
+			firstValue:       v,
 			firstPlaceholder: *placeholderPos,
+			withValue:        withValue,
 			isPartial:        isPartial,
+			placeholderCount: placeholderCount,
 		})
 	}
 
@@ -109,28 +124,44 @@ type part struct {
 	value         string
 }
 
-type mutate struct {
+type pattern struct {
 	parts            []part
-	skip             *int
+	firstValue       int
 	firstPlaceholder int
 	isPartial        bool
+	withValue        bool
+	placeholderCount int
+	index            int
 }
 
-func (m *module) exec(mu mutate, path string) (string, bool) {
+func (m *pattern) toStrings() []string {
+	list := make([]string, len(m.parts))
+	for i, v := range m.parts {
+		list[i] = v.value
+	}
+
+	return list
+}
+
+func (m *module) serializePattern(pat pattern) string {
+	return strings.Join(pat.toStrings(), m.cfg.pathSeparator)
+}
+
+func (m *module) exec(pat pattern, path string) (string, bool) {
 	urlParts := m.newStringList(path)
 
 	urlPartCount := len(urlParts)
-	patternPartCount := len(mu.parts)
+	patternPartCount := len(pat.parts)
 
 	if urlPartCount < patternPartCount {
-		return path, false //skip rule (matches by min)
+		return path, false //firstValue rule (matches by min)
 	}
 
 	if urlPartCount == patternPartCount {
-		return m.applyPipeEqual(urlParts, patternPartCount, mu, path)
+		return m.applyPipeEqual(urlParts, patternPartCount, pat, path)
 	}
 
-	return m.applyPipePartial(urlParts, urlPartCount, patternPartCount, mu, path)
+	return m.applyPipePartial(urlParts, urlPartCount, patternPartCount, pat, path)
 }
 
 func (m *module) serialize(list []string) string {
@@ -141,23 +172,55 @@ func (m *module) newStringList(path string) []string {
 	return strings.Split(strings.TrimLeft(path, m.cfg.pathSeparator), m.cfg.pathSeparator)
 }
 
-func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, mu mutate, path string) (string, bool) {
+func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, pat pattern, path string) (string, bool) {
 	for i := 0; i < patternPartCount; i++ {
-		if mu.parts[i].isPlaceholder {
-			urlParts[i] = mu.parts[i].value
+		if pat.parts[i].isPlaceholder {
+			urlParts[i] = pat.parts[i].value
 			continue
 		}
 
-		if strings.Compare(urlParts[i], mu.parts[i].value) != 0 {
-			return path, false //skip rule
+		if strings.Compare(urlParts[i], pat.parts[i].value) != 0 {
+			return path, false //firstValue rule
 		}
 	}
 
 	return m.serialize(urlParts), true
 }
 
-func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, mu mutate, path string) (string, bool) {
+func (m *module) mutate(i, j, pLen int, urlParts []string, pat pattern, path string) (string, bool) {
+	left := j - i
+	for iL := 0; iL < i; iL++ {
+		if pat.parts[iL].isPlaceholder {
+			urlParts[left+iL] = pat.parts[iL].value
+		} else {
+			return path, false
+		}
+	}
 
-	//TODO implementation
+	//right := uLen - pLen - left
+	for iR := i + 1; iR < pLen; iR++ {
+		if pat.parts[iR].isPlaceholder {
+			urlParts[j+iR] = pat.parts[iR].value
+		} else {
+			return path, false
+		}
+	}
+
 	return m.serialize(urlParts), true
+}
+
+func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, pat pattern, path string) (string, bool) {
+	for i := pat.firstValue; i < patternPartCount; i++ {
+		for j := pat.firstValue; j < urlPartCount; j++ {
+			if strings.Compare(urlParts[j], pat.parts[i].value) == 0 {
+				if nv, state := m.mutate(i, j, patternPartCount, urlParts, pat, path); state {
+					return nv, true
+				}
+
+				return path, false
+			}
+		}
+	}
+
+	return path, false
 }

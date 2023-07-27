@@ -19,6 +19,14 @@ func TestPartial(t *testing.T) {
 		":XX/b21",
 		"b22/:XX",
 		":XX/c23",
+
+		"b26/:XX/:YY",
+		":XX/:YY/c27",
+		":XX/:YY/d28",
+		"a29/:XX/:YY",
+
+		"b30/:XX",
+		":XX/c31",
 	})
 	assert.NoError(t, errP)
 
@@ -27,6 +35,13 @@ func TestPartial(t *testing.T) {
 		"/a21/b21/c21": "/:XX/b21/c21",
 		"/a22/b22/c22": "/a22/b22/:XX",
 		"/a23/b23/c23": "/a23/:XX/c23",
+
+		"/a26/b26/c26/d26": "/a26/b26/:XX/:YY",
+		"/a27/b27/c27/d27": "/:XX/:YY/c27/d27",
+		"/a28/b28/c28/d28": "/a28/:XX/:YY/d28",
+		"/a29/b29/c29/d29": "/a29/:XX/:YY/d29",
+		"/a30/b30/c30/d30": "/a30/b30/:XX/d30",
+		"/a31/b31/c31/d31": "/a31/:XX/c31/d31",
 	}
 
 	var list = cardinality.ReplacerList{gP}
@@ -143,12 +158,12 @@ func TestRulesByLen2(t *testing.T) {
 	assert.NoError(t, errP)
 
 	tests := map[string]string{
-		//"/a10/b10/c10": "/a10/:BB/c10",
-		//"/a11/b11/c11": "/a11/b11/:CC",
-		//"/a12/b12":     "/a12/:BB",
+		"/a10/b10/c10": "/a10/:BB/c10",
+		"/a11/b11/c11": "/a11/b11/:CC",
+		"/a12/b12":     "/a12/:BB",
 		"/a13/b13/c13": "/:AA/b13/c13",
-		//"/a14/b14":     "/:AA/b14",
-		//"/a15":         "/:AA",
+		"/a14/b14":     "/:AA/b14",
+		"/a15":         "/:AA",
 	}
 
 	var list = cardinality.ReplacerList{gP}
@@ -219,6 +234,12 @@ Without partial logic (idle)
 	cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
 	BenchmarkPartial
 	BenchmarkPartial-8   	 2058320	       574.1 ns/op
+
+With partial logic
+
+	cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
+	BenchmarkPartial
+	BenchmarkPartial-8   	   15498	     73421 ns/op
 */
 func BenchmarkPartial(b *testing.B) {
 	var (
