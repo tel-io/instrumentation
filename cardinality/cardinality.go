@@ -1,19 +1,5 @@
 package cardinality
 
-import (
-	"fmt"
-	"regexp"
-)
-
-const (
-	PathSeparator = "/"
-)
-
-var (
-	PlaceholderFormatter = func(id string) string { return fmt.Sprintf(`:%s`, id) }
-	PlaceholderRegexp    = regexp.MustCompile(`^:[-\w]+$`)
-)
-
 type Replacer interface {
 	Replace(path string) string
 }

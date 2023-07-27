@@ -22,21 +22,18 @@ Only equal logic
 func BenchmarkEqualDefaults(b *testing.B) {
 	benchmarkEqual(b, rules.DefaultMaxRuleCount, rules.DefaultMaxSeparatorCount)
 }
-
 func BenchmarkEqualSep100(b *testing.B) {
 	benchmarkEqual(b, rules.DefaultMaxRuleCount, 100)
 }
 func BenchmarkEqualSep1000(b *testing.B) {
 	benchmarkEqual(b, rules.DefaultMaxRuleCount, 1000)
 }
-
 func BenchmarkEqualRules1000(b *testing.B) {
 	benchmarkEqual(b, 1000, rules.DefaultMaxSeparatorCount)
 }
 func BenchmarkEqualRules1000Sep100(b *testing.B) {
 	benchmarkEqual(b, 1000, 100)
 }
-
 func BenchmarkEqualRules10000(b *testing.B) {
 	benchmarkEqual(b, 10000, rules.DefaultMaxSeparatorCount)
 }
@@ -60,21 +57,18 @@ With partial logic
 func BenchmarkPartialDefaults(b *testing.B) {
 	benchmarkPartial(b, rules.DefaultMaxRuleCount, rules.DefaultMaxSeparatorCount)
 }
-
 func BenchmarkPartialSep100(b *testing.B) {
 	benchmarkPartial(b, rules.DefaultMaxRuleCount, 100)
 }
 func BenchmarkPartialSep1000(b *testing.B) {
 	benchmarkPartial(b, rules.DefaultMaxRuleCount, 1000)
 }
-
 func BenchmarkPartialRules1000(b *testing.B) {
 	benchmarkPartial(b, 1000, rules.DefaultMaxSeparatorCount)
 }
 func BenchmarkPartialRules1000Sep100(b *testing.B) {
 	benchmarkPartial(b, 1000, 100)
 }
-
 func BenchmarkPartialRules10000(b *testing.B) {
 	benchmarkPartial(b, 10000, rules.DefaultMaxSeparatorCount)
 }
@@ -84,7 +78,8 @@ func BenchmarkPartialRules10000Sep1000(b *testing.B) {
 
 func benchmarkEqual(b *testing.B, rulesCount, separatorsCount int) {
 	var rList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.PlaceholderFormatter("id")
+	var placeholder = cardinality.DefaultConfig().PlaceholderFormatter()("id")
+	var separator = cardinality.DefaultConfig().PathSeparator()
 
 	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
 		var rp = make([]string, 0, rulesCount)
@@ -98,7 +93,7 @@ func benchmarkEqual(b *testing.B, rulesCount, separatorsCount int) {
 			}
 		}
 
-		rList = append(rList, rules.DefaultPathSeparator+strings.Join(rp, rules.DefaultPathSeparator))
+		rList = append(rList, separator+strings.Join(rp, separator))
 	}
 
 	m, errP := rules.New(rList,
@@ -113,11 +108,11 @@ func benchmarkEqual(b *testing.B, rulesCount, separatorsCount int) {
 		m.Replace(url)
 	}
 }
-
 func benchmarkPartial(b *testing.B, rulesCount, separatorsCount int) {
 	var rList = make([]string, 0, rulesCount)
 	var eList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.PlaceholderFormatter("id")
+	var placeholder = cardinality.DefaultConfig().PlaceholderFormatter()("id")
+	var separator = cardinality.DefaultConfig().PathSeparator()
 
 	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
 		repIndex := ruleIndex % separatorsCount
@@ -160,8 +155,8 @@ func benchmarkPartial(b *testing.B, rulesCount, separatorsCount int) {
 			rpl = rp[left:right]
 		}
 
-		rList = append(rList, strings.Join(rpl, rules.DefaultPathSeparator))
-		eList = append(eList, strings.Replace(strings.Join(rp, rules.DefaultPathSeparator), placeholder, "cardinality", 1))
+		rList = append(rList, strings.Join(rpl, separator))
+		eList = append(eList, strings.Replace(strings.Join(rp, separator), placeholder, "cardinality", 1))
 	}
 
 	m, errP := rules.New(rList,
@@ -174,7 +169,6 @@ func benchmarkPartial(b *testing.B, rulesCount, separatorsCount int) {
 		m.Replace(eList[i%rulesCount])
 	}
 }
-
 func randInt(min, max int) int {
 	r, _ := rand.Int(rand.Reader, big.NewInt(int64(max+1-min)))
 	return int(r.Int64()) + min

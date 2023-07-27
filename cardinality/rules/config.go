@@ -16,16 +16,15 @@ func WithMaxSeparatorCount(max int) Option {
 	})
 }
 
-func WithPathSeparator(separator string) Option {
+func WithConfigReader(reader cardinality.ConfigReader) Option {
 	return optionFunc(func(c *config) {
-		c.pathSeparator = separator
+		c.reader = reader
 	})
 }
 
 const (
 	DefaultMaxRuleCount      = 100
 	DefaultMaxSeparatorCount = 10
-	DefaultPathSeparator     = cardinality.PathSeparator
 )
 
 type Option interface {
@@ -35,7 +34,7 @@ type Option interface {
 type config struct {
 	maxRuleCount      int
 	maxSeparatorCount int
-	pathSeparator     string
+	reader            cardinality.ConfigReader
 }
 
 type optionFunc func(*config)
@@ -46,7 +45,7 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		pathSeparator:     DefaultPathSeparator,
+		reader:            cardinality.DefaultConfig(),
 		maxRuleCount:      DefaultMaxRuleCount,
 		maxSeparatorCount: DefaultMaxSeparatorCount,
 	}

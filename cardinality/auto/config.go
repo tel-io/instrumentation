@@ -16,25 +16,44 @@ const (
 	KeyId       = "id"
 	KeyResource = "resource"
 	KeyUUID     = "uuid"
-
-	DefaultPathSeparator = cardinality.PathSeparator
 )
+
+func WithConfigReader(reader cardinality.ConfigReader) Option {
+	return optionFunc(func(c *config) {
+		c.reader = reader
+	})
+}
 
 func WithoutId() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(KeyId))
+		for i, m := range c.matches {
+			if m.id == KeyId {
+				c.matches[i].state = false
+				return
+			}
+		}
 	})
 }
 
 func WithoutResource() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(KeyResource))
+		for i, m := range c.matches {
+			if m.id == KeyResource {
+				c.matches[i].state = false
+				return
+			}
+		}
 	})
 }
 
 func WithoutUUID() Option {
 	return optionFunc(func(c *config) {
-		delete(c.Matches, cardinality.PlaceholderFormatter(KeyUUID))
+		for i, m := range c.matches {
+			if m.id == KeyUUID {
+				c.matches[i].state = false
+				return
+			}
+		}
 	})
 }
 
@@ -42,9 +61,15 @@ type Option interface {
 	apply(*config)
 }
 
+type matchState struct {
+	*regexp.Regexp
+	state bool
+	id    string
+}
+
 type config struct {
-	RuleSeparator string
-	Matches       map[string]*regexp.Regexp
+	matches []matchState //array instead of map for save order
+	reader  cardinality.ConfigReader
 }
 
 type optionFunc func(*config)
@@ -55,11 +80,23 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		RuleSeparator: DefaultPathSeparator,
-		Matches: map[string]*regexp.Regexp{
-			cardinality.PlaceholderFormatter(KeyId):       reID,
-			cardinality.PlaceholderFormatter(KeyResource): reResource,
-			cardinality.PlaceholderFormatter(KeyUUID):     reUUID,
+		reader: cardinality.DefaultConfig(),
+		matches: []matchState{
+			{
+				Regexp: reID,
+				state:  true,
+				id:     KeyId,
+			},
+			{
+				Regexp: reResource,
+				state:  true,
+				id:     KeyResource,
+			},
+			{
+				Regexp: reUUID,
+				state:  true,
+				id:     KeyUUID,
+			},
 		},
 	}
 }

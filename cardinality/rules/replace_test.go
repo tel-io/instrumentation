@@ -1,6 +1,8 @@
 package rules_test
 
 import (
+	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 
@@ -170,16 +172,60 @@ func TestRulesByLen2(t *testing.T) {
 
 func TestBreakRule(t *testing.T) {
 	gP, errP := rules.New([]string{
-		"/:AA/b01/:DD/e01",
+		"/:AA/b01/:CC/e01",
+		"b02/:CC/e02",
+		"x02/:CC/d03",
 	})
 	assert.NoError(t, errP)
 
 	tests := map[string]string{
 		"/a01/b01/c01/d01": "/a01/b01/c01/d01",
+		"/a02/b02/c02/d02": "/a02/b02/c02/d02",
+		"/a03/b03/c03/d03": "/a03/b03/c03/d03",
 	}
 
 	var list = cardinality.ReplacerList{gP}
 	for url, exp := range tests {
 		assert.Equal(t, exp, list.Apply(url))
 	}
+}
+
+func TestOptions(t *testing.T) {
+	var err error
+	var l cardinality.Replacer
+
+	_, err = rules.New([]string{":XX"},
+		rules.WithMaxRuleCount(2),
+	)
+	assert.NoError(t, err)
+
+	_, err = rules.New([]string{":XX", ":YY"},
+		rules.WithMaxRuleCount(2),
+	)
+	assert.Error(t, err)
+
+	cfg := cardinality.NewConfig(
+		".",
+		false,
+		regexp.MustCompile(`^\{[-\w]+}$`),
+		func(id string) string {
+			return fmt.Sprintf(`{%s}`, id)
+		},
+	)
+
+	l, err = rules.New([]string{"{XX}.aa.bb.cc"},
+		rules.WithMaxSeparatorCount(3),
+		rules.WithConfigReader(cfg),
+	)
+	assert.Error(t, err)
+	assert.Nil(t, l)
+
+	l, err = rules.New([]string{"{XX}.cc"},
+		rules.WithMaxSeparatorCount(3),
+		rules.WithConfigReader(cfg),
+	)
+	assert.NoError(t, err)
+	assert.NotNil(t, l)
+
+	assert.Equal(t, "aa.{XX}.cc", l.Replace("aa.bb.cc"))
 }
