@@ -1,14 +1,10 @@
 package rules_test
 
 import (
-	"crypto/rand"
-	"fmt"
-	"math/big"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/tel-io/instrumentation/cardinality"
 	"github.com/tel-io/instrumentation/cardinality/rules"
 )
@@ -186,124 +182,4 @@ func TestBreakRule(t *testing.T) {
 	for url, exp := range tests {
 		assert.Equal(t, exp, list.Apply(url))
 	}
-}
-
-/*
-Only equal logic
-
-	cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-	BenchmarkEqual
-	BenchmarkEqual-8   	   41247	     28634 ns/op
-*/
-func BenchmarkEqual(b *testing.B) {
-	const (
-		rulesCount      = rules.DefaultMaxRuleCount - 1
-		separatorsCount = rules.DefaultMaxSeparatorCount - 1
-	)
-	var rList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.PlaceholderFormatter("id")
-
-	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
-		var rp = make([]string, 0, rulesCount)
-		repIndex := ruleIndex % separatorsCount
-
-		for sepIndex := 0; sepIndex < separatorsCount; sepIndex++ {
-			if repIndex == sepIndex {
-				rp = append(rp, placeholder)
-			} else {
-				rp = append(rp, fmt.Sprintf("part-%d-%d", ruleIndex, sepIndex))
-			}
-		}
-
-		rList = append(rList, rules.DefaultPathSeparator+strings.Join(rp, rules.DefaultPathSeparator))
-	}
-
-	m, errP := rules.New(rList)
-	require.NoError(b, errP)
-
-	url := strings.TrimSuffix(rList[len(rList)-1], placeholder) + "cardinality"
-
-	for i := 0; i < b.N; i++ {
-		m.Replace(url)
-	}
-}
-
-/*
-Without partial logic (idle)
-
-	cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-	BenchmarkPartial
-	BenchmarkPartial-8   	 2058320	       574.1 ns/op
-
-With partial logic
-
-	cpu: Intel(R) Core(TM) i7-10510U CPU @ 1.80GHz
-	BenchmarkPartial
-	BenchmarkPartial-8   	   15498	     73421 ns/op
-*/
-func BenchmarkPartial(b *testing.B) {
-	var (
-		rulesCount      = rules.DefaultMaxRuleCount - 1
-		separatorsCount = rules.DefaultMaxSeparatorCount - 1
-	)
-	var rList = make([]string, 0, rulesCount)
-	var eList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.PlaceholderFormatter("id")
-
-	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
-		repIndex := ruleIndex % separatorsCount
-		var rp = make([]string, 0, rulesCount)
-
-		for sepIndex := 0; sepIndex < separatorsCount; sepIndex++ {
-			if repIndex == sepIndex {
-				rp = append(rp, placeholder)
-			} else {
-				rp = append(rp, fmt.Sprintf("part-%d-%d", ruleIndex, sepIndex))
-			}
-		}
-
-		var left, right int
-		var rpl []string
-
-		if repIndex < 2 {
-			right = 2 + randInt(0, len(rp)-2)
-
-			//fmt.Printf("A(len:%d, rep:%d) [:%d]\n", len(rp), repIndex, right)
-			rpl = rp[:right]
-		} else if repIndex == len(rp)-1 {
-			left = randInt(0, len(rp)-2)
-
-			//fmt.Printf("B(len:%d, rep:%d) [%d:]\n", len(rp), repIndex, left)
-			rpl = rp[left:]
-		} else {
-			if repIndex > 1 {
-				left = randInt(0, repIndex-2)
-			}
-			if repIndex > 1 {
-				right = len(rp) - 1
-
-				if rm := len(rp) - 1 - repIndex; rm >= 1 {
-					right = randInt(0, rm-1) + repIndex + 1
-				}
-			}
-
-			//fmt.Printf("C(len:%d, rep:%d) [%d:%d]\n", len(rp), repIndex, left, right)
-			rpl = rp[left:right]
-		}
-
-		rList = append(rList, strings.Join(rpl, rules.DefaultPathSeparator))
-		eList = append(eList, strings.Replace(strings.Join(rp, rules.DefaultPathSeparator), placeholder, "cardinality", 1))
-	}
-
-	m, errP := rules.New(rList)
-	require.NoError(b, errP)
-
-	for i := 0; i < b.N; i++ {
-		m.Replace(eList[i%rulesCount])
-	}
-}
-
-func randInt(min, max int) int {
-	r, _ := rand.Int(rand.Reader, big.NewInt(int64(max+1-min)))
-	return int(r.Int64()) + min
 }
