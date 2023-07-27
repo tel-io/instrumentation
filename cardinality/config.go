@@ -6,17 +6,10 @@ import (
 )
 
 var (
-	globalConfig = NewConfig(
-		"/",
-		true,
-		regexp.MustCompile(`^:[-\w]+$`),
-		func(id string) string {
-			return fmt.Sprintf(`:%s`, id)
-		},
-	)
+	globalConfig = defaultConfig()
 )
 
-func DefaultConfig() ConfigReader {
+func GlobalConfig() ConfigReader {
 	return globalConfig
 }
 
@@ -27,12 +20,47 @@ type ConfigReader interface {
 	HasLeadingSeparator() bool
 }
 
-func NewConfig(separator string, hasLeadingSeparator bool, exp *regexp.Regexp, formatter func(id string) string) ConfigReader {
+func NewConfig(options ...Option) ConfigReader {
+	c := defaultConfig()
+	for _, opt := range options {
+		opt.apply(c)
+	}
+
+	return c
+}
+
+func WithPathSeparator(hasLeadingSeparator bool, separator string) Option {
+	return optionFunc(func(c *immutableCfg) {
+		c.hasLeadingSeparator = hasLeadingSeparator
+		c.pathSeparator = separator
+	})
+}
+
+func WithPlaceholder(placeholderRegexp *regexp.Regexp, placeholderFormatter func(string) string) Option {
+	return optionFunc(func(c *immutableCfg) {
+		c.placeholderRegexp = placeholderRegexp
+		c.placeholderFormatter = placeholderFormatter
+	})
+}
+
+type Option interface {
+	apply(*immutableCfg)
+}
+
+type optionFunc func(*immutableCfg)
+
+func (o optionFunc) apply(c *immutableCfg) {
+	o(c)
+}
+
+func defaultConfig() *immutableCfg {
 	return &immutableCfg{
-		hasLeadingSeparator:  hasLeadingSeparator,
-		pathSeparator:        separator,
-		placeholderRegexp:    exp,
-		placeholderFormatter: formatter,
+		true,
+		"/",
+		regexp.MustCompile(`^:[-\w]+$`),
+		func(id string) string {
+			return fmt.Sprintf(`:%s`, id)
+		},
 	}
 }
 

@@ -205,12 +205,10 @@ func TestOptions(t *testing.T) {
 	assert.Error(t, err)
 
 	cfg := cardinality.NewConfig(
-		".",
-		false,
-		regexp.MustCompile(`^\{[-\w]+}$`),
-		func(id string) string {
+		cardinality.WithPathSeparator(false, "."),
+		cardinality.WithPlaceholder(regexp.MustCompile(`^\{[-\w]+}$`), func(id string) string {
 			return fmt.Sprintf(`{%s}`, id)
-		},
+		}),
 	)
 
 	l, err = rules.New([]string{"{XX}.aa.bb.cc"},

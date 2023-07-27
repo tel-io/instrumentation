@@ -80,7 +80,7 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		reader: cardinality.DefaultConfig(),
+		reader: cardinality.GlobalConfig(),
 		matches: []matchState{
 			{
 				Regexp: reID,

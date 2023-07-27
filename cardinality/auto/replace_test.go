@@ -2,7 +2,6 @@ package auto_test
 
 import (
 	"fmt"
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,12 +24,10 @@ func TestAuto(t *testing.T) {
 	assert.Equal(t, "/player/update/:id/file/:resource/550e8400-e29b-41d4-a716-446655440000", r.Replace(u))
 
 	cfg := cardinality.NewConfig(
-		".",
-		false,
-		regexp.MustCompile(`^\{[-\w]+}$`),
-		func(id string) string {
+		cardinality.WithPathSeparator(false, "."),
+		cardinality.WithPlaceholder(nil, func(id string) string {
 			return fmt.Sprintf(`{%s}`, id)
-		},
+		}),
 	)
 	r = auto.New(auto.WithConfigReader(cfg))
 	assert.Equal(t, "player.update.{id}",

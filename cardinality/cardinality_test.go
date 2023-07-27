@@ -1,6 +1,8 @@
 package cardinality_test
 
 import (
+	"fmt"
+	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -10,14 +12,25 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	cfg := cardinality.DefaultConfig()
+	cfg := cardinality.GlobalConfig()
 	assert.Equal(t, true, cfg.HasLeadingSeparator())
 	assert.Equal(t, "/", cfg.PathSeparator())
-	assert.NotEqual(t, ".", cfg.PathSeparator())
 
 	assert.Equal(t, ":id", cfg.PlaceholderFormatter()("id"))
 	assert.True(t, cfg.PlaceholderRegexp().MatchString(":id"))
-	assert.False(t, cfg.PlaceholderRegexp().MatchString("{id}"))
+
+	cfg = cardinality.NewConfig(
+		cardinality.WithPathSeparator(false, "."),
+		cardinality.WithPlaceholder(regexp.MustCompile(`^\{[-\w]+}$`), func(id string) string {
+			return fmt.Sprintf(`{%s}`, id)
+		}),
+	)
+
+	assert.Equal(t, false, cfg.HasLeadingSeparator())
+	assert.Equal(t, ".", cfg.PathSeparator())
+
+	assert.Equal(t, "{id}", cfg.PlaceholderFormatter()("id"))
+	assert.True(t, cfg.PlaceholderRegexp().MatchString("{id}"))
 }
 
 func TestApply(t *testing.T) {
