@@ -108,7 +108,7 @@ func ServerMiddleware(opts ...Option) Middleware {
 				// inject additional metrics fields: otelhttp.NewHandler
 				if labeler, ok := otelhttp.LabelerFromContext(ctx); ok {
 					labeler.Add(attribute.String("method", r.Method))
-					labeler.Add(attribute.String("url", s.groupers.Apply(extractedUrl)))
+					labeler.Add(attribute.String("url", s.replacers.Apply(extractedUrl)))
 					labeler.Add(attribute.String("status", http.StatusText(rww.statusCode)))
 					labeler.Add(attribute.Int("code", rww.statusCode))
 				}
