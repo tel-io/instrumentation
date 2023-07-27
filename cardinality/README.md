@@ -1,4 +1,4 @@
-# Library for replace cardinality params
+# Library for replace high cardinality values
 
 ### Possible cases:
 1. **Uncontrolled sender**. In the case of a controlled frontend, it is better to change it, of course))
@@ -36,13 +36,13 @@ func main() {
       fmt.Println(url)
    }
 
-   fmt.Println("\nAutomatic replace ID, Filename, and UUID")
+   fmt.Println("\nAutomatic replacing: ID, Filename, and UUID")
    r1 := auto.New()
    for _, url := range urls {
       fmt.Println(r1.Replace(url))
    }
 
-   fmt.Println("\nReplace by Rules")
+   fmt.Println("\nReplace by custom rules")
    r2, err := rules.New([]string{
       "/player/delete/file/:resource", //Full rule (start with separator)
       "update/:id/:uuid",              //Partial rule (without leading separator)
