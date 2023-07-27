@@ -112,17 +112,17 @@ func (m *module) exec(pat pattern, path string) (string, bool) {
 	}
 
 	if urlPartCount == patternPartCount {
-		return m.applyPipeEqual(urlParts, patternPartCount, pat, path)
+		return m.mutateEqual(urlParts, patternPartCount, pat, path)
 	}
 
-	return m.applyPipePartial(urlParts, urlPartCount, patternPartCount, pat, path)
+	return m.mutatePartial(urlParts, urlPartCount, patternPartCount, pat, path)
 }
 
 func (m *module) serialize(list []string) string {
 	return m.cfg.pathSeparator + strings.Join(list, m.cfg.pathSeparator)
 }
 
-func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, pat pattern, path string) (string, bool) {
+func (m *module) mutateEqual(urlParts []string, patternPartCount int, pat pattern, path string) (string, bool) {
 	for i := 0; i < patternPartCount; i++ {
 		if pat.parts[i].isPlaceholder {
 			urlParts[i] = pat.parts[i].value
@@ -137,7 +137,7 @@ func (m *module) applyPipeEqual(urlParts []string, patternPartCount int, pat pat
 	return m.serialize(urlParts), true
 }
 
-func (m *module) applyPipePartial(urlParts []string, urlPartCount int, patternPartCount int, pat pattern, path string) (string, bool) {
+func (m *module) mutatePartial(urlParts []string, urlPartCount int, patternPartCount int, pat pattern, path string) (string, bool) {
 	for i := pat.firstValuePos; i < patternPartCount; i++ {
 		for j := pat.firstValuePos; j < urlPartCount; j++ {
 			if strings.Compare(urlParts[j], pat.parts[i].value) == 0 {
