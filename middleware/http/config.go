@@ -2,47 +2,25 @@ package http
 
 import (
 	"net/http"
-	"regexp"
 	"strings"
 
+	"github.com/tel-io/instrumentation/cardinality"
+	"github.com/tel-io/instrumentation/cardinality/auto"
 	"github.com/tel-io/tel/v2"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 var (
-	reID       = regexp.MustCompile(`^\d+$`)
-	reResource = regexp.MustCompile(`^[a-zA-Z0-9\-]+\.\w{2,4}$`) // .css, .js, .png, .jpeg, etc.
-	reUUID     = regexp.MustCompile(`^[a-f\d]{4}(?:[a-f\d]{4}-){4}[a-f\d]{12}$`)
-
-	decreasePathCardinality = func(path string) string {
-		var b strings.Builder
-
-		path = strings.TrimLeft(path, "/")
-		pathParts := strings.Split(path, "/")
-		for _, part := range pathParts {
-			b.WriteString("/")
-
-			p := part
-			if reID.MatchString(part) {
-				p = ":id:"
-			} else if reResource.MatchString(part) {
-				p = ":resource:"
-			} else if reUUID.MatchString(part) {
-				p = ":uuid:"
-			}
-			b.WriteString(p)
-		}
-
-		return b.String()
+	replacers = cardinality.ReplacerList{
+		auto.NewHttp(),
 	}
-
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
 		var b strings.Builder
 
 		b.WriteString(r.Method)
 		b.WriteString(":")
-		b.WriteString(decreasePathCardinality(r.URL.Path))
+		b.WriteString(replacers.Apply(r.URL.Path))
 
 		return b.String()
 	}

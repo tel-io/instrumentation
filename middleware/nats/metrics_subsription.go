@@ -2,12 +2,13 @@ package nats
 
 import (
 	"context"
+	"sync"
+
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/metric/instrument/asyncint64"
 	"go.opentelemetry.io/otel/metric/unit"
-	"sync"
 )
 
 // SubscriptionStatMetric hook provide important subscription statistics
@@ -80,7 +81,7 @@ func (s *SubscriptionStatMetric) callback(ctx context.Context) {
 		dropped, _ := v.Dropped()
 		count, _ := v.Delivered()
 
-		subject := decreaseSubjectCardinality(v.Subject)
+		subject := replacers.Apply(v.Subject)
 
 		vc := data[subject]
 		vc.msgs += int64(pMsg)

@@ -2,44 +2,13 @@ package nats
 
 import (
 	"context"
-	"regexp"
 	"strings"
 
 	"github.com/nats-io/nats.go"
+	"github.com/tel-io/instrumentation/cardinality"
+	"github.com/tel-io/instrumentation/cardinality/auto"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/metric"
-)
-
-var (
-	rePartition = regexp.MustCompile(`^\d+$`)
-
-	decreaseSubjectCardinality = func(subject string) string {
-		if strings.HasPrefix(subject, "_INBOX") {
-			return ":inbox:"
-		}
-
-		if strings.HasPrefix(subject, "/") {
-			return ":url:"
-		}
-
-		var b strings.Builder
-
-		subjectParts := strings.Split(subject, ".")
-		subjectPartsLastIdx := len(subjectParts) - 1
-		for i, part := range subjectParts {
-			p := part
-			if rePartition.MatchString(part) {
-				p = ":partition:"
-			}
-
-			b.WriteString(p)
-			if i != subjectPartsLastIdx {
-				b.WriteByte('.')
-			}
-		}
-
-		return b.String()
-	}
 )
 
 // Option allows configuration of the httptrace Extract()
@@ -59,6 +28,10 @@ type PostHook func(ctx context.Context, msg *nats.Msg, data []byte) error
 // NameFn operation name description
 type NameFn func(kind string, msg *nats.Msg) string
 
+var replacers = cardinality.ReplacerList{
+	auto.NewNats(),
+}
+
 // defaultOperationFn default name convention
 func defaultOperationFn(kind string, msg *nats.Msg) string {
 	var b strings.Builder
@@ -72,7 +45,7 @@ func defaultOperationFn(kind string, msg *nats.Msg) string {
 	}
 
 	b.WriteByte('/')
-	b.WriteString(decreaseSubjectCardinality(msg.Subject))
+	b.WriteString(replacers.Apply(msg.Subject))
 
 	return b.String()
 }
