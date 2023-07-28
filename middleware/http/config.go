@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	autoReplacer             = auto.New()
+	autoReplacer             = auto.NewHttp()
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
 		var b strings.Builder
 

@@ -12,7 +12,7 @@ import (
 )
 
 func TestConfig(t *testing.T) {
-	cfg := cardinality.GlobalConfig()
+	cfg := cardinality.NewConfig()
 	assert.Equal(t, true, cfg.HasLeadingSeparator())
 	assert.Equal(t, "/", cfg.PathSeparator())
 
@@ -35,7 +35,7 @@ func TestConfig(t *testing.T) {
 
 func TestApply(t *testing.T) {
 	list := cardinality.ReplacerList{
-		auto.New(),
+		auto.NewHttp(),
 		func() cardinality.Replacer {
 			r, err := rules.New([]string{
 				"/:service/:action",

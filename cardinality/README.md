@@ -37,7 +37,7 @@ func main() {
    }
 
    fmt.Println("\nAutomatic replacing: ID, Filename, and UUID")
-   r1 := auto.New()
+   r1 := auto.NewHttp()
    for _, url := range urls {
       fmt.Println(r1.Replace(url))
    }
@@ -71,7 +71,7 @@ func main() {
          return fmt.Sprintf(`{%s}`, id)
       }),
    )
-   r4 := auto.New(
+   r4 := auto.NewHttp(
       auto.WithoutId(),
       auto.WithConfigReader(cfg),
    )
