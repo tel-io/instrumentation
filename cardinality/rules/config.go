@@ -45,7 +45,7 @@ func (o optionFunc) apply(c *config) {
 
 func defaultConfig() *config {
 	return &config{
-		reader:            cardinality.GlobalConfig(),
+		reader:            cardinality.NewConfig(),
 		maxRuleCount:      DefaultMaxRuleCount,
 		maxSeparatorCount: DefaultMaxSeparatorCount,
 	}

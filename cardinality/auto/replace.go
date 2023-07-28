@@ -7,7 +7,7 @@ import (
 	"github.com/tel-io/instrumentation/cardinality"
 )
 
-// New instance of automatic cardinality replacer
+// NewHttp instance of automatic cardinality replacer
 /*
 Options for disable placeholders:
    - WithoutId
@@ -15,46 +15,47 @@ Options for disable placeholders:
    - WithoutUUID
    - WithConfigReader
 */
-func New(options ...Option) cardinality.Replacer {
-	c := defaultConfig()
+func NewHttp(options ...Option) cardinality.Replacer {
+	c := defaultConfigHttp()
 	for _, opt := range options {
 		opt.apply(c)
 	}
 
-	formatter := c.reader.PlaceholderFormatter()
-
-	var matches []match
-	for _, m := range c.matches {
-		if !m.state {
-			continue
-		}
-
-		matches = append(matches, match{
-			Regexp:      m.Regexp,
-			placeholder: formatter(m.id),
-		})
-	}
-
-	return &module{
-		matches:             matches,
-		separator:           c.reader.PathSeparator(),
-		hasLeadingSeparator: c.reader.HasLeadingSeparator(),
-	}
+	return fromCfg(c)
 }
 
-type match struct {
-	*regexp.Regexp
-	placeholder string
+// NewNats instance of automatic cardinality replacer
+/*
+Options for disable placeholders:
+   - WithoutPartition
+   - WithoutUrl
+   - WithoutInbox
+   - WithConfigReader
+*/
+func NewNats(options ...Option) cardinality.Replacer {
+	c := defaultConfigNats()
+	for _, opt := range options {
+		opt.apply(c)
+	}
+
+	return fromCfg(c)
 }
 
 type module struct {
 	separator           string
 	matches             []match
+	prefixes            []prefix
 	hasLeadingSeparator bool
 }
 
 // Replace cardinality parts in path
 func (m *module) Replace(path string) string {
+	for _, pre := range m.prefixes {
+		if strings.HasPrefix(path, pre.value) {
+			return pre.placeholder
+		}
+	}
+
 	path = strings.TrimLeft(path, m.separator)
 	pathParts := strings.Split(path, m.separator)
 
@@ -78,4 +79,49 @@ func (m *module) Replace(path string) string {
 	}
 
 	return b.String()
+}
+
+func fromCfg(c *config) cardinality.Replacer {
+	formatter := c.reader.PlaceholderFormatter()
+
+	var prefixes []prefix
+	for _, m := range c.prefixes {
+		if !m.state {
+			continue
+		}
+
+		prefixes = append(prefixes, prefix{
+			value:       m.prefix,
+			placeholder: formatter(m.id),
+		})
+	}
+
+	var matches []match
+	for _, m := range c.matches {
+		if !m.state {
+			continue
+		}
+
+		matches = append(matches, match{
+			Regexp:      m.Regexp,
+			placeholder: formatter(m.id),
+		})
+	}
+
+	return &module{
+		prefixes:            prefixes,
+		matches:             matches,
+		separator:           c.reader.PathSeparator(),
+		hasLeadingSeparator: c.reader.HasLeadingSeparator(),
+	}
+}
+
+type match struct {
+	*regexp.Regexp
+	placeholder string
+}
+
+type prefix struct {
+	value       string
+	placeholder string
 }

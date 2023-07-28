@@ -78,8 +78,9 @@ func BenchmarkPartialRules10000Sep1000(b *testing.B) {
 
 func benchmarkEqual(b *testing.B, rulesCount, separatorsCount int) {
 	var rList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.GlobalConfig().PlaceholderFormatter()("id")
-	var separator = cardinality.GlobalConfig().PathSeparator()
+	var cfg = cardinality.NewConfig()
+	var placeholder = cfg.PlaceholderFormatter()("id")
+	var separator = cfg.PathSeparator()
 
 	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
 		var rp = make([]string, 0, rulesCount)
@@ -111,8 +112,9 @@ func benchmarkEqual(b *testing.B, rulesCount, separatorsCount int) {
 func benchmarkPartial(b *testing.B, rulesCount, separatorsCount int) {
 	var rList = make([]string, 0, rulesCount)
 	var eList = make([]string, 0, rulesCount)
-	var placeholder = cardinality.GlobalConfig().PlaceholderFormatter()("id")
-	var separator = cardinality.GlobalConfig().PathSeparator()
+	var cfg = cardinality.NewConfig()
+	var placeholder = cfg.PlaceholderFormatter()("id")
+	var separator = cfg.PathSeparator()
 
 	for ruleIndex := 0; ruleIndex < rulesCount; ruleIndex++ {
 		repIndex := ruleIndex % separatorsCount

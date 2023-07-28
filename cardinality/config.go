@@ -5,14 +5,6 @@ import (
 	"regexp"
 )
 
-var (
-	globalConfig = defaultConfig()
-)
-
-func GlobalConfig() ConfigReader {
-	return globalConfig
-}
-
 type ConfigReader interface {
 	PlaceholderFormatter() func(id string) string
 	PlaceholderRegexp() *regexp.Regexp

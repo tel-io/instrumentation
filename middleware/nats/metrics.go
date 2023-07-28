@@ -2,13 +2,14 @@ package nats
 
 import (
 	"context"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
 	"go.opentelemetry.io/otel/metric/instrument/syncint64"
-	"time"
 )
 
 type metrics struct {
@@ -66,7 +67,7 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 
 			attr := []attribute.KeyValue{
 				IsError.Bool(err != nil),
-				Subject.String(decreaseSubjectCardinality(msg.Subject)),
+				Subject.String(replacers.Apply(msg.Subject)),
 				Kind.String(kind),
 			}
 

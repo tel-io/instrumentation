@@ -2,10 +2,14 @@ module github.com/tel-io/instrumentation/middleware/nats/v2
 
 go 1.17
 
+//TODO Remove this after merge cardinality to tel-io
+replace github.com/tel-io/instrumentation/cardinality => ../../cardinality
+require github.com/tel-io/instrumentation/cardinality v0.0.0-00010101000000-000000000000
+
 require (
 	github.com/nats-io/nats.go v1.18.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.4
 	github.com/tel-io/tel/v2 v2.3.0
 	go.opentelemetry.io/otel v1.11.2-0.20221111171059-308d0362e6c5
 	go.opentelemetry.io/otel/trace v1.11.1

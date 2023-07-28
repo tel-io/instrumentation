@@ -12,13 +12,15 @@ import (
 )
 
 var (
-	autoReplacer             = auto.New()
+	replacers = cardinality.ReplacerList{
+		auto.NewHttp(),
+	}
 	DefaultSpanNameFormatter = func(_ string, r *http.Request) string {
 		var b strings.Builder
 
 		b.WriteString(r.Method)
 		b.WriteString(":")
-		b.WriteString(autoReplacer.Replace(r.URL.Path))
+		b.WriteString(replacers.Apply(r.URL.Path))
 
 		return b.String()
 	}
@@ -44,8 +46,6 @@ type config struct {
 	otelOpts      []otelhttp.Option
 	pathExtractor PathExtractor
 	filters       []otelhttp.Filter
-
-	replacers cardinality.ReplacerList
 
 	readRequest        bool
 	readHeader         bool
@@ -76,7 +76,6 @@ func newConfig(opts ...Option) *config {
 			otelhttp.WithFilter(DefaultFilter),
 		},
 		pathExtractor:      DefaultURI,
-		replacers:          cardinality.ReplacerList{autoReplacer},
 		filters:            []otelhttp.Filter{DefaultFilter},
 		dumpPayloadOnError: true,
 	}
