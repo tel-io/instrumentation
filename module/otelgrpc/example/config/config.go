@@ -15,13 +15,13 @@
 package config // import "go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc/example/config"
 
 import (
-	"go.opentelemetry.io/otel/sdk/metric"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	stdout "go.opentelemetry.io/otel/exporters/stdout/stdoutmetric"
+	"go.opentelemetry.io/otel/sdk/metric"
+
+	"go.opentelemetry.io/otel"
 	stdoutTrace "go.opentelemetry.io/otel/exporters/stdout/stdouttrace"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
@@ -47,13 +47,9 @@ func Meter() (*metric.MeterProvider, error) {
 		return nil, err
 	}
 
-	//exp, err := otlpmetricgrpc.New(context.Background(), opts...)
-	//if err != nil {
-	//	log.Fatalln("failed to start the metric controller:", err)
-	//}
-
 	reader := metric.NewPeriodicReader(exp,
-		metric.WithAggregationSelector(metric.DefaultAggregationSelector),
+		//metric.WithAggregationSelector(metric.DefaultAggregationSelector),
+
 		//metric.WithTimeout(30*time.Second),
 		metric.WithInterval(3*time.Second),
 	)
@@ -76,7 +72,7 @@ func Meter() (*metric.MeterProvider, error) {
 	//	log.Fatalln("failed to start the metric controller:", err)
 	//}
 
-	global.SetMeterProvider(cont)
+	otel.SetMeterProvider(cont)
 
 	return cont, nil
 }
