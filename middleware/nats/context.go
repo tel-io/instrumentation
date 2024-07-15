@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+
 	"go.opentelemetry.io/otel/baggage"
 )
 

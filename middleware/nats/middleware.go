@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+
 	"github.com/nats-io/nats.go"
 )
 
@@ -9,7 +10,7 @@ type Middleware interface {
 	apply(next MsgHandler) MsgHandler
 }
 
-//MsgHandler our desired way to handle subscriptions
+// MsgHandler our desired way to handle subscriptions
 // ctx allow inside function continue traces or pass log attachment
 // error return allow subMiddleware to understand behaviour of system what has gone here,
 // and it could change differently

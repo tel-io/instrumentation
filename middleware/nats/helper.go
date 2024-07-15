@@ -2,6 +2,7 @@ package nats
 
 import (
 	"context"
+
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"github.com/tel-io/instrumentation/middleware/nats/v2/natsprop"

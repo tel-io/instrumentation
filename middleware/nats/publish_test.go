@@ -2,6 +2,7 @@ package nats
 
 import (
 	"fmt"
+
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/mock"
 	natsmockery "github.com/tel-io/instrumentation/middleware/nats/v2/mocks"

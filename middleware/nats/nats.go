@@ -2,11 +2,12 @@ package nats
 
 import (
 	"context"
+	"sync"
+
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/baggage"
-	"sync"
 )
 
 // PostFn callback function which got new instance of tele inside ctx

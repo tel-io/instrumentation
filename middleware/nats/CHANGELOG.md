@@ -1,3 +1,7 @@
+== middleware/nats/v2.0.7
+* update go.opentelemetry.io/otel/* dependencies according to:
+    * https://github.com/open-telemetry/opentelemetry-go/blob/main/CHANGELOG.md
+
 == middleware/nats/v2.0.2
 * one simple middleware for all
 * separate publisher

@@ -3,9 +3,10 @@ package nats
 import (
 	"bytes"
 	"context"
+	"testing"
+
 	"github.com/stretchr/testify/suite"
 	"github.com/tel-io/tel/v2"
-	"testing"
 )
 
 type Suite struct {
