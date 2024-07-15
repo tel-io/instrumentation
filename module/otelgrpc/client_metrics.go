@@ -7,10 +7,6 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
-	"go.opentelemetry.io/otel/metric/instrument/syncint64"
-	"go.opentelemetry.io/otel/metric/unit"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -23,8 +19,8 @@ type ClientMetrics struct {
 	labels                        []attribute.KeyValue
 	clientHandledHistogramEnabled bool
 
-	counters       map[string]syncint64.Counter
-	valueRecorders map[string]syncfloat64.Histogram
+	counters       map[string]metric.Int64Counter
+	valueRecorders map[string]metric.Float64Histogram
 }
 
 const (
@@ -60,50 +56,50 @@ func (m *ClientMetrics) configure(c *config) {
 }
 
 func (m *ClientMetrics) createMeasures() {
-	m.counters = make(map[string]syncint64.Counter)
-	m.valueRecorders = make(map[string]syncfloat64.Histogram)
+	m.counters = make(map[string]metric.Int64Counter)
+	m.valueRecorders = make(map[string]metric.Float64Histogram)
 
 	// "grpc_type", "grpc_service", "grpc_method"
-	m.counters[clientStartedCounter] = MustCounter(m.meter.SyncInt64().Counter(clientStartedCounter,
-		instrument.WithDescription("Total number of RPCs started on the client."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[clientStartedCounter] = MustCounter(m.meter.Int64Counter(clientStartedCounter,
+		metric.WithDescription("Total number of RPCs started on the client."),
+		metric.WithUnit("1"),
 	))
 
 	// "grpc_type", "grpc_service", "grpc_method", "grpc_code"
-	m.counters[clientHandledCounter] = MustCounter(m.meter.SyncInt64().Counter(clientHandledCounter,
-		instrument.WithDescription("Total number of RPCs completed by the client, regardless of success or failure."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[clientHandledCounter] = MustCounter(m.meter.Int64Counter(clientHandledCounter,
+		metric.WithDescription("Total number of RPCs completed by the client, regardless of success or failure."),
+		metric.WithUnit("1"),
 	))
 
 	// "grpc_type", "grpc_service", "grpc_method"
-	m.counters[clientStreamMsgReceived] = MustCounter(m.meter.SyncInt64().Counter(clientStreamMsgReceived,
-		instrument.WithDescription("Total number of RPC stream messages received by the client."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[clientStreamMsgReceived] = MustCounter(m.meter.Int64Counter(clientStreamMsgReceived,
+		metric.WithDescription("Total number of RPC stream messages received by the client."),
+		metric.WithUnit("1"),
 	))
 
 	// "grpc_type", "grpc_service", "grpc_method"
-	m.counters[clientStreamMsgSent] = MustCounter(m.meter.SyncInt64().Counter(clientStreamMsgSent,
-		instrument.WithDescription("Total number of gRPC stream messages sent by the client."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[clientStreamMsgSent] = MustCounter(m.meter.Int64Counter(clientStreamMsgSent,
+		metric.WithDescription("Total number of gRPC stream messages sent by the client."),
+		metric.WithUnit("1"),
 	))
 
 	if !m.clientHandledHistogramEnabled {
 		return
 	}
 
-	m.valueRecorders[clientHandledHistogram] = MustHistogram(m.meter.SyncFloat64().Histogram(clientHandledHistogram,
-		instrument.WithDescription("Histogram of response latency (milliseconds) of the gRPC until it is finished by the application."),
-		instrument.WithUnit(unit.Milliseconds),
+	m.valueRecorders[clientHandledHistogram] = MustHistogram(m.meter.Float64Histogram(clientHandledHistogram,
+		metric.WithDescription("Histogram of response latency (milliseconds) of the gRPC until it is finished by the application."),
+		metric.WithUnit("ms"),
 	))
 
-	m.valueRecorders[clientStreamRecvHistogram] = MustHistogram(m.meter.SyncFloat64().Histogram(clientStreamRecvHistogram,
-		instrument.WithDescription("Histogram of response latency (milliseconds) of the gRPC single message receive."),
-		instrument.WithUnit(unit.Milliseconds),
+	m.valueRecorders[clientStreamRecvHistogram] = MustHistogram(m.meter.Float64Histogram(clientStreamRecvHistogram,
+		metric.WithDescription("Histogram of response latency (milliseconds) of the gRPC single message receive."),
+		metric.WithUnit("ms"),
 	))
 
-	m.valueRecorders[clientStreamSendHistogram] = MustHistogram(m.meter.SyncFloat64().Histogram(clientStreamSendHistogram,
-		instrument.WithDescription("Histogram of response latency (seconds) of the gRPC single message send."),
-		instrument.WithUnit(unit.Milliseconds),
+	m.valueRecorders[clientStreamSendHistogram] = MustHistogram(m.meter.Float64Histogram(clientStreamSendHistogram,
+		metric.WithDescription("Histogram of response latency (seconds) of the gRPC single message send."),
+		metric.WithUnit("ms"),
 	))
 }
 

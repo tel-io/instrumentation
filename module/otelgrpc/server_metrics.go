@@ -7,11 +7,6 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
-	"go.opentelemetry.io/otel/metric/instrument/syncint64"
-	"go.opentelemetry.io/otel/metric/unit"
-
 	"google.golang.org/grpc"
 )
 
@@ -38,8 +33,8 @@ type ServerMetrics struct {
 	bucket                        []float64
 	serverHandledHistogramEnabled bool
 
-	counters       map[string]syncint64.Counter
-	valueRecorders map[string]syncfloat64.Histogram
+	counters       map[string]metric.Int64Counter
+	valueRecorders map[string]metric.Float64Histogram
 }
 
 // NewServerMetrics returns a ServerMetrics object. Use a new instance of
@@ -65,33 +60,33 @@ func (m *ServerMetrics) configure(c *config) {
 }
 
 func (m *ServerMetrics) createMeasures() {
-	m.counters = make(map[string]syncint64.Counter)
-	m.valueRecorders = make(map[string]syncfloat64.Histogram)
+	m.counters = make(map[string]metric.Int64Counter)
+	m.valueRecorders = make(map[string]metric.Float64Histogram)
 
-	m.counters[serverStartedCounter] = MustCounter(m.meter.SyncInt64().Counter(serverStartedCounter,
-		instrument.WithDescription("Total number of RPCs started on the server."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[serverStartedCounter] = MustCounter(m.meter.Int64Counter(serverStartedCounter,
+		metric.WithDescription("Total number of RPCs started on the server."),
+		metric.WithUnit("1"),
 	))
 
-	m.counters[serverHandledCounter] = MustCounter(m.meter.SyncInt64().Counter(serverHandledCounter,
-		instrument.WithDescription("Total number of RPCs completed on the server, regardless of success or failure."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[serverHandledCounter] = MustCounter(m.meter.Int64Counter(serverHandledCounter,
+		metric.WithDescription("Total number of RPCs completed on the server, regardless of success or failure."),
+		metric.WithUnit("1"),
 	))
 
-	m.counters[serverStreamMsgReceived] = MustCounter(m.meter.SyncInt64().Counter(serverStreamMsgReceived,
-		instrument.WithDescription("Total number of RPC stream messages received on the server."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[serverStreamMsgReceived] = MustCounter(m.meter.Int64Counter(serverStreamMsgReceived,
+		metric.WithDescription("Total number of RPC stream messages received on the server."),
+		metric.WithUnit("1"),
 	))
 
-	m.counters[serverStreamMsgSent] = MustCounter(m.meter.SyncInt64().Counter(serverStreamMsgSent,
-		instrument.WithDescription("Total number of gRPC stream messages sent by the server."),
-		instrument.WithUnit(unit.Dimensionless),
+	m.counters[serverStreamMsgSent] = MustCounter(m.meter.Int64Counter(serverStreamMsgSent,
+		metric.WithDescription("Total number of gRPC stream messages sent by the server."),
+		metric.WithUnit("1"),
 	))
 
 	if m.serverHandledHistogramEnabled {
-		m.valueRecorders[serverHandledHistogram] = MustHistogram(m.meter.SyncFloat64().Histogram(serverHandledHistogram,
-			instrument.WithDescription("Histogram of response latency (milliseconds) of gRPC that had been application-level handled by the server."),
-			instrument.WithUnit(unit.Milliseconds), // seconds
+		m.valueRecorders[serverHandledHistogram] = MustHistogram(m.meter.Float64Histogram(serverHandledHistogram,
+			metric.WithDescription("Histogram of response latency (milliseconds) of gRPC that had been application-level handled by the server."),
+			metric.WithUnit("ms"), // seconds
 		))
 	}
 }
@@ -164,7 +159,7 @@ func (s *monitoredServerStream) RecvMsg(m interface{}) error {
 	return nil
 }
 
-func MustCounter(v syncint64.Counter, err error) syncint64.Counter {
+func MustCounter(v metric.Int64Counter, err error) metric.Int64Counter {
 	if err != nil {
 		handleErr(err)
 	}
@@ -172,7 +167,7 @@ func MustCounter(v syncint64.Counter, err error) syncint64.Counter {
 	return v
 }
 
-func MustHistogram(v syncfloat64.Histogram, err error) syncfloat64.Histogram {
+func MustHistogram(v metric.Float64Histogram, err error) metric.Float64Histogram {
 	if err != nil {
 		handleErr(err)
 	}

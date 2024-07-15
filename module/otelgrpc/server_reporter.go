@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"google.golang.org/grpc/codes"
 )
 
@@ -31,11 +32,13 @@ func newServerReporter(ctx context.Context, m *ServerMetrics, rpcType grpcType, 
 
 	r.serviceName, r.methodName = splitMethodName(fullMethod)
 	r.metrics.counters[serverStartedCounter].Add(ctx, 1,
-		append(r.metrics.labels,
-			attribute.String(AttrType, string(r.rpcType)),
-			attribute.String(AttrService, r.serviceName),
-			attribute.String(AttrMethod, r.methodName),
-		)...,
+		metric.WithAttributes(
+			append(r.metrics.labels,
+				attribute.String(AttrType, string(r.rpcType)),
+				attribute.String(AttrService, r.serviceName),
+				attribute.String(AttrMethod, r.methodName),
+			)...,
+		),
 	)
 
 	return r
@@ -43,43 +46,51 @@ func newServerReporter(ctx context.Context, m *ServerMetrics, rpcType grpcType, 
 
 func (r *serverReporter) ReceivedMessage(ctx context.Context) {
 	r.metrics.counters[serverStreamMsgReceived].Add(ctx, 1,
-		append(r.metrics.labels,
-			attribute.String(AttrType, string(r.rpcType)),
-			attribute.String(AttrService, r.serviceName),
-			attribute.String(AttrMethod, r.methodName),
-		)...,
+		metric.WithAttributes(
+			append(r.metrics.labels,
+				attribute.String(AttrType, string(r.rpcType)),
+				attribute.String(AttrService, r.serviceName),
+				attribute.String(AttrMethod, r.methodName),
+			)...,
+		),
 	)
 }
 
 func (r *serverReporter) SentMessage(ctx context.Context) {
 	r.metrics.counters[serverStreamMsgSent].Add(ctx, 1,
-		append(r.metrics.labels,
-			attribute.String(AttrType, string(r.rpcType)),
-			attribute.String(AttrService, r.serviceName),
-			attribute.String(AttrMethod, r.methodName),
-		)...,
+		metric.WithAttributes(
+			append(r.metrics.labels,
+				attribute.String(AttrType, string(r.rpcType)),
+				attribute.String(AttrService, r.serviceName),
+				attribute.String(AttrMethod, r.methodName),
+			)...,
+		),
 	)
 }
 
 func (r *serverReporter) Handled(ctx context.Context, code codes.Code) {
 	r.metrics.counters[serverHandledCounter].Add(ctx, 1,
-		append(r.metrics.labels,
-			attribute.String(AttrType, string(r.rpcType)),
-			attribute.String(AttrService, r.serviceName),
-			attribute.String(AttrMethod, r.methodName),
-			attribute.String(AttrCode, code.String()),
-		)...,
+		metric.WithAttributes(
+			append(r.metrics.labels,
+				attribute.String(AttrType, string(r.rpcType)),
+				attribute.String(AttrService, r.serviceName),
+				attribute.String(AttrMethod, r.methodName),
+				attribute.String(AttrCode, code.String()),
+			)...,
+		),
 	)
 
 	if r.metrics.serverHandledHistogramEnabled {
 		dur := float64(time.Since(r.startTime).Seconds())
 
 		r.metrics.valueRecorders[serverHandledHistogram].Record(ctx, dur,
-			append(r.metrics.labels,
-				attribute.String(AttrType, string(r.rpcType)),
-				attribute.String(AttrService, r.serviceName),
-				attribute.String(AttrMethod, r.methodName),
-			)...,
+			metric.WithAttributes(
+				append(r.metrics.labels,
+					attribute.String(AttrType, string(r.rpcType)),
+					attribute.String(AttrService, r.serviceName),
+					attribute.String(AttrMethod, r.methodName),
+				)...,
+			),
 		)
 	}
 }
