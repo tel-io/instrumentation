@@ -2,35 +2,34 @@ package nats
 
 import (
 	"context"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/instrument/syncfloat64"
-	"go.opentelemetry.io/otel/metric/instrument/syncint64"
-	"time"
 )
 
 type metrics struct {
-	counters       map[string]syncint64.Counter
-	valueRecorders map[string]syncfloat64.Histogram
+	counters       map[string]metric.Int64Counter
+	valueRecorders map[string]metric.Float64Histogram
 }
 
 func createMeasures(tele tel.Telemetry, meter metric.Meter) *metrics {
-	counters := make(map[string]syncint64.Counter)
-	valueRecorders := make(map[string]syncfloat64.Histogram)
+	counters := make(map[string]metric.Int64Counter)
+	valueRecorders := make(map[string]metric.Float64Histogram)
 
-	counter, err := meter.SyncInt64().Counter(Count)
+	counter, err := meter.Int64Counter(Count)
 	if err != nil {
 		tele.Panic("nats mw", tel.String("key", Count))
 	}
 
-	requestBytesCounter, err := meter.SyncInt64().Counter(ContentLength)
+	requestBytesCounter, err := meter.Int64Counter(ContentLength)
 	if err != nil {
 		tele.Panic("nats mw", tel.String("key", ContentLength))
 	}
 
-	serverLatencyMeasure, err := meter.SyncFloat64().Histogram(Latency)
+	serverLatencyMeasure, err := meter.Float64Histogram(Latency)
 	if err != nil {
 		tele.Panic("nats mw", tel.String("key", Latency))
 	}
@@ -70,9 +69,9 @@ func (t *SubMetrics) apply(next MsgHandler) MsgHandler {
 				Kind.String(kind),
 			}
 
-			t.counters[Count].Add(ctx, 1, attr...)
-			t.counters[ContentLength].Add(ctx, int64(len(msg.Data)), attr...)
-			t.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), attr...)
+			t.counters[Count].Add(ctx, 1, metric.WithAttributes(attr...))
+			t.counters[ContentLength].Add(ctx, int64(len(msg.Data)), metric.WithAttributes(attr...))
+			t.valueRecorders[Latency].Record(ctx, float64(time.Since(start).Milliseconds()), metric.WithAttributes(attr...))
 
 		}(time.Now())
 

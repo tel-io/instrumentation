@@ -3,9 +3,10 @@ package nats
 import (
 	"context"
 	"fmt"
+	"runtime/debug"
+
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
-	"runtime/debug"
 )
 
 type Recovery struct{}

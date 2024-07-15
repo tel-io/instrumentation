@@ -2,30 +2,43 @@ package nats
 
 import (
 	"context"
+	"sync"
+
 	"github.com/nats-io/nats.go"
 	"github.com/pkg/errors"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/instrument/asyncint64"
-	"go.opentelemetry.io/otel/metric/unit"
-	"sync"
+	"go.opentelemetry.io/otel/metric"
+)
+
+const (
+	unitBytes = "By"
 )
 
 // SubscriptionStatMetric hook provide important subscription statistics
 type SubscriptionStatMetric struct {
 	list     sync.Map
-	counters map[string]asyncint64.Gauge
+	counters map[string]metric.Int64ObservableGauge
 }
 
 func NewSubscriptionStatMetrics(opts ...Option) (*SubscriptionStatMetric, error) {
 	cfg := newConfig(opts)
 
-	c := make(map[string]asyncint64.Gauge)
-	msgs, _ := cfg.meter.AsyncInt64().Gauge(SubscriptionsPendingCount)
-	bs, _ := cfg.meter.AsyncInt64().Gauge(SubscriptionsPendingBytes,
-		instrument.WithUnit(unit.Bytes))
-
-	dd, _ := cfg.meter.AsyncInt64().Gauge(SubscriptionsDroppedMsgs)
-	cc, _ := cfg.meter.AsyncInt64().Gauge(SubscriptionCountMsgs)
+	c := make(map[string]metric.Int64ObservableGauge)
+	msgs, err := cfg.meter.Int64ObservableGauge(SubscriptionsPendingCount)
+	if err != nil {
+		return nil, err
+	}
+	bs, err := cfg.meter.Int64ObservableGauge(SubscriptionsPendingBytes, metric.WithUnit(unitBytes))
+	if err != nil {
+		return nil, err
+	}
+	dd, err := cfg.meter.Int64ObservableGauge(SubscriptionsDroppedMsgs)
+	if err != nil {
+		return nil, err
+	}
+	cc, err := cfg.meter.Int64ObservableGauge(SubscriptionCountMsgs)
+	if err != nil {
+		return nil, err
+	}
 
 	c[SubscriptionsPendingCount] = msgs
 	c[SubscriptionsPendingBytes] = bs
@@ -36,7 +49,7 @@ func NewSubscriptionStatMetrics(opts ...Option) (*SubscriptionStatMetric, error)
 		counters: c,
 	}
 
-	err := cfg.meter.RegisterCallback([]instrument.Asynchronous{msgs, bs, dd, cc}, res.callback)
+	cfg.meter.RegisterCallback(res.callback, msgs, bs, dd, cc)
 	if err != nil {
 		return nil, errors.WithMessagef(err, "reggister callback")
 	}
@@ -60,7 +73,7 @@ func (s *SubscriptionStatMetric) Register(sub ...*nats.Subscription) {
 	}
 }
 
-func (s *SubscriptionStatMetric) callback(ctx context.Context) {
+func (s *SubscriptionStatMetric) callback(ctx context.Context, obs metric.Observer) error {
 	// we could have multi subscriptions with the same subject
 	// we should set total number of that
 	data := make(map[string]struct {
@@ -93,9 +106,11 @@ func (s *SubscriptionStatMetric) callback(ctx context.Context) {
 	})
 
 	for k, v := range data {
-		s.counters[SubscriptionsPendingCount].Observe(ctx, v.msgs, Subject.String(k))
-		s.counters[SubscriptionsPendingBytes].Observe(ctx, v.bytes, Subject.String(k))
-		s.counters[SubscriptionsDroppedMsgs].Observe(ctx, v.dropped, Subject.String(k))
-		s.counters[SubscriptionCountMsgs].Observe(ctx, v.count, Subject.String(k))
+		obs.ObserveInt64(s.counters[SubscriptionsPendingCount], v.msgs, metric.WithAttributes(Subject.String(k)))
+		obs.ObserveInt64(s.counters[SubscriptionsPendingBytes], v.bytes, metric.WithAttributes(Subject.String(k)))
+		obs.ObserveInt64(s.counters[SubscriptionsDroppedMsgs], v.dropped, metric.WithAttributes(Subject.String(k)))
+		obs.ObserveInt64(s.counters[SubscriptionCountMsgs], v.count, metric.WithAttributes(Subject.String(k)))
 	}
+
+	return nil
 }

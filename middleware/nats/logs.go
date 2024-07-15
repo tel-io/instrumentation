@@ -2,11 +2,12 @@ package nats
 
 import (
 	"context"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/tel-io/tel/v2"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 // Logs dump some payload
