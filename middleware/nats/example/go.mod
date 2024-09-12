@@ -1,13 +1,15 @@
 module github.com/tel-io/instrumentation/middleware/nats/example
 
-go 1.20
+go 1.22
+
+toolchain go1.22.7
 
 replace github.com/tel-io/instrumentation/middleware/nats/v2 => ../
 
 require (
 	github.com/joho/godotenv v1.4.0
 	github.com/nats-io/nats.go v1.18.0
-	github.com/tel-io/instrumentation/middleware/nats/v2 v2.0.0
+	github.com/tel-io/instrumentation/middleware/nats/v2 v2.0.7
 	github.com/tel-io/tel/v2 v2.3.6
 )
 

@@ -1,6 +1,6 @@
 module github.com/tel-io/instrumentation/module/otelgrpc/example
 
-go 1.20
+go 1.21
 
 replace github.com/tel-io/instrumentation/module/otelgrpc => ../
 
@@ -18,7 +18,7 @@ require (
 
 require (
 	github.com/golang/protobuf v1.5.4
-	github.com/tel-io/instrumentation/module/otelgrpc v1.0.3
+	github.com/tel-io/instrumentation/module/otelgrpc v1.0.4
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.28.0
 )
 

@@ -1,10 +1,12 @@
 module github.com/tel-io/instrumentation/middleware/gin
 
-go 1.20
+go 1.22
+
+toolchain go1.22.7
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/http v1.2.7
+	github.com/tel-io/instrumentation/middleware/http v1.2.8
 	go.opentelemetry.io/otel v1.28.0
 )
 

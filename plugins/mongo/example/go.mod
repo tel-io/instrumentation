@@ -1,11 +1,13 @@
 module github.com/tel-io/instrumentation/plugins/mongo/example
 
-go 1.20
+go 1.22
+
+toolchain go1.22.7
 
 replace github.com/tel-io/instrumentation/plugins/mongo => ../
 
 require (
-	github.com/tel-io/instrumentation/plugins/mongo v0.4.0
+	github.com/tel-io/instrumentation/plugins/mongo v0.4.3
 	github.com/tel-io/tel/v2 v2.3.6
 	go.mongodb.org/mongo-driver v1.11.0
 )

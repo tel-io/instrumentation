@@ -1,6 +1,6 @@
 module github.com/tel-io/instrumentation/plugins/otelsql
 
-go 1.20
+go 1.21
 
 require (
 	go.opentelemetry.io/otel v1.28.0
