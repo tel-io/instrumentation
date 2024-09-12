@@ -6,13 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/global"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/instrument/asyncfloat64"
-	"go.opentelemetry.io/otel/metric/instrument/asyncint64"
-	"go.opentelemetry.io/otel/metric/unit"
 )
 
 // defaultMinimumReadDBStatsInterval is the default minimum interval between calls to db.Stats().
@@ -21,7 +17,7 @@ const defaultMinimumReadDBStatsInterval = time.Second
 // RecordStats records database statistics for provided sql.DB at the provided interval.
 func RecordStats(db *sql.DB, opts ...StatsOption) error {
 	o := statsOptions{
-		meterProvider:              global.MeterProvider(),
+		meterProvider:              otel.GetMeterProvider(),
 		minimumReadDBStatsInterval: defaultMinimumReadDBStatsInterval,
 	}
 
@@ -44,13 +40,13 @@ func recordStats(
 	var (
 		err error
 
-		openConnections   asyncint64.Gauge
-		idleConnections   asyncint64.Gauge
-		activeConnections asyncint64.Gauge
-		waitCount         asyncint64.Gauge
-		waitDuration      asyncfloat64.Gauge
-		idleClosed        asyncint64.Gauge
-		lifetimeClosed    asyncint64.Gauge
+		openConnections   metric.Int64ObservableGauge
+		idleConnections   metric.Int64ObservableGauge
+		activeConnections metric.Int64ObservableGauge
+		waitCount         metric.Int64ObservableGauge
+		waitDuration      metric.Float64ObservableGauge
+		idleClosed        metric.Int64ObservableGauge
+		lifetimeClosed    metric.Int64ObservableGauge
 
 		dbStats     sql.DBStats
 		lastDBStats time.Time
@@ -62,71 +58,63 @@ func recordStats(
 	lock.Lock()
 	defer lock.Unlock()
 
-	if openConnections, err = meter.AsyncInt64().Gauge(
+	if openConnections, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsOpen,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("Count of open connections in the pool"),
+		metric.WithUnit("1"),
+		metric.WithDescription("Count of open connections in the pool"),
 	); err != nil {
 		return err
 	}
 
-	if idleConnections, err = meter.AsyncInt64().Gauge(
+	if idleConnections, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsIdle,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("Count of idle connections in the pool"),
+		metric.WithUnit("1"),
+		metric.WithDescription("Count of idle connections in the pool"),
 	); err != nil {
 		return err
 	}
 
-	if activeConnections, err = meter.AsyncInt64().Gauge(
+	if activeConnections, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsActive,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("Count of active connections in the pool"),
+		metric.WithUnit("1"),
+		metric.WithDescription("Count of active connections in the pool"),
 	); err != nil {
 		return err
 	}
 
-	if waitCount, err = meter.AsyncInt64().Gauge(
+	if waitCount, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsWaitCount,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("The total number of connections waited for"),
+		metric.WithUnit("1"),
+		metric.WithDescription("The total number of connections waited for"),
 	); err != nil {
 		return err
 	}
 
-	if waitDuration, err = meter.AsyncFloat64().Gauge(
+	if waitDuration, err = meter.Float64ObservableGauge(
 		dbSQLConnectionsWaitDuration,
-		instrument.WithUnit(unit.Milliseconds),
-		instrument.WithDescription("The total time blocked waiting for a new connection"),
+		metric.WithUnit("ms"),
+		metric.WithDescription("The total time blocked waiting for a new connection"),
 	); err != nil {
 		return err
 	}
 
-	if idleClosed, err = meter.AsyncInt64().Gauge(
+	if idleClosed, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsIdleClosed,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("The total number of connections closed due to SetMaxIdleConns"),
+		metric.WithUnit("1"),
+		metric.WithDescription("The total number of connections closed due to SetMaxIdleConns"),
 	); err != nil {
 		return err
 	}
 
-	if lifetimeClosed, err = meter.AsyncInt64().Gauge(
+	if lifetimeClosed, err = meter.Int64ObservableGauge(
 		dbSQLConnectionsLifetimeClosed,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription("The total number of connections closed due to SetConnMaxLifetime"),
+		metric.WithUnit("1"),
+		metric.WithDescription("The total number of connections closed due to SetConnMaxLifetime"),
 	); err != nil {
 		return err
 	}
 
-	return meter.RegisterCallback([]instrument.Asynchronous{
-		openConnections,
-		idleConnections,
-		activeConnections,
-		waitCount,
-		waitDuration,
-		idleClosed,
-		lifetimeClosed,
-	}, func(ctx context.Context) {
+	_, err = meter.RegisterCallback(func(ctx context.Context, o metric.Observer) error {
 		lock.Lock()
 		defer lock.Unlock()
 
@@ -136,12 +124,38 @@ func recordStats(
 			lastDBStats = now
 		}
 
-		openConnections.Observe(ctx, int64(dbStats.OpenConnections), attrs...)
-		idleConnections.Observe(ctx, int64(dbStats.Idle), attrs...)
-		activeConnections.Observe(ctx, int64(dbStats.InUse), attrs...)
-		waitCount.Observe(ctx, dbStats.WaitCount, attrs...)
-		waitDuration.Observe(ctx, float64(dbStats.WaitDuration.Nanoseconds())/1e6, attrs...)
-		idleClosed.Observe(ctx, dbStats.MaxIdleClosed, attrs...)
-		lifetimeClosed.Observe(ctx, dbStats.MaxLifetimeClosed, attrs...)
-	})
+		o.ObserveInt64(openConnections, int64(dbStats.OpenConnections),
+			metric.WithAttributes(attrs...),
+		)
+
+		o.ObserveInt64(idleConnections, int64(dbStats.Idle),
+			metric.WithAttributes(attrs...))
+
+		o.ObserveInt64(activeConnections, int64(dbStats.InUse),
+			metric.WithAttributes(attrs...))
+
+		o.ObserveInt64(waitCount, dbStats.WaitCount,
+			metric.WithAttributes(attrs...))
+
+		o.ObserveFloat64(waitDuration, float64(dbStats.WaitDuration.Nanoseconds())/1e6,
+			metric.WithAttributes(attrs...))
+
+		o.ObserveInt64(idleClosed, dbStats.MaxIdleClosed,
+			metric.WithAttributes(attrs...))
+
+		o.ObserveInt64(lifetimeClosed, dbStats.MaxLifetimeClosed,
+			metric.WithAttributes(attrs...))
+
+		return nil
+	}, []metric.Observable{
+		openConnections,
+		idleConnections,
+		activeConnections,
+		waitCount,
+		waitDuration,
+		idleClosed,
+		lifetimeClosed,
+	}...)
+
+	return err
 }

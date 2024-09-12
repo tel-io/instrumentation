@@ -1,8 +1,6 @@
 module github.com/tel-io/instrumentation/module/otelgrpc/example
 
-go 1.21
-
-toolchain go1.22.2
+go 1.20
 
 replace github.com/tel-io/instrumentation/module/otelgrpc => ../
 

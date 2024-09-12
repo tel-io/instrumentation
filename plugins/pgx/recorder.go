@@ -8,8 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/pkg/errors"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/metric/unit"
+	"go.opentelemetry.io/otel/metric"
 	semconv "go.opentelemetry.io/otel/semconv/v1.12.0"
 )
 
@@ -27,10 +26,10 @@ const (
 )
 
 // float64Recorder adds a new value to the list of Histogram's records.
-type float64Recorder = func(ctx context.Context, value float64, labels ...attribute.KeyValue)
+type float64Recorder = func(ctx context.Context, value float64, options ...metric.RecordOption)
 
 // int64Counter adds the value to the counter's sum.
-type int64Counter = func(ctx context.Context, value int64, labels ...attribute.KeyValue)
+type int64Counter = func(ctx context.Context, value int64, options ...metric.AddOption)
 
 // methodRecorder records metrics about a sql method.
 type methodRecorder interface {
@@ -47,18 +46,18 @@ type methodRecorderImpl struct {
 func newRecorder(cfg *RecordConfig) (Callback, error) {
 	meter := cfg.meterProvider.Meter(instrumentationName)
 
-	latencyMsHistogram, err := meter.SyncFloat64().Histogram(dbSQLClientLatencyMs,
-		instrument.WithUnit(unit.Milliseconds),
-		instrument.WithDescription(`The distribution of latencies of various calls in milliseconds`),
+	latencyMsHistogram, err := meter.Float64Histogram(dbSQLClientLatencyMs,
+		metric.WithUnit("ms"),
+		metric.WithDescription(`The distribution of latencies of various calls in milliseconds`),
 	)
 
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	callsCounter, err := meter.SyncInt64().Counter(dbSQLClientCalls,
-		instrument.WithUnit(unit.Dimensionless),
-		instrument.WithDescription(`The number of various calls of methods`),
+	callsCounter, err := meter.Int64Counter(dbSQLClientCalls,
+		metric.WithUnit("1"),
+		metric.WithDescription(`The number of various calls of methods`),
 	)
 
 	if err != nil {
@@ -88,8 +87,8 @@ func (r *methodRecorderImpl) Record(ctx context.Context) func(method string, err
 			)
 		}
 
-		r.countCalls(ctx, 1, attrs...)
-		r.recordLatency(ctx, elapsedTime, attrs...)
+		r.countCalls(ctx, 1, metric.WithAttributes(attrs...))
+		r.recordLatency(ctx, elapsedTime, metric.WithAttributes(attrs...))
 	}
 }
 
