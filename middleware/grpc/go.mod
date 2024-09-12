@@ -1,14 +1,12 @@
 module github.com/tel-io/instrumentation/middleware/grpc
 
-go 1.22
-
-toolchain go1.22.2
+go 1.20
 
 require (
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
 	github.com/stretchr/testify v1.9.0
 	github.com/tel-io/instrumentation/module/otelgrpc v1.0.3
-	github.com/tel-io/tel/v2 v2.3.6-0.20240712121757-7d829d84f809
+	github.com/tel-io/tel/v2 v2.3.6
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0
 	go.opentelemetry.io/otel v1.28.0
 	go.uber.org/zap v1.27.0
@@ -58,3 +56,5 @@ require (
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace github.com/tel-io/instrumentation/module/otelgrpc => ../../module/otelgrpc
