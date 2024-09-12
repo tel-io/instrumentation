@@ -140,8 +140,6 @@ github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.9.0 h1:HtqpIVDClZ4nwg75+f6Lvsy/wHu+3BoSGCbBAcpTsTg=
 github.com/stretchr/testify v1.9.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
-github.com/tel-io/instrumentation/middleware/http v1.2.8 h1:nM4DPfV8LlSLIOjVfarmMsEAG8ZtDm9tHlkP+DzcHvU=
-github.com/tel-io/instrumentation/middleware/http v1.2.8/go.mod h1:dU7AdykMlZhbhePXiKSUO+qj40q1ww9++zTt/2ZQa3k=
 github.com/tel-io/tel/v2 v2.3.6 h1:W6Bwn94CH18+GwaoM9jbzGH4oi8RV/fVmOM1b8oBqf4=
 github.com/tel-io/tel/v2 v2.3.6/go.mod h1:G29ueeFnbj5PbpQ8UUzSxBfO/bU8cXAHYXq1RKpShsw=
 github.com/tklauser/go-sysconf v0.3.14 h1:g5vzr9iPFFz24v2KZXs/pvpvh8/V9Fw6vQK5ZZb78yU=

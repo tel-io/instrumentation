@@ -67,3 +67,5 @@ require (
 )
 
 replace github.com/tel-io/instrumentation/middleware/gin => ../../../middleware/gin
+
+replace github.com/tel-io/instrumentation/middleware/http => ../../../middleware/http
