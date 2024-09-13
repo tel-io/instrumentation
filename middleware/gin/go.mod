@@ -6,7 +6,7 @@ toolchain go1.22.7
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/http v1.2.8
+	github.com/tel-io/instrumentation/middleware/http v1.2.9
 	go.opentelemetry.io/otel v1.28.0
 )
 

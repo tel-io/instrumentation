@@ -8,7 +8,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.3.0
 	github.com/google/uuid v1.6.0
 	github.com/pkg/errors v0.9.1
-	github.com/tel-io/instrumentation/plugins/otelsql v1.1.1
+	github.com/tel-io/instrumentation/plugins/otelsql v1.1.2
 	github.com/tel-io/tel/v2 v2.3.6
 	go.opentelemetry.io/otel v1.28.0
 )
