@@ -1,6 +1,8 @@
 module github.com/tel-io/instrumentation/middleware/nats/v2
 
-go 1.20
+go 1.22
+
+toolchain go1.22.7
 
 require (
 	github.com/nats-io/nats.go v1.18.0

@@ -1,12 +1,14 @@
 module github.com/tel-io/instrumentation/middleware/echo
 
-go 1.20
+go 1.22
+
+toolchain go1.22.7
 
 require (
 	github.com/gorilla/websocket v1.5.0
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/stretchr/testify v1.9.0
-	github.com/tel-io/instrumentation/middleware/http v1.2.7
+	github.com/tel-io/instrumentation/middleware/http v1.2.8
 	github.com/tel-io/tel/v2 v2.3.6
 	go.opentelemetry.io/otel v1.28.0
 )
