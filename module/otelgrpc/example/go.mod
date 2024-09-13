@@ -18,7 +18,7 @@ require (
 
 require (
 	github.com/golang/protobuf v1.5.4
-	github.com/tel-io/instrumentation/module/otelgrpc v1.0.4
+	github.com/tel-io/instrumentation/module/otelgrpc v1.0.5
 	go.opentelemetry.io/otel/exporters/stdout/stdoutmetric v1.28.0
 )
 

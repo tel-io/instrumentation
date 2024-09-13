@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/gin-gonic/gin v1.8.1
-	github.com/tel-io/instrumentation/middleware/gin v1.2.7
+	github.com/tel-io/instrumentation/middleware/gin v1.2.8
 	github.com/tel-io/tel/v2 v2.3.6
 )
 
@@ -36,7 +36,7 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/shirou/gopsutil/v4 v4.24.6 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
-	github.com/tel-io/instrumentation/middleware/http v1.2.8 // indirect
+	github.com/tel-io/instrumentation/middleware/http v1.2.9 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/ugorji/go/codec v1.2.7 // indirect

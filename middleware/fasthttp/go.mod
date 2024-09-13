@@ -6,7 +6,7 @@ toolchain go1.22.7
 
 require (
 	github.com/stretchr/testify v1.9.0
-	github.com/tel-io/instrumentation/middleware/http v1.2.8
+	github.com/tel-io/instrumentation/middleware/http v1.2.9
 	github.com/tel-io/tel/v2 v2.3.6
 	github.com/valyala/fasthttp v1.40.0
 	go.opentelemetry.io/otel v1.28.0

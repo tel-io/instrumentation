@@ -8,7 +8,7 @@ require (
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.9.0
-	github.com/tel-io/instrumentation/plugins/otelsql v1.1.1
+	github.com/tel-io/instrumentation/plugins/otelsql v1.1.2
 	github.com/tel-io/tel/v2 v2.3.6
 	go.opentelemetry.io/otel v1.28.0
 	go.opentelemetry.io/otel/metric v1.28.0
